@@ -64,7 +64,6 @@ return [
     'userName' => '3885',
     'password' => 'homes',
     'action' => '/be/search/xml.jsp',
-    'default_rate' => '766', // id del cargo a aplicar
     'rooms_cl' => [ // habitaciones id de cm reservas, id de clase bamboo
         '17661' => '15',
         '17662' => '14',
@@ -77,6 +76,7 @@ return [
     'warrantyType' => '2', // Código del tipo de garantia a aplicar
     'programType' => '7', // Código del tipo de programa a aplicar
     'codpla' => 728, // Código del plan a aplicar
+    'tipres' => '2', // Código del tipo de reserva a aplicar
 ];
 ```
 
