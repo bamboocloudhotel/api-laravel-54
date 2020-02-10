@@ -48,10 +48,10 @@ Configurar en Bamboo los datos del WebService en `hotel5\app\clases\Reservations
 ```php
 public function __construct()
 {
-    $this->apiUrl = 'http://api-laravel-54.test';
-    $this->hotelId = '3885';
-    $this->hotelName = '3885';
-    $this->bookingEngineCode = 'cm-reservas';
+    $this->apiUrl = 'http://api-laravel-54.test'; // URL de esta aplicación
+    $this->hotelId = '3885'; // Id del hotel en el PMS
+    $this->hotelName = '3885'; // Nombre del hotel en el PMS
+    $this->bookingEngineCode = 'cm-reservas'; // Código del PMS 'cm-reservas', 'rategain'
 }
 ```
 
