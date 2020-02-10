@@ -7,7 +7,6 @@ return [
     'userName' => '3885',
     'password' => 'Bamboo2019',
     'action' => '/be/search/xml.jsp',
-    'default_rate' => '766',
     'rooms_cl' => [ // channel to local
         '17661' => '15',
         '17662' => '14',
@@ -16,8 +15,9 @@ return [
         '15' => '17661',
         '14' => '17662',
     ],
-    'paymentType' => '46',
+    'paymentType' => '15',
     'warrantyType' => '2',
     'programType' => '7',
     'codpla' => 728,
+    'tipres' => '2',
 ];

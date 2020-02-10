@@ -29,6 +29,7 @@ class Kernel extends ConsoleKernel
         // $schedule->command('inspire')
         //          ->hourly();
         $schedule->command('cr:get_reservations cm-reservas')->hourly();
+        $schedule->command('queue:work')->everyMinute();
     }
 
     /**
