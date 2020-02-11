@@ -124,44 +124,6 @@ class TestSoapController extends SoapController
         }
         return response()->json($soapRequest['data']);
 
-        $xmlr = $this->getCrReservasRequest();
-
-        $modify = $xmlr->addChild('modify');
-        $modify->addAttribute('hotelId', $hotel);
-        $modify->addAttribute('startDate', $sDate); // Must be today or before, and equal or after end date
-        $modify->addAttribute('endDate', $eDate); // Must be today or before, and equal or before start date
-
-        $begin = new DateTime($sDate);
-        $end = new DateTime($eDate);
-        $end = $end->modify('+1 day');
-
-        $interval = new DateInterval('P1D');
-        $daterange = new DatePeriod($begin, $interval, $end);
-
-        $previous = null;
-        $dates    = [];
-        foreach ($daterange as $dt) {
-            $current = $dt->format("Y-m-d");
-            if (!empty($previous)) {
-                $show = new DateTime($current);
-                // $dates[] = [$previous, $show->format("Y-m-d")];
-                $dates[] = $show->format("Y-m-d");
-            } else {
-                $dates[] = $dt->format("Y-m-d");
-            }
-            $previous = $current;
-        }
-
-        foreach ($dates as $date) {
-            $availability = $modify->addChild('availability');
-            $availability->addAttribute('day', $date);
-            $availability->addAttribute('roomId', $room);
-            $availability->addAttribute('quantity', $quantity);
-        }
-
-        $this->xmlr = $xmlr;
-
-        return $this->makeCrReservasRequest();
     }
 
     public function modifyInventoryByDatesAndRoom(Request $request, $startDate, $endDate, $roomTypeId, $oldStartDate = null, $oldEndDate = null)
@@ -174,7 +136,7 @@ class TestSoapController extends SoapController
                 new ModifyBookingEngineInventory($startDate, $endDate, $roomTypeId, $request->bookingEngine)
             );
 
-            dispatch($job);
+            $this->dispatch($job);
 
             return response()->json([
                 'message' => 'OK',
