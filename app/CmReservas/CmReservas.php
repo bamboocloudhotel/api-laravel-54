@@ -238,7 +238,7 @@ class CmReservas
 
     public function saveReservations($reservations)
     {
-        dd($reservations);
+        // dd($reservations);
         \DB::setDefaultConnection('hhotel5');
         $reservations = $reservations['data']->reservation;
         $attributesKey = '@attributes';
