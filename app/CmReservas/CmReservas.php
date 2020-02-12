@@ -110,7 +110,7 @@ class CmReservas
         $xmlr = $this->request();
 
         $view = $xmlr->addChild('view');
-        $view->addAttribute('hotelId', $hotelId ? $hotelId : config('cm_reservas.userName'));
+        $view->addAttribute('hotelId', $hotelId ? $hotelId : config('cm_reservas.hotel_id'));
         $view->addAttribute('startDate', $sDate);
         $view->addAttribute('endDate', $eDate);
 
@@ -124,7 +124,7 @@ class CmReservas
         $hotelId = $hotelId ? $hotelId : config('cm_reservas.hotel_id');
         $sDate = $startDate ? $startDate : date('Y-m-d');
         $eDate = $endDate ? $endDate : date('Y-m-d');
-        $hotel = $hotelId ? $hotelId : config('cm_reservas.userName');
+        $hotel = $hotelId ? $hotelId : config('cm_reservas.hotel_id');
         $room = $roomId;
         $quantity = $quantity;
 
