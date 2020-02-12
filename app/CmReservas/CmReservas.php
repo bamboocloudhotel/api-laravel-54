@@ -82,9 +82,9 @@ class CmReservas
         $xmlr = $this->request();
 
         $xmlr->addChild('reservations')
-            ->addAttribute('hotelId', $hotelId ? $hotelId : config('cm_reservas.userName'));
+            ->addAttribute('hotelId', $hotelId ? $hotelId : config('cm_reservas.hotel_id'));
         $reservations = $xmlr->addChild('reservations');
-        $reservations->addAttribute('hotelId', $hotelId ? $hotelId : config('cm_reservas.userName'));
+        $reservations->addAttribute('hotelId', $hotelId ? $hotelId : config('cm_reservas.hotel_id'));
 
         if ($dlm) {
             $reservations->addAttribute('useDLM', 'true');
