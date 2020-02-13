@@ -62,3 +62,5 @@ Route::get('soap/cr-reservas/modify-inventory/{startDate}/{endDate}/{roomTypeId}
 Route::get('soap/cr-reservas/modify-inventory', 'Api\TestSoapController@modifyInventory');
 
 Route::get('soap/bamboo/availability/{startDate?}/{endDate?}/{hotelId?}', 'Api\TestSoapController@getBambooQuantityAvailability');
+
+Route::post('rgbridgeapi/push/receive', 'XMLController@index');
