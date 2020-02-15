@@ -18,10 +18,6 @@ class XMLController extends Controller
         $object = $sxe;
 
         $json = json_encode($object);
-
-        // echo $json;
-        // die();
-
         $matches = null;
         preg_match_all("|\"@attributes\"\:\{(.*)\}|U", $json, $matches);
         $cnt = 0;
@@ -29,7 +25,6 @@ class XMLController extends Controller
             $json = str_replace($matches[0][$cnt], $matches[1][$cnt], $json);
             $cnt++;
         }
-        dd(json_decode($json));
 
         return response()->json([
             'data' => $object,
