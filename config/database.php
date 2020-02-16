@@ -57,8 +57,8 @@ return [
         'hhotel5' => [
             'driver' => 'mysql',
             'host' => 'localhost',
-            'port' => '3306',
-            'database' => 'hentrevilla',
+            'port' => '33060',
+            'database' => 'hhotel5',
             'username' => 'root',
             'password' => 'hea101',
             'unix_socket' => env('DB_SOCKET', ''),

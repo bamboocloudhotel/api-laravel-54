@@ -128,7 +128,7 @@ class TestSoapController extends SoapController
 
     public function modifyInventoryByDatesAndRoom(Request $request, $startDate, $endDate, $roomTypeId, $oldStartDate = null, $oldEndDate = null)
     {
-        $typeRoom = config( 'cm_reservas.rooms_lc.' . $roomTypeId);
+        $typeRoom = config( $request->bookingEngine . '.rooms_lc.' . $roomTypeId);
 
         if ($typeRoom) {
 

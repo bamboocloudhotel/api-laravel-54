@@ -11,9 +11,28 @@ class XMLController extends Controller
     {
         $xml = $request->getContent();
 
+        $data = $this->parseRequestXml($xml, true);
+
+        $validation = \Validator::make($data, [
+            'method' => 'required|in:OTA_HotelResNotifRQ'
+        ]);
+
+        if ($validation->fails()) {
+            return response()->xml($validation->errors(), $status = 200, $headers = [], $xmlRoot = 'OTA_HotelResNotifRS');
+        }
+
+        return response()->xml([
+            'data' => $data['data'],
+            'method' => $data['method'],
+        ]);
+
+    }
+
+    public function parseRequestXml($xml, $array = false)
+    {
         $sxe = new \SimpleXMLElement($xml);
 
-        $function = $sxe->getName();
+        $method = $sxe->getName();
 
         $object = $sxe;
 
@@ -26,21 +45,11 @@ class XMLController extends Controller
             $cnt++;
         }
 
-        return response()->json([
-            'data' => $object,
-            'function' => $function,
-        ]);
+        $data = json_decode($json, $array);
 
-
-    }
-
-    public function replaceBetween($str, $needle_start, $needle_end, $replacement) {
-        $pos = strpos($str, $needle_start);
-        $start = $pos === false ? 0 : $pos + strlen($needle_start);
-
-        $pos = strpos($str, $needle_end, $start);
-        $end = $start === false ? strlen($str) : $pos;
-
-        return substr_replace($str,$replacement,  $start, $end - $start);
+        return [
+            'data' => $data,
+            'method' => $method,
+        ];
     }
 }
