@@ -30,6 +30,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Reccaj extends Model
 {
+    protected $connection = 'hhotel5';
 	protected $table = 'reccaj';
 	protected $primaryKey = 'numrec';
 	public $incrementing = false;

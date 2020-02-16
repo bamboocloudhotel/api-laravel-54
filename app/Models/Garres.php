@@ -10,7 +10,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Class Garre
+ * Class Garres
  * 
  * @property int $numres
  * @property int $item
@@ -25,8 +25,9 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @package App\Models
  */
-class Garre extends Model
+class Garres extends Model
 {
+    protected $connection = 'hhotel5';
 	protected $table = 'garres';
 	public $incrementing = false;
 	public $timestamps = false;
