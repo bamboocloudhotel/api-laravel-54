@@ -2,26 +2,135 @@
 
 namespace App\Rategain;
 
+use App\Jobs\ModifyBookingEngineInventory;
+use App\Models\Reserva;
+use App\Models\Tipdoc;
+
 class Rategain
 {
+    /**
+     * @var string
+     */
+    public $reservationResponseSuccess;
 
+    /**
+     * @var string
+     */
+    public $reservationResponseError;
+
+    /**
+     * @var string
+     */
+    public $inventoryModifyRequest;
+
+    public $uit;
+
+    public $aqc;
+
+    /**
+     * Rategain constructor.
+     * @throws \Exception
+     */
     public function __construct()
     {
-    }
-
-
-    public function modifyInventory($startDate = null, $endDate = null, $roomId = null, $hotelId = null, $quantity = null)
-    {
-        $hotelId = $hotelId ? $hotelId : config('rategain.hotelCode');
-        $sDate = $startDate ? $startDate : date('Y-m-d');
-        $eDate = $endDate ? $endDate : date('Y-m-d');
-        $room = $roomId;
-
         $currentDate = date('Y-m-d');
         $currentTime = date('H:i:s');
+        $hotelId = config('rategain.hotelCode');
 
-        $xml = <<<XML
-<OTA_HotelAvailNotifRQ xmlns="http://www.opentravel.org/OTA/2003/05" TimeStamp="{$currentDate}T{$currentTime}" Target="Production" Version="1.002" EchoToken="{$hotelId}">
+        $this->uit = [
+            '1' => 'Customer',
+            '2' => 'CRO (Customer Reservations Office)',
+            '3' => 'Corporation representative',
+            '4' => 'Company',
+            '5' => 'Travel agency',
+            '6' => 'Airline',
+            '7' => 'Wholesaler',
+            '8' => 'Car rental',
+            '9' => 'Group',
+            '10' => 'Hotel',
+            '11' => 'Tour operator',
+            '12' => 'Cruise line',
+            '13' => 'Internet broker',
+            '14' => 'Reservation',
+            '15' => 'Cancellation',
+            '16' => 'Reference',
+            '17' => 'Meeting planning agency',
+            '18' => 'Other',
+            '19' => 'Insurance agency',
+            '20' => 'Insurance agent',
+            '21' => 'Profile',
+            '22' => 'ERSP (Electronic reservation service provider)',
+            '23' => 'Provisional reservation',
+            '24' => 'Travel Agent PNR',
+            '25' => 'Associated reservation',
+            '26' => 'Associated itinerary reservation',
+            '27' => 'Associated shared reservation',
+            '28' => 'Alliance',
+            '29' => 'Booking agent',
+            '30' => 'Ticket',
+            '31' => 'Divided reservation',
+            '32' => 'Merchant',
+            '33' => 'Acquirer',
+            '34' => 'Master reference',
+            '35' => 'Purged master reference',
+            '36' => 'Parent reference',
+            '37' => 'Child reference',
+            '38' => 'Linked reference',
+            '39' => 'Contract',
+            '40' => 'Confirmation number',
+            '41' => 'Fare quote',
+            '42' => 'Reissue/refund quote',
+            '43' => 'Ground transportation supplier',
+            '44' => 'EMD',
+        ];
+
+        $this->aqc = [
+            '1' => 'Over 21',
+            '2' => 'Over 65',
+            '3' => 'Under 2',
+            '4' => 'Under 12',
+            '5' => 'Under 17',
+            '6' => 'Under 21',
+            '7' => 'Infant',
+            '8' => 'Child',
+            '9' => 'Teenager',
+            '10' => 'Adult',
+            '11' => 'Senior',
+            '12' => 'Additional occupant with adult',
+            '13' => 'Additional occupant without adult',
+            '14' => 'Free child',
+            '15' => 'Free adult',
+            '16' => 'Young driver',
+            '17' => 'Younger driver',
+            '18' => 'Under 10',
+            '19' => 'Junior',
+        ];
+
+        $this->reservationResponseSuccess = <<<XML
+<OTA_HotelResNotifRS TimeStamp="{$currentDate}T{$currentTime}">
+    <HotelReservations>
+        <HotelReservation>
+            <ResGlobalInfo>
+                <HotelReservationIDs>
+                    <HotelReservationID ResID_Type="3" ResID_Value="123456789" />
+                    <HotelReservationID ResID_Type="14" ResID_Value="chd23242342"/>
+                </HotelReservationIDs>
+            </ResGlobalInfo>
+        </HotelReservation>
+    </HotelReservations>
+    <Success />
+</OTA_HotelResNotifRS>
+XML;
+        $this->reservationResponseError = <<<XML
+<OTA_HotelResNotifRS EchoToken="{$this->uniqidReal()}" TimeStamp="{$currentDate}T{$currentTime}">
+    <Errors>
+        <Error Code="450" Status="NotProcessed" ShortText="Invalid XML" />
+    </Errors>
+</OTA_HotelResNotifRS>
+XML;
+
+        $this->inventoryModifyRequest = <<<XML
+<OTA_HotelAvailNotifRQ xmlns="http://www.opentravel.org/OTA/2003/05" TimeStamp="{$currentDate}T{$currentTime}" Target="Production" Version="1.002" EchoToken="{$this->uniqidReal()}">
 	<AvailStatusMessages HotelCode="{$hotelId}">
 		<AvailStatusMessage BookingLimit="1" BookingLimitMessageType="SetLimit">
 			<StatusApplicationControl Start="2020-03-01" End="2020-03-01" InvCode="SGL"></StatusApplicationControl>
@@ -30,6 +139,27 @@ class Rategain
 	</AvailStatusMessages>
 </OTA_HotelAvailNotifRQ>
 XML;
+
+    }
+
+
+    /**
+     * @param null $startDate
+     * @param null $endDate
+     * @param null $roomId
+     * @param null $hotelId
+     * @param null $quantity
+     * @return array
+     * @throws \Exception
+     */
+    public function modifyInventory($startDate = null, $endDate = null, $roomId = null, $hotelId = null, $quantity = null)
+    {
+        $hotelId = $hotelId ? $hotelId : config('rategain.hotelCode');
+        $sDate = $startDate ? $startDate : date('Y-m-d');
+        $eDate = $endDate ? $endDate : date('Y-m-d');
+        $room = $roomId;
+
+        $xml = $this->inventoryModifyRequest;
 
         $begin = new \DateTime($sDate);
         $end = new \DateTime($eDate);
@@ -54,8 +184,8 @@ XML;
         $return = [];
         foreach ($dates as $date) {
             $thisXml = str_replace('BookingLimit="1"', 'BookingLimit="' . $quantity . '"', $xml);
-            $thisXml = str_replace('Start="2020-03-01"', 'Start="'.$date.'"', $thisXml);
-            $thisXml = str_replace('End="2020-03-01"', 'End="'.$date.'"', $thisXml);
+            $thisXml = str_replace('Start="2020-03-01"', 'Start="' . $date . '"', $thisXml);
+            $thisXml = str_replace('End="2020-03-01"', 'End="' . $date . '"', $thisXml);
             $thisXml = str_replace('InvCode="SGL"', 'InvCode="' . $room . '"', $thisXml);
             $thisXml = str_replace('InvCode="SGL"', 'InvCode="' . $room . '"', $thisXml);
             $thisXml = str_replace('ID="1"', 'ID="' . $this->uniqidReal() . '"', $thisXml);
@@ -83,46 +213,54 @@ XML;
         return $return;
     }
 
+    /**
+     * @param $reservationAttributes
+     * @param $roomClass
+     * @return mixed
+     */
     public function getBambooAvailability($reservationAttributes, $roomClass)
     {
-        \DB::setDefaultConnection('hhotel5');
         $roomsOccupied = [];
 
-        $roomsBlocked = collect(\DB::select("
+        $end = $reservationAttributes->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->End;
+        $start = $reservationAttributes->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->Start;
+        $class = (int)$roomClass;
+
+        $roomsBlocked = collect(\DB::connection('hhotel5')->select("
                 SELECT blohab.numhab
                 FROM blohab
                 INNER JOIN habitacion ON blohab.numhab = habitacion.numhab
-                WHERE blohab.fecini <= '$reservationAttributes->checkout' AND blohab.fecfin >= '$reservationAttributes->checkin'
+                WHERE blohab.fecini <= '{$end}' AND blohab.fecfin >= '{$start}'
                 AND blohab.fecdes IS NULL
-                AND habitacion.codcla = {$roomClass}
+                AND habitacion.codcla = {$class}
             "));
 
         foreach ($roomsBlocked as $roomBlocked) {
             $roomsOccupied[] = $roomBlocked->numhab;
         }
 
-        $roomsReserved = collect(\DB::select("
+        $roomsReserved = collect(\DB::connection('hhotel5')->select("
                 SELECT reserva.numres, reserva.numhab, reserva.estado, habitacion.codcla
                 FROM `reserva`
                 INNER JOIN habitacion ON reserva.numhab = habitacion.numhab
-                WHERE reserva.feclle < '$reservationAttributes->checkout' AND reserva.fecsal > '$reservationAttributes->checkin'
+                WHERE reserva.feclle < '{$end}' AND reserva.fecsal > '{$start}'
                 AND reserva.estado IN ('P','G')
-                AND habitacion.codcla = {$roomClass}
+                AND habitacion.codcla = {$class}
             "));
 
         foreach ($roomsReserved as $roomReserved) {
             $roomsOccupied[] = $roomReserved->numhab;
         }
 
-        $roomsHosted = collect(\DB::select("
+        $roomsHosted = collect(\DB::connection('hhotel5')->select("
                 SELECT reserva.numres, reserva.numhab, reserva.estado, habitacion.codcla, folio.numfol, folio.estado
                 FROM `reserva`
                 INNER JOIN habitacion ON reserva.numhab = habitacion.numhab
                 INNER JOIN folio ON reserva.numhab = folio.numres
-                WHERE reserva.feclle < '$reservationAttributes->checkout' AND reserva.fecsal > '$reservationAttributes->checkin'
+                WHERE reserva.feclle < '{$end}' AND reserva.fecsal > '{$start}'
                 AND reserva.estado IN ('H')
                 AND folio.estado IN ('I')
-                AND habitacion.codcla = {$roomClass}
+                AND habitacion.codcla = {$class}
             "));
 
         foreach ($roomsHosted as $roomHosted) {
@@ -131,18 +269,21 @@ XML;
 
         $roomsOccupied = implode('\',\'', $roomsOccupied);
 
-        $numhab = collect(\DB::select("
+        $numhab = collect(\DB::connection('hhotel5')->select("
             select habitacion.numhab 
             from habitacion 
             where habitacion.numhab not in ('{$roomsOccupied}')
-            AND habitacion.codcla = {$roomClass}
-            "))->first();
+            AND habitacion.codcla = {$class}
+            "));
 
-        return $numhab;
+        return $numhab->toArray();
     }
 
     /**
-     * @return mixed
+     * @param $in
+     * @param $out
+     * @param $roomClass
+     * @return array
      */
     public function getBambooQuantityAvailability($in, $out, $roomClass)
     {
@@ -212,7 +353,14 @@ XML;
         return $availability;
     }
 
-    function uniqidReal($lenght = 13) {
+
+    /**
+     * @param int $lenght
+     * @return false|string
+     * @throws \Exception
+     */
+    function uniqidReal($lenght = 13)
+    {
         // uniqid gives 13 chars, but you could adjust it to your needs.
         if (function_exists("random_bytes")) {
             try {
@@ -226,6 +374,357 @@ XML;
             throw new \Exception("no cryptographically secure random function available");
         }
         return substr(bin2hex($bytes), 0, $lenght);
+    }
+
+    public function getReservationError($errorsArray)
+    {
+        $xml = $this->reservationResponseError;
+
+        $errors = "<Errors>";
+
+        $responseErrors = [
+            'data.ResStatus' => [
+                'Code' => 321,
+                'ShortText' => 'Invalid data ResStatus'
+            ],
+            'data.POS.Source.BookingChannel.CompanyName.Code' => [
+                'Code' => 321,
+                'ShortText' => 'Invalid data POS Source BookingChannel CompanyName Code'
+            ],
+            'data.HotelReservations.HotelReservation.ResStatus' => [
+                'Code' => 321,
+                'ShortText' => 'Invalid data HotelReservations HotelReservation ResStatus'
+            ],
+            'data.HotelReservations.HotelReservation.UniqueID.ID' => [
+                'Code' => 321,
+                'ShortText' => 'Invalid data HotelReservations HotelReservation UniqueID ID'
+            ],
+            'data.HotelReservations.HotelReservation.BasicPropertyInfo.HotelCode' => [
+                'Code' => 400,
+                'ShortText' => 'Invalid data HotelReservations HotelReservation BasicPropertyInfo HotelCode'
+            ],
+            'data.HotelReservations.HotelReservation.RoomStays.RoomStay.RoomStayStatus' => [
+                'Code' => 321,
+                'ShortText' => 'Invalid data HotelReservations HotelReservation RoomStays RoomStay RoomStayStatus'
+            ],
+            'data.HotelReservations.HotelReservation.RoomStays.RoomRates.RoomRate.RoomTypeCode' => [
+                'Code' => 402,
+                'ShortText' => 'Invalid data HotelReservations HotelReservation RoomStays RoomRates RoomRate RoomTypeCode'
+            ],
+            'data.HotelReservations.HotelReservation.RoomStays.RoomRates.RoomRate.NumberOfUnits' => [
+                'Code' => 321,
+                'ShortText' => 'Invalid data HotelReservations HotelReservation RoomStays RoomRates RoomRate NumberOfUnits'
+            ],
+            'data.HotelReservations.HotelReservation.RoomStays.RoomStay.RoomRates.RoomRate.Rates.Rate.*.EffectiveDate' => [
+                'Code' => 321,
+                'ShortText' => 'Invalid data HotelReservations HotelReservation RoomStays RoomStay RoomRates RoomRate Rates Rate EffectiveDate'
+            ],
+            'data.HotelReservations.HotelReservation.RoomStays.RoomStay.RoomRates.RoomRate.Rates.Rate.*.ExpireDate' => [
+                'Code' => 321,
+                'ShortText' => 'Invalid data HotelReservations HotelReservation RoomStays RoomStay RoomRates RoomRate Rates Rate ExpireDate'
+            ],
+            'data.HotelReservations.HotelReservation.ResGlobalInfo.TimeSpan.End' => [
+                'Code' => 321,
+                'ShortText' => 'Invalid data HotelReservations HotelReservation ResGlobalInfo TimeSpan End'
+            ],
+            'data.HotelReservations.HotelReservation.ResGlobalInfo.TimeSpan.Start' => [
+                'Code' => 321,
+                'ShortText' => 'Invalid data HotelReservations HotelReservation ResGlobalInfo TimeSpan Start'
+            ],
+
+            'noAvailabilities' => [
+                'Code' => 450,
+                'ShortText' => 'No room availabilities'
+            ],
+
+        ];
+
+        foreach ($errorsArray as $error) {
+            if (is_array($error)) {
+                foreach ($error as $err) {
+                    $errors .= "\n\t\t<Error Code=\"" . $responseErrors[$err]['Code'] . "\" Status=\"NotProcessed\" ShortText=\"" . $responseErrors[$err]['ShortText'] . "\" />";
+                }
+            } else {
+                $errors .= "\n\t\t<Error Code=\"" . $responseErrors[$error]['Code'] . "\" Status=\"NotProcessed\" ShortText=\"" . $responseErrors[$error]['ShortText'] . "\" />";
+            }
+
+        }
+
+        $errors .= "\n\t</Errors>";
+
+        $xml = str_replace('<Errors>
+        <Error Code="450" Status="NotProcessed" ShortText="Invalid XML" />
+    </Errors>', $errors, $xml);
+
+        return $xml;
+    }
+
+    public function saveReservation($data)
+    {
+        // dd($data);
+        if (!is_array($data->HotelReservations->HotelReservation->RoomStays->RoomStay)) {
+            $data->HotelReservations->HotelReservation->RoomStays->RoomStay = [
+                $data->HotelReservations->HotelReservation->RoomStays->RoomStay
+            ];
+        }
+
+        $availables = [];
+
+        $selectedRooms = [];
+
+        foreach ($data->HotelReservations->HotelReservation->RoomStays->RoomStay as $roomStay) {
+            $roomClass = config('rategain.rooms_cl.' . $roomStay->RoomRates->RoomRate->RoomTypeCode);
+            if ($this->getBambooAvailability($data, $roomClass)) {
+                $availables[] = $this->getBambooAvailability($data, $roomClass);
+                $selectedRooms[] = $this->getBambooAvailability($data, $roomClass)[0];
+            }
+        }
+
+        if ($selectedRooms) {
+            for ($i = 0; $i <= count($selectedRooms); $i++) {
+                if ($i > 0 && $i < count($selectedRooms)) {
+                    if ($selectedRooms[$i]->numhab == $selectedRooms[$i - 1]->numhab) {
+                        for ($j = 0; $j <= count($availables[$i - 1]); $j++) {
+                            if (($j > 0 && $j < count($availables[$i - 1]))) {
+                                if ($selectedRooms[$i - 1]->numhab != $availables[$i - 1][$j]->numhab) {
+                                    $selectedRooms[$i - 1]->numhab = $availables[$i - 1][$j]->numhab;
+                                    break 2;
+                                }
+                            } else {
+                                $selectedRooms[$i - 1]->numhab = null;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        foreach ($selectedRooms as $selectedRoom) {
+            if (null == $selectedRoom->numhab) {
+                return $this->getReservationError(['noAvailabilities']);
+            }
+        }
+
+        if (!$availables) {
+            return $this->getReservationError(['noAvailabilities']);
+        }
+
+        if (count($availables) < count($data->HotelReservations->HotelReservation->RoomStays->RoomStay)) {
+            return $this->getReservationError(['noAvailabilities']);
+        }
+        $tipDoc = Tipdoc::where('detalle', 'CEDULA CIUDADANIA')->first();
+        $confirmationid = $this->uniqidReal(16);
+
+        $roomStayCnt = 0;
+        foreach ($data->HotelReservations->HotelReservation->RoomStays->RoomStay as $roomStay) {
+            $roomClass = config('rategain.rooms_cl.' . $roomStay->RoomRates->RoomRate->RoomTypeCode);
+            $numres = collect(\DB::connection('hhotel5')->select('select MAX(numres)+1 as res from reserva limit 1'))->first();
+            $dathot = collect(\DB::connection('hhotel5')->select("select nit, numrec from dathot;"))->first();
+            $numres = $numres->res;
+            $nit = explode('.', $dathot->nit);
+            $nit = implode('', $nit);
+            $nit = explode('-', $nit);
+            $nit = $nit[0];
+            $numrec = $dathot->numrec;
+            $numhab = $selectedRooms[$roomStayCnt]->numhab;
+
+            // {$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Address->CountryName}
+            $observacion = "
+{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->GivenName} {$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->Surname}
+{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Address->AddressLine}
+{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Address->CityName}
+{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Address->PostalCode}
+
+{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Telephone->PhoneNumber}
+{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Email}
+
+RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Type} {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Value}
+RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Type} {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value}
+            ";
+            $paymentType = config('cm_reservas.paymentType');
+            $warrantyType = config('cm_reservas.warrantyType');
+            $programType = config('cm_reservas.programType');
+            $tipres = config('cm_reservas.tipres');
+            $metadata = json_encode($data);
+
+            try {
+                $newReservation = Reserva::create([
+                    'numres' => $numres,
+                    'referencia' => 'RateGain ' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Type . ' ' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Value,
+                    'tipdoc' => $tipDoc->tipdoc,
+                    'cedula' => 0,
+                    'nit' => $nit,
+                    'numhab' => $numhab,
+                    'tipres' => $tipres,
+                    'fecres' => date('Y-m-d'),
+                    'feclle' => $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->Start,
+                    'fecsal' => $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->End,
+                    'feclim' => $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->Start,
+                    'hora' => '12:00',
+                    'numadu' => count($data->HotelReservations->HotelReservation->ResGuests->ResGuest),
+                    'observacion' => $observacion,
+                    'habfij' => 'N',
+                    'solicitada' => "{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->GivenName} {$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->Surname}",
+                    'forpag' => $paymentType,
+                    'fecest' => date('Y-m-d'),
+                    'estado' => 'G',
+                    'tippro' => $programType,
+                    'tipgar' => $warrantyType,
+                    'codven' => 1,
+                    'metadata' => $metadata,
+                    'confirmationid' => $confirmationid,
+                ]);
+            } catch (\Exception $exception) {
+                return response()->json([
+                    'message' => $exception->getMessage(),
+                    'file' => $exception->getFile(),
+                    'line' => $exception->getLine()
+                ], 400);
+            }
+
+            $codpla = config('cm_reservas.codpla');
+            $dayPriceCnt = 1;
+            foreach ($roomStay->RoomRates->RoomRate->Rates->Rate as $dayPrice) {
+                $queryPlares = "
+                INSERT INTO plares
+                (numres, numpla, codpla, fecini, fecfin, pordes, tipdes, valornoche)
+                VALUES({$numres}, {$dayPriceCnt}, {$codpla}, '{$dayPrice->EffectiveDate}', '{$dayPrice->ExpireDate}', 0, 'P', {$dayPrice->Base->AmountBeforeTax});
+                ";
+                \DB::connection('hhotel5')->insert($queryPlares);
+                $dayPriceCnt++;
+            }
+            $address = substr($data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Address->AddressLine, 0, 16);
+            $queryReccaj = "
+            INSERT INTO reccaj
+            (numrec, cedula, nombre, direccion, ciudad, telefono, fecha, codcaj, codusu, codcar, codven, nota, estado)
+            VALUES(
+                   {$numrec}, 
+                   '0', 
+                   '{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->GivenName} {$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->Surname}', 
+                   '{$address}', 
+                   'na', 
+                   '{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Telephone->PhoneNumber}', 
+                   CURRENT_DATE, 
+                   1, 
+                   1, 
+                   54,
+                   0, 
+                   'Pago de reserva por RateGain.', 
+                   'A'
+               );
+            ";
+            \DB::connection('hhotel5')->insert($queryReccaj);
+
+            $queryDetrec = "
+            INSERT INTO detrec
+            (numrec, numero, forpag, numfor, fecven, ivarep, valorm, valor)
+            VALUES({$numrec}, 1, 1, 0, CURRENT_DATE, 0, 0, {$data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax});
+            ";
+            \DB::connection('hhotel5')->insert($queryDetrec);
+
+            $queryGarres = "
+            INSERT INTO garres
+            (numres, item, codusu, codcaj, fecha, codcar, total, numrec, numegr, estado)
+            VALUES({$numres}, 1, 1, 3, CURRENT_TIMESTAMP, 54, {$data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax}, {$numrec}, 0, 'A');
+            ";
+            \DB::connection('hhotel5')->insert($queryGarres);
+
+            $nNumrec = ($numrec + 1);
+            \DB::connection('hhotel5')->update("
+            UPDATE dathot
+            SET
+            numrec = {$nNumrec}
+            WHERE numrec = {$numrec};
+            ");
+
+            $queryNumfolio = "select MAX(numfol)+1 as fol from folio";
+
+            $numfolio = collect(\DB::connection('hhotel5')->select($queryNumfolio))->first();
+            $resDate = substr($data->TimeStamp, 0, 10);
+            $sqlFolio = "
+            INSERT INTO folio
+            (numfol, numres, codeve, tipdoc, cedula, nit, nitage, locpro, codpai, codciu, paides, locdes, ciudes, codtra, trasal, codmot, numhab, usuout, codusu, fecres, feclle, fecsal, hora, horsal, numadu, numnin, numinf, nota, notaayb, equipaje, placa, trahot, estpai, corregir, forpag, estado, walkin, tippro, tipgar, codven, idresweb, idcanal, idclifre)
+            VALUES(
+            {$numfolio->fol}, 
+            {$numres}, 
+            0,
+            {$tipDoc->tipdoc}, 
+            '0',
+            '0', 
+            '0', 
+            127591, 
+            null, 
+            null, 
+            null, 
+            129499, 
+            null, 
+            0, 
+            0, 
+            null, 
+            '$numhab', 
+            null, 
+            null, 
+            '{$resDate}', 
+            '{$data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->Start}', 
+            '{$data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->End}', 
+            null, 
+            null, 
+            1, 
+            0, 
+            0, 
+            'FOLIO CREADO PARA GARANTIZAR RESERVA EN LINEA RateGain', 
+            '', 
+            'N', 
+            null, 
+            'N', 
+            null, 
+            'N', 
+            null,
+            'O', 
+            'A', 
+            '', 
+            '', 
+            0, 
+            null,
+            null,
+            null           
+            );
+            ";
+
+            \DB::connection('hhotel5')->insert($sqlFolio);
+
+            $queryValcar = "
+                INSERT INTO valcar
+                (numfol, numcue, item, codusu, codcaj, fecha, cantidad, codcar, cladoc, numdoc, codpla, valor, iva, impo, valser, valter, total, estado, oldfol, movcor)
+                VALUES({$numfolio->fol}, 1, 1, 3, 7, CURRENT_TIMESTAMP, 1, 54, 'RC', '2109', null, {$data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax}, 0, null, 0, 0, {$data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax}, 'A', null, 'N');
+            ";
+
+            \DB::connection('hhotel5')->insert($queryValcar);
+
+            $roomStayCnt++;
+        }
+
+        $returnSuccess = $this->reservationResponseSuccess;
+
+        $returnSuccess = str_replace(
+            '<HotelReservationID ResID_Type="14" ResID_Value="chd23242342"/>',
+            '<HotelReservationID ResID_Type="14" ResID_Value="' . $confirmationid . '"/>',
+            $returnSuccess
+        );
+
+        $job = (
+            new ModifyBookingEngineInventory(
+                $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->Start,
+                $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->End,
+                $roomClass,
+                'rategain')
+        );
+
+        dispatch($job);
+
+
+        return $returnSuccess;
+
     }
 
 }

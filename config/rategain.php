@@ -14,9 +14,9 @@ return [
         '12' => 'SGL',
         '13' => 'DBL',
     ],
-    'paymentType' => '15',
+    'paymentType' => '46',
     'warrantyType' => '2',
     'programType' => '7',
-    'codpla' => 728,
+    'codpla' => 766,
     'tipres' => '2',
 ];

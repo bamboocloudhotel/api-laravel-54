@@ -14,16 +14,16 @@
 4. Crear tablas `php artisan migrate`
 
 # Rest API Aplicación Reservas por Central de Reservas
-Agregar el campo `metadata` a la tabla `reserva`
+Agregar las siguientes columnas a la tabla `reserva` de Bamboo:
 ```sql
-ALTER TABLE reserva ADD metadata LONGTEXT NULL;
-```
-Agregar el campo `valornoche` a la tabla `plares`
-```sql
-ALTER TABLE plares ADD valornoche INTEGER NULL;
+ALTER TABLE reserva ADD metadata LONGTEXT NULL COMMENT 'XML de la reserva obtenido por el motor de reservas (rategain o cm reservas)';
+
+ALTER TABLE plares ADD valornoche INTEGER NULL COMMENT 'Valor de la noche obtenido por el motor de reservas (rategain o cm reservas)';
+
+ALTER TABLE reserva ADD confirmationid TEXT NULL COMMENT 'ID de confirmación enviado al motor de reservas (rategain o cm reservas)';
 ```
 
-Configurar la conexión `hhotel5` en `config/database.php` apuntando a la base de datos de bamboo. *Ejemplo*:
+Configurar la conexión `hhotel5` en `config/database.php` apuntando a la base de datos de Bamboo. *Ejemplo*:
 ```php
 'hhotel5' => [
     'driver' => 'mysql',

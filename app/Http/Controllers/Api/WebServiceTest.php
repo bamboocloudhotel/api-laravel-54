@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use nusoap_client;
 
 class WebServiceTest extends Controller
 {
@@ -16,41 +15,6 @@ class WebServiceTest extends Controller
     {
         // ToDo: Return this from config.
         $this->wsUrl = 'https://200.1.124.118/PSEHostingWebServices/PSEHostingWS.asmx';
-
-    }
-
-    public function getBanklist(Request $request) {
-        $parameters = $request->all();
-
-        $method = $parameters['method'];
-        unset($parameters['method']);
-
-        $client = new nusoap_client($this->wsUrl . '?wsdl','wsdl');
-        $client->soap_defencoding = 'utf-8';
-        $client->decode_utf8 = false;
-
-        $client->call($method, $parameters);
-    }
-
-    public function processRequest(Request $request) {
-        $parameters = $request->all();
-
-        $method = $parameters['method'];
-        unset($parameters['method']);
-
-        $client = new nusoap_client($this->wsUrl . '?wsdl','wsdl');
-        $client->soap_defencoding = 'utf-8';
-        $client->decode_utf8 = false;
-
-        $client->call($method, $parameters);
-
-        $req = preg_split("/[\s]Content-Length:[\s](.*)[\s]+/", $client->request)[1];
-        $res = preg_split("/[\s]GMT[\s](.*)[\s]+/", $client->response)[2];
-
-        return response()->json([
-            'req' => $this->xmlToArray(simplexml_load_string($req)),
-            'res' => $this->xmlToArray(simplexml_load_string($res)),
-        ], 200);
 
     }
 

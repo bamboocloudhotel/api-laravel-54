@@ -54,6 +54,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $idclifre
  * @property string $tipseg
  * @property array $metadata
+ * @property array $confirmationid
  *
  * @package App\Models
  */
@@ -96,6 +97,7 @@ class Reserva extends Model
 	];
 
 	protected $fillable = [
+	    'numres',
 		'referencia',
 		'tipdoc',
 		'cedula',
@@ -136,6 +138,7 @@ class Reserva extends Model
 		'idcanal',
 		'idclifre',
 		'tipseg',
-		'metadata'
+		'metadata',
+        'confirmationid'
 	];
 }
