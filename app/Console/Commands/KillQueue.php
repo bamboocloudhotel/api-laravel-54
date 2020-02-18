@@ -42,9 +42,10 @@ class KillQueue extends Command
         if ($process) {
             foreach ($process as $pro) {
                 $this->info($pro);
-                $pid = substr($pro, 10, 5);
+                $pid = substr($pro, 9, 5);
+				$this->info('Killing ' . $pid);
                 exec('kill ' . $pid, $ret);
-                $this->info('Terminated');
+                $this->info($pid . ' Killed');
             }
             return;
         }
