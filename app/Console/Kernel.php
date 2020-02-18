@@ -28,7 +28,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->command('cr:get_reservations cm-reservas')->everyFiveMinutes();
-
+        $schedule->command('kill:queue')->everyFiveMinutes();
         // start the queue daemon, if its not running
         if (!$this->osProcessIsRunning('queue:work')) {
             $schedule->command('queue:work --tries=3')->everyMinute();
