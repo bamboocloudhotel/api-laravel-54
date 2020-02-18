@@ -38,6 +38,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Valcar extends Model
 {
+    protected $connection = 'hhotel5';
 	protected $table = 'valcar';
 	public $incrementing = false;
 	public $timestamps = false;
@@ -66,8 +67,6 @@ class Valcar extends Model
 	];
 
 	protected $fillable = [
-	    'numfol',
-        'numcue',
 		'codusu',
 		'codcaj',
 		'fecha',

@@ -25,6 +25,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Detrec extends Model
 {
+    protected $connection = 'hhotel5';
 	protected $table = 'detrec';
 	public $incrementing = false;
 	public $timestamps = false;

@@ -14,16 +14,16 @@
 4. Crear tablas `php artisan migrate`
 
 # Rest API Aplicación Reservas por Central de Reservas
-Agregar el campo `metadata` a la tabla `reserva`
+Agregar las siguientes columnas a la tabla `reserva` de Bamboo:
 ```sql
-ALTER TABLE reserva ADD metadata LONGTEXT NULL;
-```
-Agregar el campo `valornoche` a la tabla `plares`
-```sql
-ALTER TABLE plares ADD valornoche INTEGER NULL;
+ALTER TABLE reserva ADD metadata LONGTEXT NULL COMMENT 'XML de la reserva obtenido por el motor de reservas (rategain o cm reservas)';
+
+ALTER TABLE plares ADD valornoche INTEGER NULL COMMENT 'Valor de la noche obtenido por el motor de reservas (rategain o cm reservas)';
+
+ALTER TABLE reserva ADD confirmationid TEXT NULL COMMENT 'ID de confirmación enviado al motor de reservas (rategain o cm reservas)';
 ```
 
-Configurar la conexión `hhotel5` en `config/database.php` apuntando a la base de datos de bamboo. *Ejemplo*:
+Configurar la conexión `hhotel5` en `config/database.php` apuntando a la base de datos de Bamboo. *Ejemplo*:
 ```php
 'hhotel5' => [
     'driver' => 'mysql',
@@ -41,42 +41,41 @@ Configurar la conexión `hhotel5` en `config/database.php` apuntando a la base d
 ],
 ```
 
-### CM Reservas
+### Rate Gain
 
 Configurar en Bamboo los datos del WebService en `hotel5\app\clases\ReservationsChannel.php`. *Ejemplo*:
 
 ```php
 public function __construct()
 {
-    $this->apiUrl = 'http://api-laravel-54.test';
-    $this->hotelId = '3885';
-    $this->hotelName = '3885';
-    $this->bookingEngineCode = 'cm-reservas';
+    $this->apiUrl = 'http://api-laravel-54.test'; // URL de esta aplicación
+    $this->hotelId = '20915'; // Id del hotel en el PMS
+    $this->hotelName = '20915'; // Nombre del hotel en el PMS
+    $this->bookingEngineCode = 'rategain'; // Código del PMS 'cm-reservas', 'rategain'
 }
 ```
 
-Configurar los datos del WebService CM Reservas en `config/cm_reservas`. *Ejemplo*:
+Configurar los datos del WebService RateGain en `config/rategain.php`. *Ejemplo*:
 ```php
 return [
-    'url' => 'https://apitest.roomcloud.net',
-    'apyKey' => 'bamboo_900hty5768fj5o6msds4',
-    'hotel_id' => 3885,
-    'userName' => '3885',
-    'password' => 'homes',
-    'action' => '/be/search/xml.jsp',
-    'default_rate' => '766', // id del cargo a aplicar
-    'rooms_cl' => [ // habitaciones id de cm reservas, id de clase bamboo
-        '17661' => '15',
-        '17662' => '14',
+    'url' => 'https://rzhospicert.rategain.com/rgbridgeapi/ari/receive',
+    'auth' => 'Authorization: Basic dXNlcm5hbWU6cGFzc3dvcmQ=',
+    'username' => 'some@email.com',
+    'password' => 'secret',
+    'hotelCode' => 20915,
+    'rooms_cl' => [ // channel to local
+        'SGL' => '12',
+        'DBL' => '13',
     ],
-    'rooms_lc' => [ // habitaciones id de clase bamboo, id de cm reservas
-        '15' => '17661',
-        '14' => '17662',
+    'rooms_lc' => [ // local to channel
+        '12' => 'SGL',
+        '13' => 'DBL',
     ],
-    'paymentType' => '46', // Código del tipo de pago a aplicar
-    'warrantyType' => '2', // Código del tipo de garantia a aplicar
-    'programType' => '7', // Código del tipo de programa a aplicar
-    'codpla' => 728, // Código del plan a aplicar
+    'paymentType' => '15',
+    'warrantyType' => '2',
+    'programType' => '7',
+    'codpla' => 728,
+    'tipres' => '2',
 ];
 ```
 
@@ -84,15 +83,15 @@ return [
 
 **Obtener Reservas:**
 
-`php artisan cr:get_reservation cm-reservas`
+`php artisan cr:get_reservations rategain`
 
 Obtiene las reservas generadas en los canales de reservas y las almacena en bamboo.
 
 **Actuaizar inventario**
 
-`php artisan cr:put_inventory 2020-03-15 2020-03-18 1 cm-reservas`
+`php artisan cr:put_inventory 2020-03-15 2020-03-18 1 rategain`
 
-Actualiza el inventario en el canal de reservas desde una fecha inicial hasta una fecha final por el código de la clase de habitación
+Actualiza el inventario en el canal de reservas desde una fecha inicial hasta una fecha final por el código de la clase de habitación (codcla)
 
 ## Tareas programadas
 Configurar la tarea programada (cronjob):

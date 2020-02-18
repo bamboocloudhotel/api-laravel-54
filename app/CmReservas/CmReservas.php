@@ -82,9 +82,9 @@ class CmReservas
         $xmlr = $this->request();
 
         $xmlr->addChild('reservations')
-            ->addAttribute('hotelId', $hotelId ? $hotelId : config('cm_reservas.userName'));
+            ->addAttribute('hotelId', $hotelId ? $hotelId : config('cm_reservas.hotel_id'));
         $reservations = $xmlr->addChild('reservations');
-        $reservations->addAttribute('hotelId', $hotelId ? $hotelId : config('cm_reservas.userName'));
+        $reservations->addAttribute('hotelId', $hotelId ? $hotelId : config('cm_reservas.hotel_id'));
 
         if ($dlm) {
             $reservations->addAttribute('useDLM', 'true');
@@ -110,7 +110,7 @@ class CmReservas
         $xmlr = $this->request();
 
         $view = $xmlr->addChild('view');
-        $view->addAttribute('hotelId', $hotelId ? $hotelId : config('cm_reservas.userName'));
+        $view->addAttribute('hotelId', $hotelId ? $hotelId : config('cm_reservas.hotel_id'));
         $view->addAttribute('startDate', $sDate);
         $view->addAttribute('endDate', $eDate);
 
@@ -124,7 +124,7 @@ class CmReservas
         $hotelId = $hotelId ? $hotelId : config('cm_reservas.hotel_id');
         $sDate = $startDate ? $startDate : date('Y-m-d');
         $eDate = $endDate ? $endDate : date('Y-m-d');
-        $hotel = $hotelId ? $hotelId : config('cm_reservas.userName');
+        $hotel = $hotelId ? $hotelId : config('cm_reservas.hotel_id');
         $room = $roomId;
         $quantity = $quantity;
 
@@ -238,6 +238,7 @@ class CmReservas
 
     public function saveReservations($reservations)
     {
+        // dd($reservations);
         \DB::setDefaultConnection('hhotel5');
 		if (!$reservations['data']) {
 			return;
@@ -318,12 +319,13 @@ class CmReservas
                 $paymentType = config('cm_reservas.paymentType');
                 $warrantyType = config('cm_reservas.warrantyType');
                 $programType = config('cm_reservas.programType');
+                $tipres = config('cm_reservas.tipres');
                 $json_data = json_encode((array)$reservation, true);
                 $queryReserva = "
                     INSERT INTO reserva
                     (numres ,referencia ,tipdoc ,cedula, nit, numhab, tipres, codusu, fecres, feclle, fecsal, feclim, numadu, numnin, numinf, observacion, numpre, carta, habfij, solicitada, forpag, fecest, estado, tippro, tipgar, codven, tipseg, metadata)
                     VALUES
-                    ('$numres->res','cm-reservas {$reservationAttributes->id} {$reservationRoom->id}', {$tipDoc->tipdoc},'0','{$nit}','$numhab->numhab','5','1',curdate(),'$reservationAttributes->checkin','$reservationAttributes->checkout' ,'$reservationAttributes->checkin','$reservationAttributes->adults','$reservationAttributes->children','0','$observacion','11','N','N','$reservationAttributes->firstName $reservationAttributes->lastName',{$paymentType},null,'G','{$programType}','{$warrantyType}','1', 'I', '{$reservationJson}');";
+                    ('$numres->res','cm-reservas {$reservationAttributes->id} {$reservationRoom->id}', {$tipDoc->tipdoc},'0','{$nit}','$numhab->numhab','{$tipres}','1',curdate(),'$reservationAttributes->checkin','$reservationAttributes->checkout' ,'$reservationAttributes->checkin','$reservationAttributes->adults','$reservationAttributes->children','0','$observacion','11','N','N','$reservationAttributes->firstName $reservationAttributes->lastName',{$paymentType},null,'G','{$programType}','{$warrantyType}','1', 'I', '{$reservationJson}');";
                 \DB::insert($queryReserva);
                 $codpla = config('cm_reservas.codpla');
                 $dayPriceCnt = 1;

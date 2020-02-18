@@ -61,6 +61,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Folio extends Model
 {
+    protected $connection = 'hhotel5';
 	protected $table = 'folio';
 	protected $primaryKey = 'numfol';
 	public $incrementing = false;

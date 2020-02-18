@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Http\Request;
-use nusoap_client as NuSoapClient;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,28 +26,6 @@ Route::get('databases', 'Api\DatabasesController@index');
 Route::post('databases', 'Api\DatabasesController@store');
 Route::put('databases/{id}', 'Api\DatabasesController@update');
 
-Route::post('ach/test', 'Api\WebServiceTest@processRequest');
-Route::post('ach/test/banks', function (Request $request) {
-    $parameters = $request->all();
-
-    $method = $parameters['method'];
-    unset($parameters['method']);
-
-    $client = new NuSoapClient($parameters['wsUrl'] . '?enc=' . $parameters['enc'],'wsdl');
-    $client->soap_defencoding = 'utf-8';
-    $client->decode_utf8 = false;
-
-    $client->call($method, $parameters);
-
-    $req = preg_split("/[\s]Content-Length:[\s](.*)[\s]+/", $client->request)[1];
-    $res = preg_split("/[\s]GMT[\s](.*)[\s]+/", $client->response)[2];
-
-    return response()->json([
-        'req' => $this->xmlToArray(simplexml_load_string($req)),
-        'res' => $this->xmlToArray(simplexml_load_string($res)),
-    ], 200);
-});
-
 Route::get('soap/test', 'SoapTestController@show');
 Route::get('soap/tests', 'SoapTestController@testing');
 
@@ -62,3 +39,5 @@ Route::get('soap/cr-reservas/modify-inventory/{startDate}/{endDate}/{roomTypeId}
 Route::get('soap/cr-reservas/modify-inventory', 'Api\TestSoapController@modifyInventory');
 
 Route::get('soap/bamboo/availability/{startDate?}/{endDate?}/{hotelId?}', 'Api\TestSoapController@getBambooQuantityAvailability');
+
+Route::post('rgbridgeapi/push/receive', 'XMLController@index');

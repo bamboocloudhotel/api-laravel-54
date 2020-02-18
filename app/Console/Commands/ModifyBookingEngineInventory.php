@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\InventoryUpdate;
 use Illuminate\Console\Command;
 
 class ModifyBookingEngineInventory extends Command
@@ -70,6 +71,19 @@ class ModifyBookingEngineInventory extends Command
             $modifies = [];
             foreach ($availabilities as $availability) {
                 $modifies[] = $this->bookingEngine->modifyInventory($availability['date'], $availability['date'], $availability['class'], null, $availability['rooms']);
+            }
+
+            foreach ($modifies as $modify) {
+                foreach ($modify as $mod) {
+                    InventoryUpdate::create([
+                        'booking_engine' => $mod['booking_engine'],
+                        'room_class_cloud' => $mod['room'],
+                        'room_class_local' => $this->argument('room-class'),
+                        'date_updated' => $mod['date'],
+                        'quantity' => $mod['quantity'],
+                        'xml' => $mod['xml'],
+                    ]);
+                }
             }
 
             return;
