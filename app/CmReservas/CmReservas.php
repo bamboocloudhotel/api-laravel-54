@@ -238,7 +238,7 @@ class CmReservas
 
     public function saveReservations($reservations)
     {
-        // dd($reservations);
+        
         \DB::setDefaultConnection('hhotel5');
 		if (!$reservations['data']) {
 			return;
@@ -255,6 +255,8 @@ class CmReservas
         }
 
         foreach ($reservations as $reservation) {
+			
+			
             if (!is_array($reservation->room)) {
                 $reservation->room = [
                     $reservation->room
@@ -265,6 +267,12 @@ class CmReservas
                 $reservationJson = json_encode($reservation);
                 $reservationAttributes = $reservation->{$attributesKey};
                 $reservationRoom = $room->{$attributesKey};
+				
+				$reservationExists = collect(\DB::select("select numres, referencia from reserva where referencia = 'cm-reservas {$reservationAttributes->id} {$reservationRoom->id}'"))->first();
+				
+                if ($reservationExists) {
+                    break;
+                }
 
                 $dayPrices = [];
                 $res = null;
@@ -290,14 +298,6 @@ class CmReservas
                 $dathot = collect(\DB::select("
                 select nit, numrec from dathot;
                 "))->first();
-
-                $reservationExists = collect(\DB::select("
-                select numres, referencia from reserva where referencia = 'cm-reservas {$reservationAttributes->id} {$reservationRoom->id}'
-                "))->first();
-
-                if ($reservationExists) {
-                    break;
-                }
 
                 $nit = explode('.', $dathot->nit);
                 $nit = implode('', $nit);
@@ -463,7 +463,7 @@ class CmReservas
     {
         \DB::setDefaultConnection('hhotel5');
         $roomsOccupied = [];
-
+		$roomClass = (int)$roomClass;
         $roomsBlocked = collect(\DB::select("
                 SELECT blohab.numhab
                 FROM blohab
@@ -482,6 +482,7 @@ class CmReservas
                 FROM `reserva`
                 INNER JOIN habitacion ON reserva.numhab = habitacion.numhab
                 WHERE reserva.feclle < '$reservationAttributes->checkout' AND reserva.fecsal > '$reservationAttributes->checkin'
+                AND reserva.estado IN ('P','G')
                 AND reserva.estado IN ('P','G')
                 AND habitacion.codcla = {$roomClass}
             "));
