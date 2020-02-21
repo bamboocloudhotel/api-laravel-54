@@ -278,9 +278,18 @@ class CmReservas
                 $res = null;
                 // Servicio para obtener cambio de moneda
                 $url = 'https://free.currconv.com/api/v7/convert?q=' . $reservationAttributes->currencycode . '_COP&compact=ultra&apiKey=495ed2da7dca68522b41';
+				
+				if (!is_array($reservation->dayPrice)) {
+					$reservation->dayPrice = [
+						$reservation->dayPrice
+					];
+				}
 
                 if (isset($reservation->dayPrice)) {
                     foreach ($reservation->dayPrice as $dayPrice) {
+						if (!isset($dayPrice->{$attributesKey})) {
+							dd($reservation);
+						}
                         $dayPrices[] = $dayPrice->{$attributesKey};
                     }
                 }
@@ -556,7 +565,7 @@ class CmReservas
                 SELECT folio.numres, folio.numhab, folio.estado, habitacion.codcla, folio.numfol
                 FROM folio
                 INNER JOIN habitacion ON folio.numhab = habitacion.numhab
-                WHERE folio.feclle <= '$out' AND folio.fecsal > '$in'
+                WHERE folio.feclle < '$out' AND folio.fecsal > '$in'
                 AND folio.estado IN ('I')
                 AND habitacion.codcla = {$roomClass}
             "));

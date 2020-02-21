@@ -45,7 +45,7 @@ class GetBookingEngineReservations extends Command
         $this->info($this->argument('booking-engine'));
 
         $yesterday =  date('Y-m-d', strtotime("-1 days"));
-        $today =  date('Y-m-d');
+        $today =  date('Y-m-d', strtotime("+1 days"));
 
         $reservations = $this->bookingEngine->getReservations($yesterday, $today, null, true);
 
