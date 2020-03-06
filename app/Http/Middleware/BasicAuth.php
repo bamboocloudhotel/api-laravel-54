@@ -25,9 +25,16 @@ class BasicAuth
             $_SERVER['PHP_AUTH_PW']   != $AUTH_PASS
         );
         if ($is_not_authenticated) {
+            $datetime = date('Y-m-d') . 'T' . date('H:i:s');
             header('HTTP/1.1 401 Authorization Required');
             header('WWW-Authenticate: Basic realm="Access denied"');
-            exit;
+            exit("
+<OTA_HotelResNotifRS EchoToken=\"E1232\" TimeStamp=\"{$datetime}\">
+    <Errors>
+        <Error Code=\"4\" Status=\"NotProcessed\" ShortText=\"Invalid credentials\" />
+    </Errors>
+</OTA_HotelResNotifRS>
+");
         }
         return $next($request);
     }
