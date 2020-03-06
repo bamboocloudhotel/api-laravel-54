@@ -39,6 +39,7 @@ class XMLController extends Controller
                 return response()->xml($response);
                 break;
             case 'Modify':
+                dd('hello');
                 $response = $this->rategain->modifyReservation($reservationObject);
                 return response()->xml($response);
                 break;
