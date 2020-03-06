@@ -31,7 +31,7 @@ class BasicAuth
             exit("
 <OTA_HotelResNotifRS EchoToken=\"E1232\" TimeStamp=\"{$datetime}\">
     <Errors>
-        <Error Code=\"4\" Status=\"NotProcessed\" ShortText=\"Invalid credentials\" />
+        <Error Code=\"6\" Status=\"NotProcessed\" ShortText=\"Invalid credentials\" />
     </Errors>
 </OTA_HotelResNotifRS>
 ");
