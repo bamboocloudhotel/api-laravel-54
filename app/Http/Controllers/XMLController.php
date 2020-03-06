@@ -30,7 +30,6 @@ class XMLController extends Controller
 
         if ($validation->fails()) {
             $errors = $validation->errors();
-            // dd($errors);
             return response()->xml($this->rategain->getReservationError($errors->all()), 422);
         }
 
@@ -40,21 +39,16 @@ class XMLController extends Controller
                 return response()->xml($response);
                 break;
             case 'Modify':
-                return response()->xml($this->rategain->reservationResponseSuccess);
+                $response = $this->rategain->modifyReservation($reservationObject);
+                return response()->xml($response);
                 break;
             case 'Cancel':
-                return response()->xml($this->rategain->reservationResponseSuccess);
+                $response = $this->rategain->cancelReservation($reservationObject);
+                return response()->xml($response);
                 break;
             default:
                 return response()->xml($this->rategain->reservationResponseError);
         }
-
-        dd($data['data']);
-
-        return response()->xml([
-            'data' => $data['data'],
-            'method' => $data['method'],
-        ]);
 
     }
 

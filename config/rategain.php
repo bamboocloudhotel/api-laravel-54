@@ -7,16 +7,18 @@ return [
     'password' => 'gemo!d@pa7t',
     'hotelCode' => 20915,
     'rooms_cl' => [ // channel to local
-        'SGL' => '12',
-        'DBL' => '13',
+        'SGL' => '8',
+        'DBL' => '9',
     ],
     'rooms_lc' => [ // local to channel
-        '12' => 'SGL',
-        '13' => 'DBL',
+        '8' => 'SGL',
+        '9' => 'DBL',
     ],
-    'paymentType' => '46',
-    'warrantyType' => '2',
-    'programType' => '7',
-    'codpla' => 766,
+    'paymentType' => '15',
+    'warrantyType' => '1',
+    'programType' => '0',
+    'codpla' => 1229,
     'tipres' => '2',
+    'tipseg' => 'I',
+    'codven' => 45
 ];

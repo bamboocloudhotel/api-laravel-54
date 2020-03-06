@@ -53,8 +53,12 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $idcanal
  * @property string $idclifre
  * @property string $tipseg
- * @property array $metadata
- * @property array $confirmationid
+ * @property string $metadata
+ * @property string $confirmationid
+ * @property string $guarantee
+ * @property string $booker
+ * @property string $onlinecomment
+ * @property string $cancellationid
  *
  * @package App\Models
  */
@@ -139,6 +143,10 @@ class Reserva extends Model
 		'idclifre',
 		'tipseg',
 		'metadata',
-        'confirmationid'
+        'confirmationid',
+        'guarantee',
+        'booker',
+        'onlinecomment',
+        'cancellationid',
 	];
 }

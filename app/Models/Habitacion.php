@@ -32,6 +32,7 @@ class Habitacion extends Model
 	protected $primaryKey = 'numhab';
 	public $incrementing = false;
 	public $timestamps = false;
+	protected $connection = 'hhotel5';
 
 	protected $casts = [
 		'codcla' => 'int',

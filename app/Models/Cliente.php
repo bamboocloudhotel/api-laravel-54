@@ -64,6 +64,7 @@ class Cliente extends Model
 	protected $primaryKey = 'cedula';
 	public $incrementing = false;
 	public $timestamps = false;
+	protected $connection = 'hhotel5';
 
 	protected $casts = [
 		'tipdoc' => 'int',
@@ -87,6 +88,7 @@ class Cliente extends Model
 	];
 
 	protected $fillable = [
+        'cedula',
 		'tipdoc',
 		'lugexp',
 		'categoria',
