@@ -936,13 +936,13 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
             return $returnError;
         }
 
-        $returnError = str_replace(
-            '<Error Code="450" Status="NotProcessed" ShortText="Invalid XML" />',
-            '<Error Code="2" Status="NotProcessed" ShortText="Not implemented" />',
-            '' . $returnError
+        $returnSuccess = str_replace(
+            '<HotelReservationID ResID_Type="14" ResID_Value="chd23242342"/>',
+            '<HotelReservationID ResID_Type="14" ResID_Value="' . $confirmationId . '"/>',
+            '' . $returnSuccess
         );
 
-        return $returnError;
+        return $returnSuccess;
     }
 
     public function cancelReservation($reservationObject)
