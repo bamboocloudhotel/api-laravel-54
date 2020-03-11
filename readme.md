@@ -1,5 +1,7 @@
 ﻿# RestAPI Aplicación
 ﻿
+ Nota: Se inplemento Laravel 5.4 para compatibilidad con PHP 5.6
+ 
 1. instalar dependencias `composer install`
 2. Copiar archvo de configuración `cp .env.example .env`
 3. Definir base de datos. Modificar en el archivo `.env`
@@ -14,13 +16,14 @@
 4. Crear tablas `php artisan migrate`
 
 # Rest API Aplicación Reservas por Central de Reservas
-Agregar las siguientes columnas a la tabla `reserva` de Bamboo:
+Agregar las siguientes columnas a la tabla `reserva` de Bamboo (o ejecutar sh install en la carpeta hotel5):
 ```sql
-ALTER TABLE reserva ADD metadata LONGTEXT NULL COMMENT 'XML de la reserva obtenido por el motor de reservas (rategain o cm reservas)';
-
-ALTER TABLE plares ADD valornoche INTEGER NULL COMMENT 'Valor de la noche obtenido por el motor de reservas (rategain o cm reservas)';
-
-ALTER TABLE reserva ADD confirmationid TEXT NULL COMMENT 'ID de confirmación enviado al motor de reservas (rategain o cm reservas)';
+ALTER TABLE reserva ADD metadata LONGTEXT NULL COMMENT 'Data original de la reserva en linea' AFTER firma;
+ALTER TABLE reserva ADD confirmationid VARCHAR(100) NULL COMMENT 'Id para la confirmacion de la reserva en linea' AFTER metadata;
+ALTER TABLE reserva ADD guarantee LONGTEXT NULL COMMENT 'Garantia de la reserva en linea' AFTER confirmationid;
+ALTER TABLE reserva ADD booker LONGTEXT NULL COMMENT 'Informacion del booker de la reserva en linea' AFTER guarantee;
+ALTER TABLE reserva ADD onlinecomment LONGTEXT NULL COMMENT 'Comentario de la reserva en linea' AFTER booker;
+ALTER TABLE reserva ADD cancellationid VARCHAR(100) NULL COMMENT 'Id para la cancelación de la reserva en linea' AFTER onlinecomment;
 ```
 
 Configurar la conexión `hhotel5` en `config/database.php` apuntando a la base de datos de Bamboo. *Ejemplo*:
@@ -51,7 +54,7 @@ public function __construct()
     $this->apiUrl = 'http://api-laravel-54.test'; // URL de esta aplicación
     $this->hotelId = '20915'; // Id del hotel en el PMS
     $this->hotelName = '20915'; // Nombre del hotel en el PMS
-    $this->bookingEngineCode = 'rategain'; // Código del PMS 'cm-reservas', 'rategain'
+    $this->bookingEngineCode = 'cm_reservas'; // Código del PMS 'cm-reservas'
 }
 ```
 
@@ -59,7 +62,6 @@ Configurar los datos del WebService RateGain en `config/rategain.php`. *Ejemplo*
 ```php
 return [
     'url' => 'https://rzhospicert.rategain.com/rgbridgeapi/ari/receive',
-    'auth' => 'Authorization: Basic dXNlcm5hbWU6cGFzc3dvcmQ=',
     'username' => 'some@email.com',
     'password' => 'secret',
     'hotelCode' => 20915,
@@ -83,13 +85,13 @@ return [
 
 **Obtener Reservas:**
 
-`php artisan cr:get_reservations rategain`
+`php artisan cr:get_reservations cm_reservas`
 
 Obtiene las reservas generadas en los canales de reservas y las almacena en bamboo.
 
 **Actuaizar inventario**
 
-`php artisan cr:put_inventory 2020-03-15 2020-03-18 1 rategain`
+`php artisan cr:put_inventory 2020-03-15 2020-03-18 1 cm_reservas`
 
 Actualiza el inventario en el canal de reservas desde una fecha inicial hasta una fecha final por el código de la clase de habitación (codcla)
 
