@@ -4,6 +4,7 @@ namespace App\Rategain;
 
 use App\Jobs\ModifyBookingEngineInventory;
 use App\Models\Cliente;
+use App\Models\Empresa;
 use App\Models\Habitacion;
 use App\Models\Reserva;
 use App\Models\Tipdoc;
@@ -576,13 +577,13 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
             $guarantee = '';
             if (isset($data->HotelReservations->HotelReservation->ResGlobalInfo->Guarantee)) {
                 $guarantee = "
-'GuaranteeCode' {$data->HotelReservations->HotelReservation->ResGlobalInfo->Guarantee->GuaranteeCode}
-'GuaranteeType' {$data->HotelReservations->HotelReservation->ResGlobalInfo->Guarantee->GuaranteeType}
-'CardType' {$data->HotelReservations->HotelReservation->ResGlobalInfo->Guarantee->GuaranteesAccepted->GuaranteeAccepted->PaymentCard->CardType}
-'CardCode' {$data->HotelReservations->HotelReservation->ResGlobalInfo->Guarantee->GuaranteesAccepted->GuaranteeAccepted->PaymentCard->CardCode}
-'CardNumber' {$data->HotelReservations->HotelReservation->ResGlobalInfo->Guarantee->GuaranteesAccepted->GuaranteeAccepted->PaymentCard->CardNumber}
-'ExpireDate' {$data->HotelReservations->HotelReservation->ResGlobalInfo->Guarantee->GuaranteesAccepted->GuaranteeAccepted->PaymentCard->ExpireDate}
-'CardHolderName' {$data->HotelReservations->HotelReservation->ResGlobalInfo->Guarantee->GuaranteesAccepted->GuaranteeAccepted->PaymentCard->CardHolderName}
+GuaranteeCode {$data->HotelReservations->HotelReservation->ResGlobalInfo->Guarantee->GuaranteeCode}
+GuaranteeType {$data->HotelReservations->HotelReservation->ResGlobalInfo->Guarantee->GuaranteeType}
+CardType {$data->HotelReservations->HotelReservation->ResGlobalInfo->Guarantee->GuaranteesAccepted->GuaranteeAccepted->PaymentCard->CardType}
+CardCode {$data->HotelReservations->HotelReservation->ResGlobalInfo->Guarantee->GuaranteesAccepted->GuaranteeAccepted->PaymentCard->CardCode}
+CardNumber {$data->HotelReservations->HotelReservation->ResGlobalInfo->Guarantee->GuaranteesAccepted->GuaranteeAccepted->PaymentCard->CardNumber}
+ExpireDate {$data->HotelReservations->HotelReservation->ResGlobalInfo->Guarantee->GuaranteesAccepted->GuaranteeAccepted->PaymentCard->ExpireDate}
+CardHolderName {$data->HotelReservations->HotelReservation->ResGlobalInfo->Guarantee->GuaranteesAccepted->GuaranteeAccepted->PaymentCard->CardHolderName}
                 ";
             }
 
@@ -591,13 +592,18 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                 $comment = $roomStay->Comments->Comment->Text;
             }
 
-            $customerExists = Cliente::where('email', $data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Email )->first();
+            $customerExists = Cliente::where('email', $data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Email )
+                ->orWhere('bookingemail', $data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Email)
+                ->first();
 
             $cliente = $data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile;
 
+            $enterprise = Empresa::where('nombre', $data->POS->Source->BookingChannel->CompanyName->Code)->first();
+
+
             if (!$customerExists) {
                 $customer = new Cliente();
-                $customer->create([
+                $customerExists = $customer->create([
                     'cedula' => 'RG' . rand(1000000, 99999999),
                     'tipdoc' => 1,
                     'lugexp' => 'NO APLICA',
@@ -606,6 +612,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     'sexo' => "M",
                     'telefono1' => "{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Telephone->PhoneNumber}",
                     'email' => "{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Email}",
+                    'bookingemail' => "{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Email}",
                     'direccion' => "{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Address->AddressLine}",
                     'codpai' => 1,
                     'codciu' => 1,
@@ -636,7 +643,6 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     'segundo_apellido',
                     'emailfe' => '',
                 ]);
-                $customerExists = $customer;
             }
 
             \DB::connection('hhotel5')->beginTransaction();
@@ -648,7 +654,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     'referencia' => 'RateGain ' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Type . ' ' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Value,
                     'tipdoc' => 1,
                     'cedula' => $customerExists->cedula,
-                    'nit' => $nit,
+                    'nit' => $enterprise ? $enterprise->nit : 0,
                     'numhab' => $numhab,
                     'tipres' => $tipres,
                     'fecres' => date('Y-m-d'),
@@ -688,8 +694,8 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
             foreach ($roomStay->RoomRates->RoomRate->Rates->Rate as $dayPrice) {
                 $queryPlares = "
                 INSERT INTO plares
-                (numres, numpla, codpla, fecini, fecfin, pordes, tipdes, valornoche)
-                VALUES({$numres}, {$dayPriceCnt}, {$codpla}, '{$dayPrice->EffectiveDate}', '{$dayPrice->ExpireDate}', 0, 'P', {$dayPrice->Base->AmountBeforeTax});
+                (numres, numpla, codpla, fecini, fecfin, pordes, tipdes, valornoche, rateplan)
+                VALUES({$numres}, {$dayPriceCnt}, {$codpla}, '{$dayPrice->EffectiveDate}', '{$dayPrice->ExpireDate}', 0, 'P', {$dayPrice->Base->AmountBeforeTax}, '{$roomStay->RoomRates->RoomRate->RatePlanCode}');
                 ";
 
                 \DB::connection('hhotel5')->beginTransaction();
@@ -725,7 +731,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                    54,
                    0, 
                    'Pago de reserva por RateGain.', 
-                   'N'
+                   'A'
                );
             ";
 

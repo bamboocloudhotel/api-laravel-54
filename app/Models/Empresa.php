@@ -50,6 +50,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Empresa extends Model
 {
+    protected $connection = 'hhotel5';
 	protected $table = 'empresas';
 	protected $primaryKey = 'nit';
 	public $incrementing = false;
@@ -74,6 +75,7 @@ class Empresa extends Model
 	];
 
 	protected $fillable = [
+	    'nit',
 		'nombre',
 		'razsoc',
 		'locfac',

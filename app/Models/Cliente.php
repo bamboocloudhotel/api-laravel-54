@@ -98,6 +98,7 @@ class Cliente extends Model
 		'telefono1',
 		'telefono2',
 		'email',
+        'bookingemail',
 		'direccion',
 		'locdir',
 		'codpai',
