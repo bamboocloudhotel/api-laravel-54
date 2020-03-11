@@ -44,7 +44,7 @@ Configurar la conexión `hhotel5` en `config/database.php` apuntando a la base d
 ],
 ```
 
-### Rate Gain
+### CM Reservas
 
 Configurar en Bamboo los datos del WebService en `hotel5\app\clases\ReservationsChannel.php`. *Ejemplo*:
 
