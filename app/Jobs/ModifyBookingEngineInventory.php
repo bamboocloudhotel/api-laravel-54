@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\InventoryUpdate;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
@@ -36,13 +37,14 @@ class ModifyBookingEngineInventory implements ShouldQueue
      * Execute the job.
      *
      * @return void
+     * @throws \Exception
      */
     public function handle()
     {
-        //
         $class = 'App\\' . studly_case($this->bookingEngineCode) . '\\' . studly_case($this->bookingEngineCode);
         $this->bookingEngine = new $class();
         //
+
         $typeRoom = config( snake_case(studly_case($this->bookingEngineCode)) . '.rooms_lc.' . $this->roomClass);
 
         if ($typeRoom) {
@@ -67,6 +69,26 @@ class ModifyBookingEngineInventory implements ShouldQueue
             foreach ($availabilities as $availability) {
                 $modifies[] = $this->bookingEngine->modifyInventory($availability['date'], $availability['date'], $availability['class'], null, $availability['rooms']);
             }
+
+            if ($this->bookingEngine == 'rategain') {
+				foreach ($modifies as $modify) {
+					foreach ($modify as $mod) {
+						InventoryUpdate::create([
+							'booking_engine' => $mod['booking_engine'],
+							'room_class_cloud' => $mod['room'],
+							'room_class_local' => $this->argument('room-class'),
+							'date_updated' => $mod['date'],
+							'quantity' => $mod['quantity'],
+							'xml' => $mod['xml'],
+						]);
+					}
+				}
+			}
+
+            return;
         }
+
+        return;
     }
 }
+

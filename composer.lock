@@ -2238,49 +2238,6 @@
             "time": "2019-12-01T04:55:27+00:00"
         },
         {
-            "name": "ritey/nusoap",
-            "version": "0.9.5",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/ritey/nusoap.git",
-                "reference": "0ab518be271312e4eac4a08b27b3a7ddf9aedea2"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/ritey/nusoap/zipball/0ab518be271312e4eac4a08b27b3a7ddf9aedea2",
-                "reference": "0ab518be271312e4eac4a08b27b3a7ddf9aedea2",
-                "shasum": ""
-            },
-            "type": "library",
-            "autoload": {
-                "classmap": [
-                    "lib/"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "LGPLv2"
-            ],
-            "authors": [
-                {
-                    "name": "Dietrich Ayala",
-                    "homepage": "http://sourceforge.net/u/dietricha/profile/"
-                },
-                {
-                    "name": "Scott Nichol",
-                    "homepage": "http://sourceforge.net/u/snichol/profile/"
-                }
-            ],
-            "description": "Clone of NuSoap to work with Packagist/Composer",
-            "homepage": "http://github.com/ritey/nusoap",
-            "keywords": [
-                "nusoap",
-                "php",
-                "soap"
-            ],
-            "time": "2016-06-07T10:48:50+00:00"
-        },
-        {
             "name": "swiftmailer/swiftmailer",
             "version": "v5.4.12",
             "source": {

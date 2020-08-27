@@ -10,9 +10,9 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Class Garre
+ * Class Gareve
  * 
- * @property int $numres
+ * @property int $codeve
  * @property int $item
  * @property int $codusu
  * @property int $codcaj
@@ -25,14 +25,14 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @package App\Models
  */
-class Garre extends Model
+class Gareve extends Model
 {
-	protected $table = 'garres';
+	protected $table = 'gareve';
 	public $incrementing = false;
 	public $timestamps = false;
 
 	protected $casts = [
-		'numres' => 'int',
+		'codeve' => 'int',
 		'item' => 'int',
 		'codusu' => 'int',
 		'codcaj' => 'int',
@@ -47,6 +47,8 @@ class Garre extends Model
 	];
 
 	protected $fillable = [
+		'codeve',
+		'item',
 		'codusu',
 		'codcaj',
 		'fecha',

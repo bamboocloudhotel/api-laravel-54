@@ -169,7 +169,6 @@ return [
         Laravel\Tinker\TinkerServiceProvider::class,
         Laravel\Passport\PassportServiceProvider::class,
         Artisaninweb\SoapWrapper\ServiceProvider::class,
-
         Reliese\Coders\CodersServiceProvider::class,
 
         /*
@@ -180,6 +179,7 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+        App\Providers\ResponseXmlServiceProvider::class,
     ],
 
     /*

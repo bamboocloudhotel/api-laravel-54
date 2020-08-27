@@ -82,9 +82,9 @@ class CmReservas
         $xmlr = $this->request();
 
         $xmlr->addChild('reservations')
-            ->addAttribute('hotelId', $hotelId ? $hotelId : config('cm_reservas.userName'));
+            ->addAttribute('hotelId', $hotelId ? $hotelId : config('cm_reservas.hotel_id'));
         $reservations = $xmlr->addChild('reservations');
-        $reservations->addAttribute('hotelId', $hotelId ? $hotelId : config('cm_reservas.userName'));
+        $reservations->addAttribute('hotelId', $hotelId ? $hotelId : config('cm_reservas.hotel_id'));
 
         if ($dlm) {
             $reservations->addAttribute('useDLM', 'true');
@@ -110,7 +110,7 @@ class CmReservas
         $xmlr = $this->request();
 
         $view = $xmlr->addChild('view');
-        $view->addAttribute('hotelId', $hotelId ? $hotelId : config('cm_reservas.userName'));
+        $view->addAttribute('hotelId', $hotelId ? $hotelId : config('cm_reservas.hotel_id'));
         $view->addAttribute('startDate', $sDate);
         $view->addAttribute('endDate', $eDate);
 
@@ -124,7 +124,7 @@ class CmReservas
         $hotelId = $hotelId ? $hotelId : config('cm_reservas.hotel_id');
         $sDate = $startDate ? $startDate : date('Y-m-d');
         $eDate = $endDate ? $endDate : date('Y-m-d');
-        $hotel = $hotelId ? $hotelId : config('cm_reservas.userName');
+        $hotel = $hotelId ? $hotelId : config('cm_reservas.hotel_id');
         $room = $roomId;
         $quantity = $quantity;
 
@@ -238,7 +238,11 @@ class CmReservas
 
     public function saveReservations($reservations)
     {
+        
         \DB::setDefaultConnection('hhotel5');
+		if (!$reservations['data']) {
+			return;
+		}
         $reservations = $reservations['data']->reservation;
         $attributesKey = '@attributes';
 
@@ -251,6 +255,8 @@ class CmReservas
         }
 
         foreach ($reservations as $reservation) {
+			
+			
             if (!is_array($reservation->room)) {
                 $reservation->room = [
                     $reservation->room
@@ -261,14 +267,29 @@ class CmReservas
                 $reservationJson = json_encode($reservation);
                 $reservationAttributes = $reservation->{$attributesKey};
                 $reservationRoom = $room->{$attributesKey};
+				
+				$reservationExists = collect(\DB::select("select numres, referencia from reserva where referencia = 'cm-reservas {$reservationAttributes->id} {$reservationRoom->id}'"))->first();
+				
+                if ($reservationExists) {
+                    break;
+                }
 
                 $dayPrices = [];
                 $res = null;
                 // Servicio para obtener cambio de moneda
                 $url = 'https://free.currconv.com/api/v7/convert?q=' . $reservationAttributes->currencycode . '_COP&compact=ultra&apiKey=495ed2da7dca68522b41';
+				
+				if (!is_array($reservation->dayPrice)) {
+					$reservation->dayPrice = [
+						$reservation->dayPrice
+					];
+				}
 
                 if (isset($reservation->dayPrice)) {
                     foreach ($reservation->dayPrice as $dayPrice) {
+						if (!isset($dayPrice->{$attributesKey})) {
+							dd($reservation);
+						}
                         $dayPrices[] = $dayPrice->{$attributesKey};
                     }
                 }
@@ -286,14 +307,6 @@ class CmReservas
                 $dathot = collect(\DB::select("
                 select nit, numrec from dathot;
                 "))->first();
-
-                $reservationExists = collect(\DB::select("
-                select numres, referencia from reserva where referencia = 'cm-reservas {$reservationAttributes->id} {$reservationRoom->id}'
-                "))->first();
-
-                if ($reservationExists) {
-                    break;
-                }
 
                 $nit = explode('.', $dathot->nit);
                 $nit = implode('', $nit);
@@ -459,7 +472,7 @@ class CmReservas
     {
         \DB::setDefaultConnection('hhotel5');
         $roomsOccupied = [];
-
+		$roomClass = (int)$roomClass;
         $roomsBlocked = collect(\DB::select("
                 SELECT blohab.numhab
                 FROM blohab
@@ -478,6 +491,7 @@ class CmReservas
                 FROM `reserva`
                 INNER JOIN habitacion ON reserva.numhab = habitacion.numhab
                 WHERE reserva.feclle < '$reservationAttributes->checkout' AND reserva.fecsal > '$reservationAttributes->checkin'
+                AND reserva.estado IN ('P','G')
                 AND reserva.estado IN ('P','G')
                 AND habitacion.codcla = {$roomClass}
             "));
@@ -551,7 +565,7 @@ class CmReservas
                 SELECT folio.numres, folio.numhab, folio.estado, habitacion.codcla, folio.numfol
                 FROM folio
                 INNER JOIN habitacion ON folio.numhab = habitacion.numhab
-                WHERE folio.feclle <= '$out' AND folio.fecsal > '$in'
+                WHERE folio.feclle < '$out' AND folio.fecsal > '$in'
                 AND folio.estado IN ('I')
                 AND habitacion.codcla = {$roomClass}
             "));
