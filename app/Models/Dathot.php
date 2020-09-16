@@ -130,6 +130,7 @@ class Dathot extends Model
 		'serial',
 		'version',
 		'webservice_seven',
-		'seven_sucursal'
+		'seven_sucursal',
+		'guarantee_password'
 	];
 }

@@ -60,6 +60,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Cliente extends Model
 {
+	protected $connection = 'hhotel5';
 	protected $table = 'clientes';
 	protected $primaryKey = 'cedula';
 	public $incrementing = false;

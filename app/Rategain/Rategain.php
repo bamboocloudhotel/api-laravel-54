@@ -4,6 +4,10 @@ namespace App\Rategain;
 
 use App\Jobs\ModifyBookingEngineInventory;
 use App\Models\Reserva;
+use App\Models\Cliente;
+use App\Models\CrBooker;
+use App\Models\CrBookerReserva;
+use App\Models\CrGuarantee;
 use App\Models\Tipdoc;
 
 class Rategain
@@ -199,6 +203,7 @@ XML;
             curl_setopt($ch, CURLOPT_POST, true);
             $data = curl_exec($ch);
             curl_close($ch);
+			//dd($data);
             preg_match_all("|\"><(.*)\s/></OTA_HotelAvailNotifRS>|U", $data, $matches);
             $return[] = [
                 'room' => $room,
@@ -462,6 +467,47 @@ XML;
     public function saveReservation($data)
     {
         // dd($data);
+		
+		$resGuest = null;
+		$booker = null;
+		$bookerExists = null;
+		
+		foreach ($data->HotelReservations->HotelReservation->ResGuests->ResGuest as $guest) {
+			
+			if ($guest->Profiles->ProfileInfo->Profile->ProfileType == 1) {
+				$resGuest = $guest->Profiles->ProfileInfo->Profile->Customer;
+				$guestExits = Cliente::where('email', $resGuest->Email)->first();
+			}
+			if ($guest->Profiles->ProfileInfo->Profile->ProfileType == 18) {
+				$booker = $guest->Profiles->ProfileInfo->Profile->Customer;
+				$bookerExists = CrBooker::where('email', $booker->Email)->first();
+				if (!$bookerExists) {
+					
+					// dd($booker->Address->CountryName);
+					
+					try {
+						$booker = CrBooker::create([
+							'givenname' => $booker->PersonName->GivenName,
+							'surname' => $booker->PersonName->Surname,
+							'phone' => $booker->Telephone->PhoneNumber,
+							'email' => $booker->Email,
+							'address' => $booker->Address->AddressLine,
+							'city' => $booker->Address->CityName,
+							'postal_code' => $booker->Address->PostalCode,
+							'country' => $booker->Address->CountryName->Code,
+						]);	
+					} catch(\Exception $exception) {
+						echo $exception->getMessage();
+						die;
+					}
+				}
+				
+				if ($bookerExists) {
+					$booker = $bookerExists;
+				}
+			}
+		}
+		
         if (!is_array($data->HotelReservations->HotelReservation->RoomStays->RoomStay)) {
             $data->HotelReservations->HotelReservation->RoomStays->RoomStay = [
                 $data->HotelReservations->HotelReservation->RoomStays->RoomStay
@@ -474,6 +520,7 @@ XML;
 
         foreach ($data->HotelReservations->HotelReservation->RoomStays->RoomStay as $roomStay) {
             $roomClass = config('rategain.rooms_cl.' . $roomStay->RoomRates->RoomRate->RoomTypeCode);
+			
             if ($this->getBambooAvailability($data, $roomClass)) {
                 $availables[] = $this->getBambooAvailability($data, $roomClass);
                 $selectedRooms[] = $this->getBambooAvailability($data, $roomClass)[0];
@@ -498,6 +545,7 @@ XML;
                 }
             }
         }
+		
 
         foreach ($selectedRooms as $selectedRoom) {
             if (null == $selectedRoom->numhab) {
@@ -517,6 +565,12 @@ XML;
 
         $roomStayCnt = 0;
         foreach ($data->HotelReservations->HotelReservation->RoomStays->RoomStay as $roomStay) {
+			
+			$guarantee = $data->HotelReservations->HotelReservation->ResGlobalInfo->Guarantee;
+			$guaranteePaymentCard = $guarantee->GuaranteesAccepted->GuaranteeAccepted->PaymentCard;
+			
+			$guaranteeText = "{$guarantee->GuaranteeCode}: {$guarantee->GuaranteeType}\n{$guaranteePaymentCard->CardCode}\n{$guaranteePaymentCard->CardNumber}\n{$guaranteePaymentCard->ExpireDate}\n{$guaranteePaymentCard->CardHolderName}";
+			
             $roomClass = config('rategain.rooms_cl.' . $roomStay->RoomRates->RoomRate->RoomTypeCode);
             $numres = collect(\DB::connection('hhotel5')->select('select MAX(numres)+1 as res from reserva limit 1'))->first();
             $dathot = collect(\DB::connection('hhotel5')->select("select nit, numrec from dathot;"))->first();
@@ -529,18 +583,18 @@ XML;
             $numhab = $selectedRooms[$roomStayCnt]->numhab;
 
             // {$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Address->CountryName}
-            $observacion = "
-{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->GivenName} {$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->Surname}
-{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Address->AddressLine}
-{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Address->CityName}
-{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Address->PostalCode}
+            $observacion = $resGuest ? "
+{$resGuest->PersonName->GivenName} {$resGuest->PersonName->Surname}
+{$resGuest->Address->AddressLine}
+{$resGuest->Address->CityName}
+{$resGuest->Address->PostalCode}
 
-{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Telephone->PhoneNumber}
-{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Email}
+{$resGuest->Telephone->PhoneNumber}
+{$resGuest->Email}
 
 RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Type} {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Value}
 RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Type} {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value}
-            ";
+            "  : '';
             $paymentType = config('cm_reservas.paymentType');
             $warrantyType = config('cm_reservas.warrantyType');
             $programType = config('cm_reservas.programType');
@@ -551,18 +605,19 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                 $newReservation = Reserva::create([
                     'numres' => $numres,
                     'referencia' => 'RateGain ' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Type . ' ' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Value,
-                    'tipdoc' => $tipDoc->tipdoc,
-                    'cedula' => 0,
+                    'tipdoc' => $guestExits ? $guestExits->tipdoc : $tipDoc->tipdoc,
+                    'cedula' => $guestExits ? $guestExits->cedula : 0,
                     'nit' => $nit,
                     'numhab' => $numhab,
                     'tipres' => $tipres,
+					'tipseg' => 'I',
                     'fecres' => date('Y-m-d'),
                     'feclle' => $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->Start,
                     'fecsal' => $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->End,
                     'feclim' => $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->Start,
                     'hora' => '12:00',
                     'numadu' => count($data->HotelReservations->HotelReservation->ResGuests->ResGuest),
-                    'observacion' => $observacion,
+                    'observacion' => $guestExits ? '' : $observacion,
                     'habfij' => 'N',
                     'solicitada' => "{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->GivenName} {$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->Surname}",
                     'forpag' => $paymentType,
@@ -573,6 +628,8 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     'codven' => 1,
                     'metadata' => $metadata,
                     'confirmationid' => $confirmationid,
+					'onlinecomment' => '' . $roomStay->Comments->Comment->Text,
+					'cancellationid' => null
                 ]);
             } catch (\Exception $exception) {
                 return response()->json([
@@ -581,14 +638,35 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     'line' => $exception->getLine()
                 ], 400);
             }
+			
+			if ($booker) {
+				$bookerReserva = CrBookerReserva::create([
+					'booker_id' => $booker->id,
+					'numres' => $numres,
+					'amount' => $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax,
+					'date' => date('Y-m-d H:i:s'),
+					'booker_name' => $booker->givenname . ' ' . $booker->surname,
+				]);
+			}
+			
+			$reservaGuarantee = CrGuarantee::create([
+				'type' => $guarantee->GuaranteeType,
+				'code' => $guarantee->GuaranteeCode . ': ' . $guaranteePaymentCard->CardCode,
+				'number' => $guaranteePaymentCard->CardNumber,
+				'expire' => $guaranteePaymentCard->ExpireDate,
+				'holder' => $guaranteePaymentCard->CardHolderName,
+				'amount' => $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax,
+				'currency' => $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->CurrencyCode,
+				'numres' => $numres
+			]);
 
             $codpla = config('cm_reservas.codpla');
             $dayPriceCnt = 1;
             foreach ($roomStay->RoomRates->RoomRate->Rates->Rate as $dayPrice) {
                 $queryPlares = "
                 INSERT INTO plares
-                (numres, numpla, codpla, fecini, fecfin, pordes, tipdes, valornoche)
-                VALUES({$numres}, {$dayPriceCnt}, {$codpla}, '{$dayPrice->EffectiveDate}', '{$dayPrice->ExpireDate}', 0, 'P', {$dayPrice->Base->AmountBeforeTax});
+                (numres, numpla, codpla, fecini, fecfin, pordes, tipdes, valornoche, codigocr)
+                VALUES({$numres}, {$dayPriceCnt}, {$codpla}, '{$dayPrice->EffectiveDate}', '{$dayPrice->ExpireDate}', 0, 'P', {$dayPrice->Base->AmountBeforeTax}, '{$roomStay->RoomRates->RoomRate->RatePlanCode}');
                 ";
                 \DB::connection('hhotel5')->insert($queryPlares);
                 $dayPriceCnt++;

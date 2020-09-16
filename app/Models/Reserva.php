@@ -139,6 +139,10 @@ class Reserva extends Model
 		'idclifre',
 		'tipseg',
 		'metadata',
-        'confirmationid'
+        'confirmationid',
+		'guarantee',
+		'booker',
+		'onlinecomment',
+		'cancelationid'
 	];
 }

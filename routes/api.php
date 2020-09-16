@@ -17,6 +17,12 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+Route::post('test', function() {
+	echo 'Hello!';
+});
+
+Route::post('rgbridgeapi/push/receive', 'XMLController@index');
+
 Route::get('radius/users', 'Api\FreeRadiusController@getUsers');
 Route::get('radius/users/{username}', 'Api\FreeRadiusController@getUser');
 Route::post('radius/users', 'Api\FreeRadiusController@addUser');
@@ -40,4 +46,4 @@ Route::get('soap/cr-reservas/modify-inventory', 'Api\TestSoapController@modifyIn
 
 Route::get('soap/bamboo/availability/{startDate?}/{endDate?}/{hotelId?}', 'Api\TestSoapController@getBambooQuantityAvailability');
 
-Route::post('rgbridgeapi/push/receive', 'XMLController@index');
+
