@@ -8,12 +8,12 @@ return [
     'password' => 'Bamboo2019',
     'action' => '/be/search/xml.jsp',
     'rooms_cl' => [ // channel to local
-        '17662' => '14',
-        '17661' => '15',
+        '17662' => '4',
+        '17661' => '8',
     ],
     'rooms_lc' => [ // local to channel
-        '14' => '17662',
-        '15' => '17661',
+        '4' => '17662',
+        '8' => '17661',
     ],
     'paymentType' => '15',
     'warrantyType' => '2',
