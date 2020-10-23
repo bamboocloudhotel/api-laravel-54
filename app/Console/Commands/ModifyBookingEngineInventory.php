@@ -48,7 +48,7 @@ class ModifyBookingEngineInventory extends Command
         $this->bookingEngine = new $class();
         //
 
-        $typeRoom = config( snake_case(studly_case($this->argument('booking-engine'))) . '.rooms_lc.' .$this->argument('room-class'));
+        $typeRoom = config(snake_case(studly_case($this->argument('booking-engine'))) . '.rooms_lc.' . $this->argument('room-class'));
 
         if ($typeRoom) {
             $period = new \DatePeriod(
@@ -72,6 +72,8 @@ class ModifyBookingEngineInventory extends Command
             foreach ($availabilities as $availability) {
                 $modifies[] = $this->bookingEngine->modifyInventory($availability['date'], $availability['date'], $availability['class'], null, $availability['rooms']);
             }
+			
+			// dd($modifies);
 			
 			if ($this->argument('booking-engine') == 'rategain') {
 				foreach ($modifies as $modify) {

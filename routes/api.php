@@ -12,6 +12,8 @@ use Illuminate\Http\Request;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+use App\Models\Dathot;
+use App\Models\CrGuarantee;
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
@@ -21,7 +23,31 @@ Route::post('test', function() {
 	echo 'Hello!';
 });
 
-Route::post('rgbridgeapi/push/receive', 'XMLController@index');
+Route::post('view-guarantee', function (Request $request) {
+
+    $dathot = Dathot::firstOrFail();
+
+    if ($dathot->guarantee_password == $request->get('guarantee_password')) {
+        $guarantee = CrGuarantee::where('numres', $request->get('numres'))->first();
+
+        if (!$guarantee) {
+            return response()->json([
+                'message' => 'Reserva no valida'
+            ], 422);
+        }
+
+        return response()->json([
+            'message' => 'Garantia obtenida con éxito!',
+            'data' => $guarantee->toArray()
+        ], 200);
+    }
+
+    return response()->json([
+        'message' => 'Clave no valida'
+    ], 422);
+});
+
+Route::any('rgbridgeapi/push/receive', 'XMLController@index');
 
 Route::get('radius/users', 'Api\FreeRadiusController@getUsers');
 Route::get('radius/users/{username}', 'Api\FreeRadiusController@getUser');

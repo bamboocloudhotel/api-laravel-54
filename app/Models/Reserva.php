@@ -143,6 +143,7 @@ class Reserva extends Model
 		'guarantee',
 		'booker',
 		'onlinecomment',
-		'cancelationid'
+		'cancellationid',
+		'modifyid'
 	];
 }

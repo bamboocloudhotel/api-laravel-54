@@ -170,6 +170,8 @@ return [
         Laravel\Passport\PassportServiceProvider::class,
         Artisaninweb\SoapWrapper\ServiceProvider::class,
         Reliese\Coders\CodersServiceProvider::class,
+        Arcanedev\LogViewer\LogViewerServiceProvider::class,
+        Rap2hpoutre\LaravelLogViewer\LaravelLogViewerServiceProvider::class,
 
         /*
          * Application Service Providers...

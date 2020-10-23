@@ -9,14 +9,16 @@
   "type": "project",
   "require": {
     "php": ">=5.6.4",
+    "ext-curl": "*",
+    "ext-json": "*",
+    "arcanedev/log-viewer": "~4.3.0",
     "artisaninweb/laravel-soap": "0.3.0.9",
     "doctrine/dbal": "^2.5",
     "guzzlehttp/guzzle": "^6.5",
     "laravel/framework": "5.4.*",
     "laravel/passport": "~4.0",
     "laravel/tinker": "~1.0",
-    "ext-curl": "*",
-    "ext-json": "*"
+    "rap2hpoutre/laravel-log-viewer": "^1.7"
   },
   "require-dev": {
     "barryvdh/laravel-ide-helper": "^2.2",

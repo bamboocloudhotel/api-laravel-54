@@ -76,5 +76,12 @@
 
     <!-- Scripts -->
     <script src="{{ asset('js/app.js') }}"></script>
+    <script type="text/javascript">
+        var jsonStr = $("pre").text();
+        var jsonObj = JSON.parse(jsonStr);
+        var jsonPretty = JSON.stringify(jsonObj, null, '\t');
+
+        $("pre").text(jsonPretty);
+    </script>
 </body>
 </html>

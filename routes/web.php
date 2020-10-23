@@ -17,6 +17,10 @@ Route::get('/', function () {
 
 Auth::routes();
 
+Route::resource('rategain-requests', 'RategainRequestController');
+
+Route::get('logs', '\Rap2hpoutre\LaravelLogViewer\LogViewerController@index');
+
 Route::get('/home', 'HomeController@index')->name('home');
 Route::get('/passport', 'PassportController@index')->name('passport');
 
