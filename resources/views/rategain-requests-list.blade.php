@@ -7,7 +7,7 @@
 <table class="table">
     <tr>
         <td>
-            <form action="http://198.50.238.202:8080/api-laravel-54/public/index.php/rategain-requests">
+            <form action="/api-laravel-54/public/index.php/rategain-requests">
                 <input type="text" name="search" value="{{isset($request['search']) ? $request['search'] : ''}}">
                 <br>
                 <button type="submit">
@@ -49,7 +49,7 @@
 
                     <td>
 
-                        <a href="http://198.50.238.202:8080/api-laravel-54/public/index.php/rategain-requests/{{$value->id}}" class="btn btn-info">View</a>
+                        <a href="/api-laravel-54/public/index.php/rategain-requests/{{$value->id}}" class="btn btn-info">View</a>
 
                     </td>
 

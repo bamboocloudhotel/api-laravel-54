@@ -88,6 +88,7 @@ class Cliente extends Model
 	];
 
 	protected $fillable = [
+		'cedula',
 		'tipdoc',
 		'lugexp',
 		'categoria',

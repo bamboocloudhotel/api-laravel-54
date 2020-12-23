@@ -16,6 +16,11 @@
 			<pre>{{$rategainRequest->request}}</pre>
 		</div>
 	</div>
+	<div class="row">
+		<div class="col-md-8 col-md-offset-2">
+			{{$rategainRequest->xml}}
+		</div>		
+	</div>
 </div>
 
 @endsection

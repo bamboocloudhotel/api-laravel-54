@@ -15,6 +15,7 @@ class RategainRequestController extends Controller
     public function index(Request $request)
     {
         //
+
     	$rateGainRequests = RategainRequest::whereNotNull('reference');
 
     	if ($request->get('search')) {
@@ -55,10 +56,13 @@ class RategainRequestController extends Controller
      * @param  \App\RategainRequest  $rategainRequest
      * @return \Illuminate\Http\Response
      */
-    public function show(RategainRequest $rategainRequest)
+    public function show($id)
     {
         //
-        // $rategainRequest->json = str_replace();
+        
+        $rategainRequest = RategainRequest::find($id);
+
+        // dd($rategainRequest->toArray());
 
         return view('rategain-requests-view', ['rategainRequest' => $rategainRequest]);
     }

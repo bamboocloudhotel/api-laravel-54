@@ -208,16 +208,16 @@ XML;
 XML;*/
 $printDate = date('Y-m-d');
 $printTime = date('H:i:s');
-$thisXml  = <<<XML
-<OTA_HotelAvailNotifRQ xmlns="http://www.opentravel.org/OTA/2003/05" TimeStamp="{$printDate}T{$printTime}" Target="Production" Version="1.002" EchoToken="576198818f398">
-<AvailStatusMessages HotelCode="20915">
-<AvailStatusMessage BookingLimit="0" BookingLimitMessageType="SetLimit">
-<StatusApplicationControl Start="2021-01-01" End="2021-01-01" InvCode="SGL"></StatusApplicationControl>
-<UniqueID Type="16" ID="e994cbd9bf48d"></UniqueID>
-</AvailStatusMessage>
-</AvailStatusMessages>
-</OTA_HotelAvailNotifRQ>
-XML;
+// $thisXml  = <<<XML
+// <OTA_HotelAvailNotifRQ xmlns="http://www.opentravel.org/OTA/2003/05" TimeStamp="{$printDate}T{$printTime}" Target="Production" Version="1.002" EchoToken="576198818f398">
+// <AvailStatusMessages HotelCode="20915">
+// <AvailStatusMessage BookingLimit="100" BookingLimitMessageType="SetLimit">
+// <StatusApplicationControl Start="2021-01-01" End="2021-01-01" InvCode="SGL"></StatusApplicationControl>
+// <UniqueID Type="16" ID="e994cbd9bf48d"></UniqueID>
+// </AvailStatusMessage>
+// </AvailStatusMessages>
+// </OTA_HotelAvailNotifRQ>
+// XML;
             // dd($thisXml);
 
             $ch = curl_init();
@@ -230,7 +230,7 @@ XML;
             $data = curl_exec($ch);
             curl_close($ch);
 			
-			// dd($data);    
+           // dd($data);    
 
             preg_match_all("|\"><(.*)\s/></OTA_HotelAvailNotifRS>|U", $data, $matches);
 
@@ -500,77 +500,89 @@ XML;
 		$booker = null;
 		$bookerExists = null;
 		$guestExits = null;
+        $cedula = 0;
 
 		// dd($data->HotelReservations->HotelReservation->ResGuests->ResGuest);
 		
 		foreach ($data->HotelReservations->HotelReservation->ResGuests->ResGuest as $guest) {
 			
-			// dd($guest->Profiles->ProfileInfo->Profile->ProfileType, $resGuest->Email);
+			foreach ($guest->Profiles as $profile) {
+                // dd($profile->Profile);
+                
+                if ($profile->Profile->ProfileType == 1 && isset($profile->Profile->Customer->Email)) {
+            
+                    $resGuest = $profile->Profile->Customer;
 
-			if ($guest->Profiles->ProfileInfo->Profile->ProfileType == 1 && isset($guest->Email)) {
-				// dd($guest->Profiles->ProfileInfo->Profile->Customer);
-				$resGuest = $guest->Profiles->ProfileInfo->Profile->Customer;
-				$guestExits = Cliente::where('email', $resGuest->Email)->first();
+                    $guestExits = Cliente::where('email', $resGuest->Email)->first();
 
-                if (!$guestExits) {
+                    // dd($resGuest, $guestExits);
+
+                    if (!$guestExits) {
+
+                        $cedula = str_random(14);
+
+                        try {
+
+                            $client = [
+                                'cedula' => $cedula,
+                                'tipdoc' => 1,
+                                'nombre' => $resGuest->PersonName->GivenName . ' ' . $resGuest->PersonName->Surname,
+                                'telefono1' => $resGuest->Telephone->PhoneNumber,
+                                'email' => $resGuest->Email,
+                                'primer_nombre' => $resGuest->PersonName->GivenName,
+                                'primer_apellido' => $resGuest->PersonName->Surname,
+                                'emailfe' =>$resGuest->Email,
+                                'ciudades_dian' => 149
+                            ];
+
+                            $guestExits = Cliente::create($client);
+
+                        } catch(\Exception $exception) {
+                            echo $exception->getMessage();
+                            die;
+                        }
 
 
-                    try {
-
-                        $client = [
-                            'cedula' => 0,
-                            'nombre' => $resGuest->PersonName->GivenName . ' ' . $resGuest->PersonName->Surname,
-                            'telefono1' => $resGuest->PersonName->GivenName->Telephone->PhoneNumber,
-                            'email' => $resGuest->Email,
-                            'primer_nombre' => $resGuest->PersonName->GivenName,
-                            'primer_apellido' => $resGuest->PersonName->Surname,
-                            'emailfe' =>$resGuest->Email
-                        ];
-
-                        Cliente::create($client);
-
-                    } catch(\Exception $exception) {
-                        echo $exception->getMessage();
-                        die;
                     }
 
+                    // dd($guestExits->toArray());
 
                 }
+                // dd($guest->Profiles->ProfileInfo->Profile->ProfileType);
+                if ($guest->Profiles->ProfileInfo->Profile->ProfileType == 18 && isset($booker->Email)) {
+                    // dd($guest->Profiles->ProfileInfo->Profile->Customer);
+                    $booker = $guest->Profiles->ProfileInfo->Profile->Customer;
+                    $bookerExists = CrBooker::where('email', $booker->Email)->first();
+                    if (!$bookerExists) {
+                        
+                        //dd($booker->Address->AddressLine);
+                        
+                        try {
+                            $booker = [
+                                'givenname' => $booker->PersonName->GivenName,
+                                'surname' => $booker->PersonName->Surname,
+                                'phone' => $booker->Telephone->PhoneNumber,
+                                'email' => $booker->Email,
+                                'address' => isset($booker->Address->AddressLine) ? json_encode($booker->Address->AddressLine) : '',
+                                'city' => isset($booker->Address->CityName) ? json_encode($booker->Address->CityName) : '',
+                                'postal_code' => isset($booker->Address->PostalCode) ? json_encode($booker->Address->PostalCode) : '',
+                                'country' => isset($booker->Address->CountryName->Code) ? $booker->Address->CountryName->Code : '',
+                            ];
+                            
+                            $booker = CrBooker::create($booker);    
+                            
+                        } catch(\Exception $exception) {
+                            echo $exception->getMessage();
+                            die;
+                        }
+                    }
+                    
+                    if ($bookerExists) {
+                        $booker = $bookerExists;
+                    }
+                }
+            }
 
-			}
-			// dd($guest->Profiles->ProfileInfo->Profile->ProfileType);
-			if ($guest->Profiles->ProfileInfo->Profile->ProfileType == 18 && isset($booker->Email)) {
-				// dd($guest->Profiles->ProfileInfo->Profile->Customer);
-				$booker = $guest->Profiles->ProfileInfo->Profile->Customer;
-				$bookerExists = CrBooker::where('email', $booker->Email)->first();
-				if (!$bookerExists) {
-					
-					//dd($booker->Address->AddressLine);
-					
-					try {
-						$booker = [
-							'givenname' => $booker->PersonName->GivenName,
-							'surname' => $booker->PersonName->Surname,
-							'phone' => $booker->Telephone->PhoneNumber,
-							'email' => $booker->Email,
-							'address' => isset($booker->Address->AddressLine) ? json_encode($booker->Address->AddressLine) : '',
-							'city' => isset($booker->Address->CityName) ? json_encode($booker->Address->CityName) : '',
-							'postal_code' => isset($booker->Address->PostalCode) ? json_encode($booker->Address->PostalCode) : '',
-							'country' => isset($booker->Address->CountryName->Code) ? $booker->Address->CountryName->Code : '',
-						];
-						
-						$booker = CrBooker::create($booker);	
-						
-					} catch(\Exception $exception) {
-						echo $exception->getMessage();
-						die;
-					}
-				}
-				
-				if ($bookerExists) {
-					$booker = $bookerExists;
-				}
-			}
 		}
 
 		// dd($data->HotelReservations->HotelReservation->RoomStays->RoomStay);
@@ -645,7 +657,13 @@ XML;
 				isset($data->HotelReservations->HotelReservation->ResGlobalInfo->Guarantee)
 			) {
 
+                // dd($data->HotelReservations->HotelReservation->ResGlobalInfo->Guarantee);
+
                 $guarantee = $data->HotelReservations->HotelReservation->ResGlobalInfo->Guarantee;
+
+                // dd($guarantee);
+
+                $guaranteesAccepted = [];
 
 				if (isset($guarantee->GuaranteesAccepted)) {
 					
@@ -665,13 +683,15 @@ XML;
             $numadu = 0;
             $numnin = 0;
 
+            // dd($roomStay->GuestCounts);
+
             if (isset($roomStay->GuestCounts)) {
-                foreach ($roomStay->GuestCounts->GuestCount as $guestCount) {
-                    if ($guestCount->AgeQualifyingCode == 10) {
+                foreach ($roomStay->GuestCounts as $guestCount) {
+                    if (isset($guestCount->AgeQualifyingCode) && $guestCount->AgeQualifyingCode == 10) {
                         $numadu = $guestCount->Count;
                     }
 
-                    if ($guestCount->AgeQualifyingCode == 8) {
+                    if (isset($guestCount->AgeQualifyingCode) && $guestCount->AgeQualifyingCode == 8) {
                         $numnin = $guestCount->Count;
                     }
                 }
@@ -711,15 +731,15 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
             $tipres = config('cm_reservas.tipres');
             $metadata = json_encode($data);
 
-            // dd($roomStay->Comments->Comment);
+            // dd($roomStay->Comments);
 
             try {
                 $newReservation = Reserva::create([
                     'numres' => $numres,
                     'referencia' => 'RateGain ' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Type . ' ' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Value . ' - ' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Type . ' ' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value,
-                    'tipdoc' => $guestExits ? $guestExits->tipdoc : $tipDoc->tipdoc,
-                    'cedula' => $guestExits ? $guestExits->cedula : 0,
-                    'nit' => $nit,
+                    'tipdoc' => $guestExits ? $guestExits->tipdoc : 1,
+                    'cedula' => $guestExits ? $guestExits->cedula : $cedula,
+                    'nit' => 0, // $nit,
                     'numhab' => $numhab,
                     'tipres' => $tipres,
 					'tipseg' => 'I',
@@ -742,7 +762,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     'metadata' => $metadata,
                     'guarantee' => ' ' . $guaranteeText,
                     'confirmationid' => $confirmationid,
-					'onlinecomment' => isset($roomStay->Comments) ? '' . (is_array($roomStay->Comments->Comment) ? json_encode($roomStay->Comments->Comment) : $roomStay->Comments->Comment) : '',
+					'onlinecomment' => isset($roomStay->Comments) ? '' . (is_array($roomStay->Comments->Comment) ? json_encode($roomStay->Comments->Comment) : $roomStay->Comments->Comment->Text) : '',
 					'cancellationid' => null
                 ]);
             } catch (\Exception $exception) {
@@ -750,42 +770,69 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
             }
 
             // dd($booker);
-
+            $amount = 0;
 			
 			if ($booker) {
 				$bookerReserva = CrBookerReserva::create([
 					'booker_id' => $booker->id,
 					'numres' => $numres,
-					'amount' => $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax,
+					'amount' => isset($data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax) ? $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax : $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountAfterTax,
 					'date' => date('Y-m-d H:i:s'),
 					'booker_name' => $booker->givenname . ' ' . $booker->surname,
 				]);
 			}
 			
-			if ($guarantee) {
+			if ($guarantee && isset($guarantee->GuaranteesAccepted)) {
+                // dd($guarantee);
 				$reservaGuarantee = CrGuarantee::create([
 					'type' => $guarantee->GuaranteeType,
-					'code' => isset($guaranteePaymentCard) ? ($guarantee->GuaranteeCode . ': ' . $guaranteePaymentCard->CardCode) : '',
-					'number' => isset($guaranteePaymentCard) ? $guaranteePaymentCard->CardNumber : '',
-					'expire' => isset($guaranteePaymentCard) ? $guaranteePaymentCard->ExpireDate : '',
-					'holder' => isset($guaranteePaymentCard) ? $guaranteePaymentCard->CardHolderName : '',
-					'amount' => $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax,
+					'code' => isset($guarantee->GuaranteesAccepted->GuaranteeAccepted->PaymentCard->CardCode) ? $guarantee->GuaranteesAccepted->GuaranteeAccepted->PaymentCard->CardCode : '',
+					'number' => isset($guarantee->GuaranteesAccepted->GuaranteeAccepted->PaymentCard->CardNumber) ? $guarantee->GuaranteesAccepted->GuaranteeAccepted->PaymentCard->CardNumber : '',
+					'expire' => isset($guarantee->GuaranteesAccepted->GuaranteeAccepted->PaymentCard->ExpireDate) ? $guarantee->GuaranteesAccepted->GuaranteeAccepted->PaymentCard->ExpireDate : '',
+					'holder' => isset($guarantee->GuaranteesAccepted->GuaranteeAccepted->PaymentCard->CardHolderName) ? $guarantee->GuaranteesAccepted->GuaranteeAccepted->PaymentCard->CardHolderName : '',
+					'amount' => isset($data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax) ? $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax : $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountAfterTax,
 					'currency' => $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->CurrencyCode,
 					'numres' => $numres
 				]);
 			}
+
+            if ($guarantee && isset($guarantee->GuaranteeCode)) {
+                $reservaGuarantee = CrGuarantee::create([
+                    'type' => null,
+                    'code' => $guarantee->GuaranteeCode,
+                    'number' => null,
+                    'expire' => null,
+                    'holder' => null,
+                    'amount' => isset($data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax) ? $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax : $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountAfterTax,
+                    'currency' => $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->CurrencyCode,
+                    'numres' => $numres
+                ]);
+            }
 
             $codpla = config('cm_reservas.codpla');
             $dayPriceCnt = 1;
 
             // dd($roomStay->RoomRates->RoomRate->Rates->Rate);
 
+            $amountBT = 0;
+            $amountAT = 0;
+            $amount = 0;
+
+
             if (is_array($roomStay->RoomRates->RoomRate->Rates->Rate)) {
+
+
                 foreach ($roomStay->RoomRates->RoomRate->Rates->Rate as $dayPrice) {
+
+                    $amountBT = isset($dayPrice->Base->AmountBeforeTax) ? $dayPrice->Base->AmountBeforeTax : 0;
+                    $amountAT = isset($dayPrice->Base->AmountAfterTax) ? $dayPrice->Base->AmountAfterTax : 0;
+
+                    $amount = $amountBT ? $amountBT : $amountAT;
+
                     $queryPlares = "
                     INSERT INTO plares
                     (numres, numpla, codpla, fecini, fecfin, pordes, tipdes, valornoche, codigocr)
-                    VALUES({$numres}, {$dayPriceCnt}, {$codpla}, '{$dayPrice->EffectiveDate}', '{$dayPrice->ExpireDate}', 0, 'P', {$dayPrice->Base->AmountBeforeTax}, '{$roomStay->RoomRates->RoomRate->RatePlanCode}');
+                    VALUES({$numres}, {$dayPriceCnt}, {$codpla}, '{$dayPrice->EffectiveDate}', '{$dayPrice->ExpireDate}', 0, 'P', {$amount}, '{$roomStay->RoomRates->RoomRate->RatePlanCode}');
                     ";
                     try {
                         
@@ -797,10 +844,13 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     }
                 }
             } else {
+                $amountBT = isset($roomStay->RoomRates->RoomRate->Rates->Rate->Base->AmountBeforeTax) ? $roomStay->RoomRates->RoomRate->Rates->Rate->Base->AmountBeforeTax : 0;
+                $amountAT = isset($roomStay->RoomRates->RoomRate->Rates->Rate->Base->AmountAfterTax) ? $roomStay->RoomRates->RoomRate->Rates->Rate->Base->AmountAfterTax : 0;
+                $amount = $amountBT ? $amountBT : $amountAT;
                 $queryPlares = "
                     INSERT INTO plares
                     (numres, numpla, codpla, fecini, fecfin, pordes, tipdes, valornoche, codigocr)
-                    VALUES({$numres}, {$dayPriceCnt}, {$codpla}, '{$roomStay->RoomRates->RoomRate->Rates->Rate->EffectiveDate}', '{$roomStay->RoomRates->RoomRate->Rates->Rate->ExpireDate}', 0, 'P', {$roomStay->RoomRates->RoomRate->Rates->Rate->Base->AmountBeforeTax}, '{$roomStay->RoomRates->RoomRate->RatePlanCode}');
+                    VALUES({$numres}, {$dayPriceCnt}, {$codpla}, '{$roomStay->RoomRates->RoomRate->Rates->Rate->EffectiveDate}', '{$roomStay->RoomRates->RoomRate->Rates->Rate->ExpireDate}', 0, 'P', {$amount}, '{$roomStay->RoomRates->RoomRate->RatePlanCode}');
                 ";
                 try {
                     
@@ -950,10 +1000,15 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
 				dd($exception->getMessage());
 			}
 
+            $amountBT = isset($data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax) ? $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax : 0;
+            $amountAT = isset($data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountAfterTax) ? $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountAfterTax : 0;
+
+            $amount = $amountBT ? $amountBT : $amountAT;
+
             $queryValcar = "
                 INSERT INTO valcar
                 (numfol, numcue, item, codusu, codcaj, fecha, cantidad, codcar, cladoc, numdoc, codpla, valor, iva, impo, valser, valter, total, estado, oldfol, movcor)
-                VALUES({$numfolio->fol}, 1, 1, 3, 7, CURRENT_TIMESTAMP, 1, 54, 'RC', '2109', null, {$data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax}, 0, null, 0, 0, {$data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax}, 'A', null, 'N');
+                VALUES({$numfolio->fol}, 1, 1, 3, 7, CURRENT_TIMESTAMP, 1, 54, 'RC', '2109', null, {$amount}, 0, null, 0, 0, {$amount}, 'A', null, 'N');
             ";
 			
 			try {

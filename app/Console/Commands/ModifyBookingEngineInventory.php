@@ -50,6 +50,8 @@ class ModifyBookingEngineInventory extends Command
 
         $typeRoom = config(snake_case(studly_case($this->argument('booking-engine'))) . '.rooms_lc.' . $this->argument('room-class'));
 
+        // dd($typeRoom);
+
         if ($typeRoom) {
             $period = new \DatePeriod(
                 new \DateTime($this->argument('start-date')),
@@ -67,6 +69,8 @@ class ModifyBookingEngineInventory extends Command
                 $availability['date'] = $dateToCheck;
                 $availabilities[] = $availability;
             }
+
+            // dd($availabilities);
 
             $modifies = [];
             foreach ($availabilities as $availability) {

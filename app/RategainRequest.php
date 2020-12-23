@@ -11,6 +11,7 @@ class RategainRequest extends Model
     protected $fillable = [
     	'reference',
     	'type',
-    	'request'
+    	'request',
+    	'xml'
     ];
 }
