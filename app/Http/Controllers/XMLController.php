@@ -21,7 +21,7 @@ class XMLController extends Controller
     {
         try {
             $xml = trim($request->getContent());
-        } catch (Exception $exception) {
+        } catch (\Exception $exception) {
             return response()->xml($exception->getMessage());
         }
 

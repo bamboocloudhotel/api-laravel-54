@@ -49,10 +49,8 @@ class DatabasesController extends Controller
         $requestData = $request->all();
 
         DB::beginTransaction();
-
         try {
             $database = Database::create($requestData);
-            DB::commit();
             return response()->json([
                 'message' => 'OK',
                 'data' => $database,
@@ -68,6 +66,7 @@ class DatabasesController extends Controller
                 ]
             ], 500);
         }
+        DB::commit();
     }
 
     /**
@@ -116,10 +115,8 @@ class DatabasesController extends Controller
         $database = Database::findOrFail($id);
 
         DB::beginTransaction();
-
         try {
             $database->update($requestData);
-            DB::commit();
             return response()->json([
                 'message' => 'OK',
                 'data' => $database,
@@ -135,6 +132,7 @@ class DatabasesController extends Controller
                 ]
             ], 500);
         }
+        DB::commit();
     }
 
     /**
@@ -150,10 +148,8 @@ class DatabasesController extends Controller
         $database = Database::findOrFail($id);
 
         DB::beginTransaction();
-
         try {
             $database->destroy();
-            DB::commit();
             return response()->json([
                 'message' => 'OK',
                 'data' => $database,
@@ -169,6 +165,7 @@ class DatabasesController extends Controller
                 ]
             ], 500);
         }
+        DB::commit();
 
     }
 }

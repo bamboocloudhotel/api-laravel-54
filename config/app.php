@@ -172,6 +172,7 @@ return [
         Reliese\Coders\CodersServiceProvider::class,
         Arcanedev\LogViewer\LogViewerServiceProvider::class,
         Rap2hpoutre\LaravelLogViewer\LaravelLogViewerServiceProvider::class,
+        Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider::class,
 
         /*
          * Application Service Providers...
