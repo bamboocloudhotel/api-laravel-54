@@ -12,9 +12,20 @@ class InventoryUpdateController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         //
+        $rateGainInventoryUpdates = InventoryUpdate::whereBookingEngine('rategain');
+
+        if ($request->get('search')) {
+            $rateGainInventoryUpdates->where('room_class_cloud', 'like', '%' . $request->get('search') . '%')
+                ->orWhere('date_updated', 'like', '%' . $request->get('search') . '%')
+                ->orWhere('quantity', 'like', '%' . $request->get('search') . '%');
+        }
+
+        $rateGainInventoryUpdates = $rateGainInventoryUpdates->paginate(20);
+
+        return view('rategain-inventory-updates-list', ['rateGainInventoryUpdates' => $rateGainInventoryUpdates, 'request' => $request->all()]);
     }
 
     /**
@@ -44,9 +55,17 @@ class InventoryUpdateController extends Controller
      * @param  \App\InventoryUpdate  $inventoryUpdate
      * @return \Illuminate\Http\Response
      */
-    public function show(InventoryUpdate $inventoryUpdate)
+    public function show($id)
     {
         //
+        $rateGainInventoryUpdate = InventoryUpdate::find($id);
+
+        // dd($rategainRequest->toArray());
+
+        $sxe = new \SimpleXMLElement($rateGainInventoryUpdate->xml);
+        $sxe = json_encode($sxe);
+
+        return view('rategain-inventory-updates-view', ['rateGainInventoryUpdate' => $rateGainInventoryUpdate, 'sxe' => $sxe]);
     }
 
     /**

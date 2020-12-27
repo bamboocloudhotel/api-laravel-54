@@ -23,7 +23,7 @@ class RategainRequestController extends Controller
                 ->orWhere('reference', 'like', '%' . $request->get('search') . '%');
         }
 
-        $rateGainRequests = $rateGainRequests->paginate(100);
+        $rateGainRequests = $rateGainRequests->paginate(20);
 
         return view('rategain-requests-list', ['rateGainRequests' => $rateGainRequests, 'request' => $request->all()]);
 

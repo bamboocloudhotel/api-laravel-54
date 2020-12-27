@@ -45,6 +45,8 @@ class Detrec extends Model
 	];
 
 	protected $fillable = [
+        'numrec',
+        'numero',
 		'forpag',
 		'numfor',
 		'fecven',

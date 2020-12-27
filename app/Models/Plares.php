@@ -44,12 +44,16 @@ class Plares extends Model
 	];
 
 	protected $fillable = [
+	    'numres',
+        'numpla',
+        'codpla',
 		'fecini',
 		'fecfin',
 		'pordes',
 		'tipdes',
 		'subsidio',
 		'valor',
-		'valornoche'
+		'valornoche',
+        'codigocr'
 	];
 }

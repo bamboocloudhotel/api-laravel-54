@@ -98,6 +98,7 @@ class Folio extends Model
 	];
 
 	protected $fillable = [
+        'numfol',
 		'numres',
 		'codeve',
 		'tipdoc',
