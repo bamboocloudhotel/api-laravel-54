@@ -48,6 +48,8 @@ class Garres extends Model
 	];
 
 	protected $fillable = [
+        'numres',
+        'item',
 		'codusu',
 		'codcaj',
 		'fecha',

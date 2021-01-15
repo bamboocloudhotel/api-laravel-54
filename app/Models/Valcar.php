@@ -67,11 +67,15 @@ class Valcar extends Model
 	];
 
 	protected $fillable = [
+        'numfol',
+        'numcue',
+        'item',
 		'codusu',
 		'codcaj',
 		'fecha',
 		'cantidad',
 		'codcar',
+        'codpla',
 		'cladoc',
 		'numdoc',
 		'codpla',

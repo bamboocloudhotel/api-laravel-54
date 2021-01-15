@@ -49,6 +49,11 @@ class Reccaj extends Model
 	];
 
 	protected $fillable = [
+        'numrec',
+        'codcaj',
+        'codusu',
+        'codcar',
+        'codven',
 		'cedula',
 		'nombre',
 		'direccion',

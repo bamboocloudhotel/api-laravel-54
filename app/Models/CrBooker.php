@@ -6,10 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class CrBooker extends Model
 {
-	protected $connection = 'hhotel5';
+	public $connection = 'hhotel5';
 	protected $table = 'cr_bookers';
 	public $incrementing = true;
-	public $timestamps = false;
+    public $timestamps = false;
 	protected $fillable = [
 		'givenname',
 		'surname',
@@ -23,6 +23,6 @@ class CrBooker extends Model
 	
 	
 	public function reservas() {
-		return $this->hasMany(App\Models\CrBookerReserva, 'booker_id', 'id');
+		return $this->hasMany(\App\Models\CrBookerReserva::class, 'booker_id', 'id');
 	}
 }

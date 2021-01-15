@@ -2,7 +2,7 @@
 ﻿
  Nota: Se inplemento Laravel 5.4 para compatibilidad con PHP 5.6
  
-1. instalar dependencias `composer install`
+1. Instalar dependencias `composer install`
 2. Copiar archvo de configuración `cp .env.example .env`
 3. Definir base de datos. Modificar en el archivo `.env`
 ```dotenv
@@ -44,7 +44,7 @@ Configurar la conexión `hhotel5` en `config/database.php` apuntando a la base d
 ],
 ```
 
-### CM Reservas
+### Configuración Bamboo
 
 Configurar en Bamboo los datos del WebService en `hotel5\app\clases\ReservationsChannel.php`. *Ejemplo*:
 
@@ -57,6 +57,8 @@ public function __construct()
     $this->bookingEngineCode = 'cm_reservas'; // Código del PMS 'cm-reservas'
 }
 ```
+
+### RateGain
 
 Configurar los datos del WebService RateGain en `config/rategain.php`. *Ejemplo*:
 ```php
@@ -89,9 +91,9 @@ return [
 
 Obtiene las reservas generadas en los canales de reservas y las almacena en bamboo.
 
-**Actuaizar inventario**
+**Actuaizar inventario:**
 
-`php artisan cr:put_inventory 2020-03-15 2020-03-18 1 cm_reservas`
+`php artisan cr:put_inventory 2020-03-15 2020-03-18 1 rategain`
 
 Actualiza el inventario en el canal de reservas desde una fecha inicial hasta una fecha final por el código de la clase de habitación (codcla)
 
