@@ -29,6 +29,8 @@
 
             <th>Type</th>
 
+            <th>Date</th>
+
             <th width="300px;">Action</th>
 
         </tr>
@@ -46,6 +48,8 @@
                     <td>{{ $value->reference }}</td>
 
                     <td>{{ $value->type }}</td>
+
+                    <td>{{ $value->created_at }}</td>
 
                     <td>
 

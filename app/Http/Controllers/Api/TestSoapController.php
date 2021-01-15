@@ -140,7 +140,7 @@ class TestSoapController extends SoapController
 
             return response()->json([
                 'message' => 'OK',
-                'data' => null
+                'data' => $request->all()
             ]);
         }
 

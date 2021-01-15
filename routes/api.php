@@ -19,15 +19,18 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::post('test', function() {
-	echo 'Hello!';
+Route::any('test', function(Request $request) {
+	return response()->json([
+        'message' => 'OK',
+        'data' => $request->all()
+    ], 200);
 });
 
 Route::post('view-guarantee', function (Request $request) {
 
     $dathot = Dathot::firstOrFail();
 
-    if ($dathot->guarantee_password == $request->get('guarantee_password')) {
+    if ($dathot->guarantee_password == $request->get('password')) {
         $guarantee = CrGuarantee::where('numres', $request->get('numres'))->first();
 
         if (!$guarantee) {

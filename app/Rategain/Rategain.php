@@ -725,10 +725,10 @@ $printTime = date('H:i:s');
 RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Type} {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Value}
 RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Type} {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value}
             "  : '';
-            $paymentType = config('cm_reservas.paymentType');
-            $warrantyType = config('cm_reservas.warrantyType');
-            $programType = config('cm_reservas.programType');
-            $tipres = config('cm_reservas.tipres');
+            $paymentType = config('rategain.paymentType');
+            $warrantyType = config('rategain.warrantyType');
+            $programType = config('rategain.programType');
+            $tipres = config('rategain.tipres');
             $metadata = json_encode($data);
 
             // dd($roomStay->Comments);
@@ -809,7 +809,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                 ]);
             }
 
-            $codpla = config('cm_reservas.codpla');
+            $codpla = config('rategain.codpla');
             $dayPriceCnt = 1;
 
             // dd($roomStay->RoomRates->RoomRate->Rates->Rate);

@@ -70,13 +70,13 @@ class ModifyBookingEngineInventory implements ShouldQueue
                 $modifies[] = $this->bookingEngine->modifyInventory($availability['date'], $availability['date'], $availability['class'], null, $availability['rooms']);
             }
 
-            if ($this->bookingEngine == 'rategain') {
+            if ($this->bookingEngineCode == 'rategain') {
 				foreach ($modifies as $modify) {
 					foreach ($modify as $mod) {
 						InventoryUpdate::create([
 							'booking_engine' => $mod['booking_engine'],
 							'room_class_cloud' => $mod['room'],
-							'room_class_local' => $this->argument('room-class'),
+							'room_class_local' => $this->roomClass,
 							'date_updated' => $mod['date'],
 							'quantity' => $mod['quantity'],
 							'xml' => $mod['xml'],
