@@ -16,6 +16,8 @@ use App\Models\CrBookerReserva;
 use App\Models\CrGuarantee;
 use App\Models\Tipdoc;
 use App\Models\Valcar;
+use App\Models\Empresa;
+use App\Models\CrChannel;
 
 class Rategain
 {
@@ -165,6 +167,7 @@ XML;
      */
     public function modifyInventory($startDate = null, $endDate = null, $roomId = null, $hotelId = null, $quantity = null)
     {
+
         $hotelId = $hotelId ? $hotelId : config('rategain.hotelCode');
         $sDate = $startDate ? $startDate : date('Y-m-d');
         $eDate = $endDate ? $endDate : date('Y-m-d');
@@ -482,6 +485,21 @@ XML;
 		$bookerExists = null;
 		$guestExits = null;
         $cedula = 0;
+
+        $bookingChannel = null;
+
+        $bambooCompanyNit = null;
+
+        if (isset($data->POS->Source->BookingChannel->CompanyName->Code)) {
+            $bookingChannel = $data->POS->Source->BookingChannel->CompanyName->Code;
+        }
+
+        $bambooBookingChannelCompany = CrChannel::with('empresa')->where('channel_code', $bookingChannel)->first();
+
+        if ($bambooBookingChannelCompany) {
+            $bambooCompanyNit = $bambooBookingChannelCompany['empresa']['nit'];
+        }
+
 		
 		foreach ($data->HotelReservations->HotelReservation->ResGuests->ResGuest as $guest) {
 			
@@ -679,7 +697,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     'referencia' => 'RateGain ' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Type . ' ' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Value . ' - ' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Type . ' ' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value,
                     'tipdoc' => $guestExits ? $guestExits->tipdoc : 1,
                     'cedula' => $guestExits ? $guestExits->cedula : $cedula,
-                    'nit' => 0, // $nit,
+                    'nit' => $bambooCompanyNit ? $bambooCompanyNit : 0, // $nit,
                     'numhab' => $numhab,
                     'tipres' => $tipres,
 					'tipseg' => 'I',
