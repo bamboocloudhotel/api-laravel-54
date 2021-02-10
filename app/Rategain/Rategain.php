@@ -794,7 +794,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                             'pordes' => 0,
                             'tipdes' => 'P',
                             // 'subsidio' => null,
-                            'valor' => 0,
+                            // 'valor' => 0,
                             'valornoche' => $amount,
                             'codigocr' => $roomStay->RoomRates->RoomRate->RatePlanCode
                         ]);
@@ -841,7 +841,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
 			         $phone = $data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Telephone->PhoneNumber;
                  }
 
-			     Reccaj::create([
+			     /*Reccaj::create([
                      'numrec' => $numrec,
                      'codcaj' => 1,
                      'codusu' => 1,
@@ -859,7 +859,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                      'codven' => 0,
                      'nota' => 'Pago de reserva por RateGain.',
                      'estado' => 'A'
-                 ]);
+                 ]);*/
 
 			 } catch(Exception $exception) {
 			 	dd($exception->getMessage());
@@ -877,7 +877,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
 			         $valor = $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax;
                  }
 
-			     Detrec::create([
+			     /*Detrec::create([
                      'numrec' => $numrec,
                      'numero' => 1,
                      'forpag' => 1,
@@ -886,7 +886,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                      'ivarep' => 0,
                      'valorm' => 0,
                      'valor' => $valor
-                 ]);
+                 ]);*/
 
 			 } catch(Exception $exception) {
 			 	dd($exception->getMessage());
@@ -894,7 +894,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
 
 			 try {
 
-			     Garres::create([
+			     /*Garres::create([
                      'numres' => $numres,
                      'item' => 1,
                      'codusu' => 1,
@@ -905,7 +905,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                      'numrec' => $numrec,
                      'numegr' => 0,
                      'estado' => 'A'
-                 ]);
+                 ]);*/
 
 			 } catch(Exception $exception) {
 			 	dd($exception->getMessage());
@@ -915,11 +915,11 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
 
 			 try {
 
-                 $dathot = Dathot::first();
+                 /*$dathot = Dathot::first();
 
 			 	$dathot->update([
 			 	    'numrec' => $nNumrec
-                ]);
+                ]);*/
 
 			 } catch(Exception $exception) {
 			 	dd($exception->getMessage());
@@ -960,7 +960,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     'numadu' => $numadu,
                     'numnin' => $numnin,
                     'numinf' => 0,
-                    'nota' => 'FOLIO CREADO PARA GARANTIZAR RESERVA EN LINEA RateGain',
+                    'nota' => 'FOLIO CREADO PARA RESERVA EN LINEA RateGain',
                     'notaayb' => '',
                     'equipaje' => 'N',
                     'placa' => null,
@@ -990,7 +990,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
 			
 			try {
 
-			    Valcar::create([
+			    /*Valcar::create([
                     'numfol' => $numfolio->fol,
                     'numcue' => 1,
                     'item' => 1,
@@ -1012,7 +1012,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     'oldfol' => null,
                     'movcor' => 'N',
                     // 'subsidio' => null
-                ]);
+                ]);*/
 				
 			} catch(Exception $exception) {
 				dd($exception->getMessage());

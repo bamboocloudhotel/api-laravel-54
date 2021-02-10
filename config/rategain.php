@@ -16,7 +16,7 @@ return [
         '1' => 'ESTANDAR',
         '3' => 'ESPECIAL ESTANDAR',
     ],
-    'paymentType' => '46',
+    'paymentType' => '42',
     'warrantyType' => '2',
     'programType' => '7',
     'codpla' => 5979,
