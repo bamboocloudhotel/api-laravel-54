@@ -570,11 +570,11 @@ XML;
                     }
                 }
                 if ($guest->Profiles->ProfileInfo->Profile->ProfileType == 3) {
-                    dd($guest);
                     $company = [
                         'id' => $guest->Profiles->ProfileInfo->UniqueID->ID,
-                        'name' => $guest->Profiles->ProfileInfo->Profile->CompanyName
+                        'name' => $guest->Profiles->ProfileInfo->Profile->CompanyInfo->CompanyName
                     ];
+                    dd($company);
                 }
             }
 
