@@ -732,7 +732,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     'metadata' => $metadata,
                     'guarantee' => ' ' . $guaranteeText,
                     'confirmationid' => $confirmationid,
-					'onlinecomment' => isset($roomStay->Comments) ? '' . (is_array($roomStay->Comments->Comment) ? json_encode($roomStay->Comments->Comment) : $roomStay->Comments->Comment->Text) : '' . $company ? "\n" . $company['name'] . ' - ' . $company['id'] : '',
+					'onlinecomment' => (isset($roomStay->Comments) ? '' . (is_array($roomStay->Comments->Comment) ? json_encode($roomStay->Comments->Comment) : $roomStay->Comments->Comment->Text) : '') . ($company ? "\n" . $company['name'] . " - " . $company['id'] : ""),
 					'cancellationid' => null,
                     'idclifre' => $booker ? $booker->givenname . ' ' . $booker->surname . ' - ' . $booker->phone : null,
                 ]);
