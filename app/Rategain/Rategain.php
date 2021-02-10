@@ -485,6 +485,7 @@ XML;
 		$bookerExists = null;
 		$guestExits = null;
         $cedula = 0;
+        $company = null;
 
         $bookingChannel = null;
 
@@ -567,6 +568,16 @@ XML;
                     if ($bookerExists) {
                         $booker = $bookerExists;
                     }
+                }
+                if (
+                    $guest->Profiles->ProfileInfo->Profile->ProfileType == 3 &&
+                    isset($guest->Profiles->ProfileInfo->CompanyInfo) &&
+                    isset($guest->Profiles->ProfileInfo->UniqueID)
+                ) {
+                    $company = [
+                        'id' => $guest->Profiles->ProfileInfo->UniqueID->ID,
+                        'name' => $guest->Profiles->ProfileInfo->Profile->CompanyName
+                    ];
                 }
             }
 
@@ -698,6 +709,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     'tipdoc' => $guestExits ? $guestExits->tipdoc : 1,
                     'cedula' => $guestExits ? $guestExits->cedula : $cedula,
                     'nit' => $bambooCompanyNit ? $bambooCompanyNit : 0, // $nit,
+                    'nitage' => $bambooCompanyNit ? $bambooCompanyNit : 0,
                     'numhab' => $numhab,
                     'tipres' => $tipres,
 					'tipseg' => 'I',
@@ -720,8 +732,9 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     'metadata' => $metadata,
                     'guarantee' => ' ' . $guaranteeText,
                     'confirmationid' => $confirmationid,
-					'onlinecomment' => isset($roomStay->Comments) ? '' . (is_array($roomStay->Comments->Comment) ? json_encode($roomStay->Comments->Comment) : $roomStay->Comments->Comment->Text) : '',
-					'cancellationid' => null
+					'onlinecomment' => isset($roomStay->Comments) ? '' . (is_array($roomStay->Comments->Comment) ? json_encode($roomStay->Comments->Comment) : $roomStay->Comments->Comment->Text) : '' . $company ? "\n" . $company['name'] . ' - ' . $company['id'] : '',
+					'cancellationid' => null,
+                    'idclifre' => $booker ? $booker->givenname . ' ' . $booker->surname . ' - ' . $booker->phone : null,
                 ]);
             } catch (\Exception $exception) {
 				dd($exception->getMessage());
