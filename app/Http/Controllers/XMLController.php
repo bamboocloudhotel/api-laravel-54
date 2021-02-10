@@ -135,7 +135,8 @@ class XMLController extends Controller
 
                 foreach($reserva as $res) {
                     $res->update([
-                        'cancellationid' => $confirmationid
+                        'cancellationid' => $confirmationid,
+                        'estado' => 'C'
                     ]);
                 }
 

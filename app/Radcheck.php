@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Radcheck extends Model
 {
-    protected $connection = 'onthefly';
+    public $connection = 'onthefly';
     //
     /**
      * The table associated with the model.
