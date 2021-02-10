@@ -574,6 +574,7 @@ XML;
                     isset($guest->Profiles->ProfileInfo->CompanyInfo) &&
                     isset($guest->Profiles->ProfileInfo->UniqueID)
                 ) {
+                    dd($guest->Profiles->ProfileInfo->Profile);
                     $company = [
                         'id' => $guest->Profiles->ProfileInfo->UniqueID->ID,
                         'name' => $guest->Profiles->ProfileInfo->Profile->CompanyName
