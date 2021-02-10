@@ -574,7 +574,6 @@ XML;
                         'id' => $guest->Profiles->ProfileInfo->UniqueID->ID,
                         'name' => $guest->Profiles->ProfileInfo->Profile->CompanyInfo->CompanyName
                     ];
-                    dd($company);
                 }
             }
 
