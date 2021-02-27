@@ -9,7 +9,6 @@
             <td>
                 <form action="/api-laravel-54/public/index.php/rategain-inventory-updates">
                     <input type="text" name="search" value="{{isset($request['search']) ? $request['search'] : ''}}">
-                    <br>
                     <button type="submit">
                         Search
                     </button>

@@ -9,11 +9,13 @@
             <td>
                 <form action="/api-laravel-54/public/index.php/rategain-bamboo-instances">
                     <input type="text" name="search" value="{{isset($request['search']) ? $request['search'] : ''}}">
-                    <br>
                     <button type="submit">
                         Search
                     </button>
                 </form>
+            </td>
+            <td>
+                <a href="/api-laravel-54/public/index.php/rategain-inventory-updates">New instance</a>
             </td>
         </tr>
     </table>
