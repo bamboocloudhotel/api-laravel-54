@@ -7,6 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class BambooInstanceRoom extends Model
 {
     //
+    protected $fillable = [
+        'bamboo_instance_id',
+        'bb_room',
+        'rg_room',
+    ];
 
     public function bambooInstance()
     {

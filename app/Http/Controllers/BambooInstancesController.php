@@ -19,7 +19,7 @@ class BambooInstancesController extends Controller
 
         $bambooInstances->get();
 
-        return view('rategain-bamboo-instances-list.blade', [
+        return view('rategain-bamboo-instances-list', [
             'instances' => $bambooInstances,
         ]);
     }
