@@ -23,4 +23,49 @@ class BambooInstancesController extends Controller
             'instances' => $bambooInstances,
         ]);
     }
+
+    public function show(Request $request, $id)
+    {
+        $bambooInstance = BambooInstance::with('bambooInstanceRooms');
+        $bambooInstance->find($id);
+
+        $instance = [];
+
+        if ($bambooInstance) {
+            $instance = $bambooInstance->toArray();
+        }
+
+        return view('rategain-bamboo-instances-list', [
+            'instance' => $instance,
+            'action' => count($instance) ? 'update' : 'create',
+        ]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        try {
+            $bambooInstance = BambooInstance::with('bambooInstanceRooms');
+            $bambooInstance->find($id);
+
+            $bambooInstance->update($request->all());
+        } catch (\Exception $exception) {
+            dd($exception->getMessage(), $exception->getFile(), $exception->getLine());
+        }
+
+
+        return redirect('/rategain-bamboo-instances');
+
+    }
+
+    public function store(Request $request)
+    {
+
+        try {
+            BambooInstance::create($request->all());
+        } catch (\Exception $exception) {
+            dd($exception->getMessage(), $exception->getFile(), $exception->getLine());
+        }
+
+        return redirect('/rategain-bamboo-instances');
+    }
 }

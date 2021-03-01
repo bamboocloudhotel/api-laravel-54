@@ -15,7 +15,7 @@
                 </form>
             </td>
             <td>
-                <a href="/api-laravel-54/public/index.php/rategain-inventory-updates">New instance</a>
+                <a href="/api-laravel-54/public/index.php/rategain-bamboo-instances/create">New instance</a>
             </td>
         </tr>
     </table>
