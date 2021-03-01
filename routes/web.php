@@ -22,9 +22,9 @@ Route::get('/rategain-requests/{id}', 'RategainRequestController@show');
 Route::get('/rategain-inventory-updates', 'InventoryUpdateController@index');
 Route::get('/rategain-inventory-updates/{id}', 'InventoryUpdateController@show');
 Route::get('/rategain-bamboo-instances', 'BambooInstancesController@index');
-Route::get('/rategain-bamboo-instances/{id?}', 'BambooInstancesController@show');
-Route::put('/rategain-bamboo-instances/{id}', 'BambooInstancesController@update');
-Route::post('/rategain-bamboo-instances/{id}', 'BambooInstancesController@store');
+Route::get('/rategain-bamboo-instances/{id}', 'BambooInstancesController@show');
+Route::post('/rategain-bamboo-instances', 'BambooInstancesController@store');
+Route::post('/rategain-bamboo-instances/{id}', 'BambooInstancesController@update');
 // Route::resource('rategain-requests', 'RategainRequestController');
 
 Route::get('/logs', '\Rap2hpoutre\LaravelLogViewer\LogViewerController@index');

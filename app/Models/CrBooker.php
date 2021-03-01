@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class CrBooker extends Model
 {
-	public $connection = 'hhotel5';
+	public $connection = 'on_the_fly';
 	protected $table = 'cr_bookers';
 	public $incrementing = true;
     public $timestamps = false;

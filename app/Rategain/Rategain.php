@@ -173,6 +173,8 @@ XML;
         $eDate = $endDate ? $endDate : date('Y-m-d');
         $room = $roomId;
 
+
+
         $xml = $this->inventoryModifyRequest;
 
         $begin = new \DateTime($sDate);
@@ -244,7 +246,7 @@ XML;
         $start = $reservationAttributes->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->Start;
         $class = (int)$roomClass;
 
-        $roomsBlocked = collect(\DB::connection('hhotel5')->select("
+        $roomsBlocked = collect(\DB::connection('on_the_fly')->select("
                 SELECT blohab.numhab
                 FROM blohab
                 INNER JOIN habitacion ON blohab.numhab = habitacion.numhab
@@ -257,7 +259,7 @@ XML;
             $roomsOccupied[] = $roomBlocked->numhab;
         }
 
-        $roomsReserved = collect(\DB::connection('hhotel5')->select("
+        $roomsReserved = collect(\DB::connection('on_the_fly')->select("
                 SELECT reserva.numres, reserva.numhab, reserva.estado, habitacion.codcla
                 FROM `reserva`
                 INNER JOIN habitacion ON reserva.numhab = habitacion.numhab
@@ -270,7 +272,7 @@ XML;
             $roomsOccupied[] = $roomReserved->numhab;
         }
 
-        $roomsHosted = collect(\DB::connection('hhotel5')->select("
+        $roomsHosted = collect(\DB::connection('on_the_fly')->select("
                 SELECT reserva.numres, reserva.numhab, reserva.estado, habitacion.codcla, folio.numfol, folio.estado
                 FROM `reserva`
                 INNER JOIN habitacion ON reserva.numhab = habitacion.numhab
@@ -287,7 +289,7 @@ XML;
 
         $roomsOccupied = implode('\',\'', $roomsOccupied);
 
-        $numhab = collect(\DB::connection('hhotel5')->select("
+        $numhab = collect(\DB::connection('on_the_fly')->select("
             select habitacion.numhab 
             from habitacion 
             where habitacion.numhab not in ('{$roomsOccupied}')
@@ -308,7 +310,7 @@ XML;
         // \DB::connection('hhotel5');
         $roomsOccupied = [];
 
-        $roomsBlocked = collect(\DB::connection('hhotel5')->select("
+        $roomsBlocked = collect(\DB::connection('on_the_fly')->select("
                 SELECT blohab.numhab
                 FROM blohab
                 INNER JOIN habitacion ON blohab.numhab = habitacion.numhab
@@ -321,7 +323,7 @@ XML;
             $roomsOccupied[] = $roomBlocked->numhab;
         }
 
-        $roomsReserved = collect(\DB::connection('hhotel5')->select("
+        $roomsReserved = collect(\DB::connection('on_the_fly')->select("
                 SELECT reserva.numres, reserva.numhab, reserva.estado, habitacion.codcla
                 FROM reserva
                 INNER JOIN habitacion ON reserva.numhab = habitacion.numhab
@@ -334,7 +336,7 @@ XML;
             $roomsOccupied[] = $roomReserved->numhab;
         }
 
-        $roomsHosted = collect(\DB::connection('hhotel5')->select("
+        $roomsHosted = collect(\DB::connection('on_the_fly')->select("
                 SELECT folio.numres, folio.numhab, folio.estado, habitacion.codcla, folio.numfol
                 FROM folio
                 INNER JOIN habitacion ON folio.numhab = habitacion.numhab
@@ -349,7 +351,7 @@ XML;
 
         $roomsOccupied = implode('\',\'', $roomsOccupied);
 
-        $numhabs = collect(\DB::connection('hhotel5')->select("
+        $numhabs = collect(\DB::connection('on_the_fly')->select("
             select habitacion.numhab, habitacion.numcam
             from habitacion 
             where habitacion.numhab not in ('{$roomsOccupied}')
@@ -674,8 +676,8 @@ XML;
             }
 			
             $roomClass = config('rategain.rooms_cl.' . $roomStay->RoomRates->RoomRate->RoomTypeCode);
-            $numres = collect(\DB::connection('hhotel5')->select('select MAX(numres)+1 as res from reserva limit 1'))->first();
-            $dathot = collect(\DB::connection('hhotel5')->select("select nit, numrec from dathot;"))->first();
+            $numres = collect(\DB::connection('on_the_fly')->select('select MAX(numres)+1 as res from reserva limit 1'))->first();
+            $dathot = collect(\DB::connection('on_the_fly')->select("select nit, numrec from dathot;"))->first();
             $numres = $numres->res;
             $nit = explode('.', $dathot->nit);
             $nit = implode('', $nit);
@@ -936,7 +938,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
 
             $queryNumfolio = "select MAX(numfol)+1 as fol from folio";
 
-            $numfolio = collect(\DB::connection('hhotel5')->select($queryNumfolio))->first();
+            $numfolio = collect(\DB::connection('on_the_fly')->select($queryNumfolio))->first();
             $resDate = substr($data->TimeStamp, 0, 10);
 
 			try {

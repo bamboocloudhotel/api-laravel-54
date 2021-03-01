@@ -1,21 +1,19 @@
 @extends('layouts.app')
 
-
-
 @section('content')
 
     <table class="table">
         <tr>
             <td>
-                <form action="/api-laravel-54/public/index.php/rategain-bamboo-instances">
-                    <input type="text" name="search" value="{{isset($request['search']) ? $request['search'] : ''}}">
+                <form action="/rategain-bamboo-instances" method="get">
+                    <input type="text" name="search" value="{{isset($_GET['search']) ? $_GET['search'] : ''}}">
                     <button type="submit">
                         Search
                     </button>
                 </form>
             </td>
             <td>
-                <a href="/api-laravel-54/public/index.php/rategain-bamboo-instances/create">New instance</a>
+                <a href="/rategain-bamboo-instances/0">New instance</a>
             </td>
         </tr>
     </table>
@@ -51,7 +49,7 @@
 
                     <td>
 
-                        <a href="/api-laravel-54/public/index.php/rategain-bamboo-instances/{{$value->id}}" class="btn btn-info">View</a>
+                        <a href="/rategain-bamboo-instances/{{$value->id}}" class="btn btn-info">View</a>
 
                     </td>
 
@@ -72,7 +70,5 @@
         </tbody>
 
     </table>
-
-
 
 @endsection

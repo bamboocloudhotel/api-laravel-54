@@ -99,10 +99,48 @@
         <script src="{{ asset('js/app.js') }}"></script>
         <script type="text/javascript">
             var jsonStr = $("pre").text();
-            var jsonObj = JSON.parse(jsonStr);
+            var jsonObj = jsonStr ? JSON.parse(jsonStr) : '';
             var jsonPretty = JSON.stringify(jsonObj, null, '\t');
 
             $("pre").text(jsonPretty);
         </script>
+
+        <script type="text/javascript">
+            // add row
+            $("#addRoom").click(function () {
+                var html = '';
+                html += '<div class="form-group row" id="inputFormRow">';
+                html += '<div class="form-group col-md-5">';
+                html += '<label for="">Bamboo room ID</label>';
+                html += '<input type="text"';
+                html += ' required autocomplete="off"';
+                html += ' oninput="this.value = this.value.replace(/[^0-9.]/g, \'\').replace(\'.\', \'\').replace(\',\', \'\');"';
+                html += ' class="form-control"';
+                html += ' id=""';
+                html += ' name="rooms[id][]">';
+                html += '</div>';
+                html += '<div class="form-group col-md-5">';
+                html += '<label for="">RateGain room code</label>';
+                html += '<input type="text"';
+                html += ' required autocomplete="off"';
+                html += ' class="form-control"';
+                html += ' id=""';
+                html += ' name="rooms[code][]">';
+                html += '</div>';
+                html += '<div class="form-group col-md-2">';
+                html += '<label for="">&nbsp;</label><br>';
+                html += '<a href="javascript:void(0)" class="btn btn-danger" id="removeRow">Remove</a>';
+                html += '</div>';
+                html += '</div>';
+
+                $('#rooms').append(html);
+            });
+
+            // remove row
+            $(document).on('click', '#removeRow', function () {
+                $(this).closest('#inputFormRow').remove();
+            });
+        </script>
+
     </body>
 </html>

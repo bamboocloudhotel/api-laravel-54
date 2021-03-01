@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\BambooInstance;
 use App\Rategain\Rategain;
 use Illuminate\Http\Request;
 use App\Models\Reserva;
@@ -39,20 +40,18 @@ class XMLController extends Controller
 
         switch ($data['data']['ResStatus']) {
             case 'Commit':
-            // dd($data);
+                try {
 
-            	try {
-
-            		RategainRequest::create([
-            			'reference' => 'Rategain ' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Type . ' ' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Value . ' - ' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Type . ' ' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value,
-            			'type' => 'commit',
-            			'request' => json_encode($reservationObject),
+                    RategainRequest::create([
+                        'reference' => 'Rategain ' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Type . ' ' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Value . ' - ' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Type . ' ' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value,
+                        'type' => 'commit',
+                        'request' => json_encode($reservationObject),
                         'xml' => $xml
-            		]);
+                    ]);
 
-            	} catch(Exception $exception) {
-        			dd($exception->getMessage());
-        		}
+                } catch (Exception $exception) {
+                    dd($exception->getMessage());
+                }
 
                 $validation = $this->doValidation($reservationObject, $data);
 
@@ -61,27 +60,31 @@ class XMLController extends Controller
                     // dd($errors);
                     return response()->xml($this->rategain->getReservationError($errors->all()), 422);
                 }
+
+
+                $this->getInstance($reservationObject->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode);
+
                 $response = $this->rategain->saveReservation($reservationObject);
                 return response()->xml($response);
                 break;
             case 'Modify':
-            // dd($data);
-            	try {
+                // dd($data);
+                try {
 
-            		RategainRequest::create([
-            			'reference' => 'Rategain ' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Type . ' ' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Value . ' - ' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Type . ' ' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value,
-            			'type' => 'modify',
-            			'request' => json_encode($reservationObject),
+                    RategainRequest::create([
+                        'reference' => 'Rategain ' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Type . ' ' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Value . ' - ' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Type . ' ' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value,
+                        'type' => 'modify',
+                        'request' => json_encode($reservationObject),
                         'xml' => $xml
-            		]);
+                    ]);
 
-            	} catch(Exception $exception) {
-        			dd($exception->getMessage());
+                } catch (Exception $exception) {
+                    dd($exception->getMessage());
 
-            	}
+                }
                 $returnSuccess = str_replace(
                     '<HotelReservationID ResID_Type="3" ResID_Value="123456789" />',
-                    '<HotelReservationID ResID_Type="3" ResID_Value="' . $confirmationid . '" />', 
+                    '<HotelReservationID ResID_Type="3" ResID_Value="' . $confirmationid . '" />',
                     $returnSuccess
                 );
                 $returnSuccess = str_replace(
@@ -92,7 +95,7 @@ class XMLController extends Controller
 
                 $reserva = Reserva::where('referencia', 'LIKE', '%' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value)->get();
 
-                foreach($reserva as $res) {
+                foreach ($reserva as $res) {
                     $res->update([
                         'modifyid' => $confirmationid
                     ]);
@@ -102,23 +105,27 @@ class XMLController extends Controller
                 break;
             case 'Cancel':
 
-            	try {
+                try {
 
-            		RategainRequest::create([
-            			'reference' => 'Rategain ' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Type . ' ' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Value . ' - ' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Type . ' ' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value,
-            			'type' => 'cancellation',
-            			'request' => json_encode($reservationObject),
+                    RategainRequest::create([
+                        'reference' => 'Rategain ' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Type . ' ' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Value . ' - ' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Type . ' ' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value,
+                        'type' => 'cancellation',
+                        'request' => json_encode($reservationObject),
                         'xml' => $xml
-            		]);
+                    ]);
 
-            	} catch(Exception $exception) {
-        			dd($exception->getMessage());
-        		}
+                } catch (Exception $exception) {
+                    dd($exception->getMessage());
+                }
+
+                // dd('cancellation', $reservationObject->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode);
+
+                $this->getInstance($reservationObject->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode);
 
 
                 $returnSuccess = str_replace(
                     '<HotelReservationID ResID_Type="3" ResID_Value="123456789" />',
-                    '<HotelReservationID ResID_Type="3" ResID_Value="' . $confirmationid . '" />', 
+                    '<HotelReservationID ResID_Type="3" ResID_Value="' . $confirmationid . '" />',
                     $returnSuccess
                 );
                 $returnSuccess = str_replace(
@@ -133,7 +140,7 @@ class XMLController extends Controller
                     return response()->xml($returnSuccess);
                 }
 
-                foreach($reserva as $res) {
+                foreach ($reserva as $res) {
                     $res->update([
                         'cancellationid' => $confirmationid,
                         'estado' => 'C'
@@ -186,6 +193,7 @@ class XMLController extends Controller
 
     public function doValidation($reservationObject, $data)
     {
+        $this->setRateGainConfig($reservationObject->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode);
         if (!is_array($reservationObject->HotelReservations->HotelReservation->RoomStays->RoomStay)) {
             $validation = \Validator::make($data, [
                 'method' => 'required|in:OTA_HotelResNotifRQ',
@@ -273,5 +281,86 @@ class XMLController extends Controller
             throw new \Exception("no cryptographically secure random function available");
         }
         return substr(bin2hex($bytes), 0, $lenght);
+    }
+
+    public function getInstance($rgHotelCode)
+    {
+        $instance = BambooInstance::with('bambooInstanceRooms')
+            ->where(
+                'rg_hotel_code', $rgHotelCode
+            )->first()
+            ->toArray();
+
+        \Config::set("database.connections.on_the_fly", [
+            "driver" => "mysql",
+            "host" => $instance['db_host'],
+            "port" => $instance['db_password'],
+            "database" => $instance['db_database'],
+            "username" => $instance['db_username'],
+            "password" => $instance['db_password'],
+            "unix_socket" => "",
+            "charset" => "utf8",
+            "collation" => "utf8_general_ci",
+            "prefix" => "",
+            "strict" => true,
+            "engine" => null,
+        ]);
+
+        $rooms_cl = [];
+
+        $rooms_lc = [];
+
+        foreach ($instance['bamboo_instance_rooms'] as $key => $value) {
+            $rooms_cl[$value['rg_room']] = $value['bb_room'];
+            $rooms_lc[$value['bb_room']] = $value['rg_room'];
+        }
+
+        \Config::set("rategain", [
+            'url' => $instance['rg_api_url'],
+            'auth' => $instance['rg_auth'],
+            'username' => $instance['rg_username'],
+            'password' => $instance['rg_password'],
+            'hotelCode' => $instance['rg_hotel_code'],
+            'rooms_cl' => $rooms_cl,
+            'rooms_lc' => $rooms_lc,
+            'paymentType' => $instance['payment_type'],
+            'warrantyType' => $instance['warranty_type'],
+            'programType' => $instance['program_type'],
+            'codpla' => $instance['codpla'],
+            'tipres' => $instance['tipres'],
+        ]);
+    }
+
+    public function setRateGainConfig($rgHotelCode)
+    {
+        $instance = BambooInstance::with('bambooInstanceRooms')
+            ->where(
+                'rg_hotel_code', $rgHotelCode
+            )->first()
+            ->toArray();
+
+        $rooms_cl = [];
+
+        $rooms_lc = [];
+
+        foreach ($instance['bamboo_instance_rooms'] as $key => $value) {
+            $rooms_cl[$value['rg_room']] = $value['bb_room'];
+            $rooms_lc[$value['bb_room']] = $value['rg_room'];
+        }
+
+        \Config::set("rategain", [
+            'url' => $instance['rg_api_url'],
+            'auth' => $instance['rg_auth'],
+            'username' => $instance['rg_username'],
+            'password' => $instance['rg_password'],
+            'hotelCode' => $instance['rg_hotel_code'],
+            'rooms_cl' => $rooms_cl,
+            'rooms_lc' => $rooms_lc,
+            'paymentType' => $instance['payment_type'],
+            'warrantyType' => $instance['warranty_type'],
+            'programType' => $instance['program_type'],
+            'codpla' => $instance['codpla'],
+            'tipres' => $instance['tipres'],
+        ]);
     }
 }
