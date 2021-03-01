@@ -101,7 +101,7 @@ class BambooInstancesController extends Controller
         \DB::commit();
 
 
-        return redirect('/rategain-bamboo-instances');
+        return redirect('/api-laravel-54/public/index.php/rategain-bamboo-instances');
 
     }
 
@@ -143,6 +143,6 @@ class BambooInstancesController extends Controller
 
         \DB::commit();
 
-        return redirect('/rategain-bamboo-instances');
+        return redirect('/api-laravel-54/public/index.php/rategain-bamboo-instances');
     }
 }
