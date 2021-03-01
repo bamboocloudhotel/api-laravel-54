@@ -18,15 +18,17 @@ class ModifyBookingEngineInventory implements ShouldQueue
     private $startDate;
     private $endDate;
     private $roomClass;
+    private $hotelId;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($startDate, $endDate, $roomClass, $bookingEngineCode)
+    public function __construct($startDate, $endDate, $roomClass, $bookingEngineCode, $hotelId = null)
     {
         //
+        $this->hotelId = $hotelId;
         $this->startDate = $startDate;
         $this->endDate = $endDate;
         $this->roomClass = $roomClass;

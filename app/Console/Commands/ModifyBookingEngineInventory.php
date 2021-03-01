@@ -49,12 +49,9 @@ class ModifyBookingEngineInventory extends Command
         $class = 'App\\' . studly_case($this->argument('booking-engine')) . '\\' . studly_case($this->argument('booking-engine'));
         $this->bookingEngine = new $class();
         //
-        if (!$this->argument('hotel-code')) {
-            return;
+        if ($this->argument('hotel-code')) {
+            $this->setRateGainConfig($this->argument('hotel-code'));
         }
-
-        $this->setRateGainConfig($this->argument('hotel-code'));
-
 
         $typeRoom = config(snake_case(studly_case($this->argument('booking-engine'))) . '.rooms_lc.' . $this->argument('room-class'));
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\BambooInstance;
 use App\bookingEngine\bookingEngine;
 use App\Jobs\ModifyBookingEngineInventory;
 use Illuminate\Http\Request;
@@ -130,10 +131,15 @@ class TestSoapController extends SoapController
     {
         $typeRoom = config( snake_case(studly_case($request->bookingEngine)) . '.rooms_lc.' . $roomTypeId);
 
+        if ($request->get('hotelId')) {
+            $this->setRateGainConfig($request->get('hotelId'));
+        }
+
+
         if ($typeRoom) {
 
             $job = (
-                new ModifyBookingEngineInventory($startDate, $endDate, $roomTypeId, $request->bookingEngine)
+                new ModifyBookingEngineInventory($startDate, $endDate, $roomTypeId, $request->bookingEngine, $request->get('hotelId') ? $request->get('hotelId') : null)
             );
 
             $this->dispatch($job);
@@ -148,5 +154,53 @@ class TestSoapController extends SoapController
             'message' => 'Esta habitación no sincroniza inventario.'
         ]);
 
+    }
+
+    public function setRateGainConfig($rgHotelCode)
+    {
+        $instance = BambooInstance::with('bambooInstanceRooms')
+            ->where(
+                'rg_hotel_code', $rgHotelCode
+            )->first()
+            ->toArray();
+
+        \Config::set("database.connections.on_the_fly", [
+            "driver" => "mysql",
+            "host" => $instance['db_host'],
+            "port" => $instance['db_password'],
+            "database" => $instance['db_database'],
+            "username" => $instance['db_username'],
+            "password" => $instance['db_password'],
+            "unix_socket" => "",
+            "charset" => "utf8",
+            "collation" => "utf8_general_ci",
+            "prefix" => "",
+            "strict" => true,
+            "engine" => null,
+        ]);
+
+        $rooms_cl = [];
+
+        $rooms_lc = [];
+
+        foreach ($instance['bamboo_instance_rooms'] as $key => $value) {
+            $rooms_cl[$value['rg_room']] = $value['bb_room'];
+            $rooms_lc[$value['bb_room']] = $value['rg_room'];
+        }
+
+        \Config::set("rategain", [
+            'url' => $instance['rg_api_url'],
+            'auth' => $instance['rg_auth'],
+            'username' => $instance['rg_username'],
+            'password' => $instance['rg_password'],
+            'hotelCode' => $instance['rg_hotel_code'],
+            'rooms_cl' => $rooms_cl,
+            'rooms_lc' => $rooms_lc,
+            'paymentType' => $instance['payment_type'],
+            'warrantyType' => $instance['warranty_type'],
+            'programType' => $instance['program_type'],
+            'codpla' => $instance['codpla'],
+            'tipres' => $instance['tipres'],
+        ]);
     }
 }
