@@ -24,12 +24,20 @@ class BambooInstancesController extends Controller
         ]);
     }
 
-    public function show(Request $request, $id)
+    public function show(Request $request, $id = 0)
     {
-        $bambooInstance = BambooInstance::with('bambooInstanceRooms');
-        $bambooInstance->find($id);
 
         $instance = [];
+
+        if ($id = 0) {
+            return view('rategain-bamboo-instances-list', [
+                'instance' => $instance,
+                'action' => 'create',
+            ]);
+        }
+
+        $bambooInstance = BambooInstance::with('bambooInstanceRooms');
+        $bambooInstance->find($id);
 
         if ($bambooInstance) {
             $instance = $bambooInstance->toArray();

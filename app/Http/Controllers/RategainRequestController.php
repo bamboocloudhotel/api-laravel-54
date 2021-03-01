@@ -58,7 +58,6 @@ class RategainRequestController extends Controller
      */
     public function show($id)
     {
-        //
         
         $rategainRequest = RategainRequest::find($id);
 
