@@ -77,6 +77,7 @@ class CmReservas
      */
     public function getReservations($startDate = null, $endDate = null, $hotelId = null, $dlm = false)
     {
+
         $sDate = $startDate ? $startDate : date('Y-m-d');
         $eDate = $endDate ? $endDate : date('Y-m-d');
         $xmlr = $this->request();
@@ -171,7 +172,7 @@ class CmReservas
     private function request()
     {
         $xmlr = new SimpleXMLElement("<Request></Request>");
-        $xmlr->addAttribute('apikey', config('cm_reservas.apyKey'));
+        $xmlr->addAttribute('apikey', config('cm_reservas.apiKey'));
         $xmlr->addAttribute('userName', config('cm_reservas.userName'));
         $xmlr->addAttribute('password', config('cm_reservas.password'));
 
@@ -240,9 +241,11 @@ class CmReservas
     {
         
         \DB::setDefaultConnection('hhotel5');
+
 		if (!$reservations['data']) {
 			return;
 		}
+
         $reservations = $reservations['data']->reservation;
         $attributesKey = '@attributes';
 
@@ -255,7 +258,6 @@ class CmReservas
         }
 
         foreach ($reservations as $reservation) {
-			
 			
             if (!is_array($reservation->room)) {
                 $reservation->room = [
@@ -314,6 +316,8 @@ class CmReservas
                 $nit = $nit[0];
 
                 $numhab = $this->getBambooAvailability($reservationAttributes, $roomClass);
+
+                // dd($numhab);
 
                 if (!$numhab) {
                     break;
@@ -517,12 +521,23 @@ class CmReservas
 
         $roomsOccupied = implode('\',\'', $roomsOccupied);
 
-        $numhab = collect(\DB::select("
+        $qry =  "
             select habitacion.numhab 
-            from habitacion 
-            where habitacion.numhab not in ('{$roomsOccupied}')
-            AND habitacion.codcla = {$roomClass}
-            "))->first();
+            from habitacion
+        ";
+
+        if ($roomsOccupied != '') {
+            $qry .= "
+                where habitacion.numhab not in ('{$roomsOccupied}')
+                and habitacion.codcla = {$roomClass}
+            ";
+        } else {
+            $qry .= "
+                where habitacion.codcla = {$roomClass}
+            ";
+        }
+
+        $numhab = collect(\DB::select($qry))->first();
 
         return $numhab;
     }

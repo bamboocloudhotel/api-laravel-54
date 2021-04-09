@@ -1,23 +1,27 @@
 <?php
 
 return [
-    'url' => 'https://apitest.roomcloud.net',
-    'apyKey' => 'bamboo_900hty5768fj5o6msds4',
-    'hotel_id' => 3885,
-    'userName' => '3885',
-    'password' => 'Bamboo2019',
+    'url' => 'https://api.roomcloud.net',
+    'apiKey' => 'bamboo_900hty5768fj5o6msds4',
+    'hotel_id' => 12314, // 3885,
+    'userName' => '12314',// '3885',
+    'password' => 'Inntuhotel2021*',// 'Bamboo2019',
     'action' => '/be/search/xml.jsp',
     'rooms_cl' => [ // channel to local
-        '17662' => '4',
-        '17661' => '8',
+        '69451' => '10', // individual 
+        '69753' => '9', // twin
+        '69752' => '8', // doble
+        '74160' => '4', // suite 
     ],
     'rooms_lc' => [ // local to channel
-        '4' => '17662',
-        '8' => '17661',
+        '10' => '69451', // individual 
+        '9' => '69753', // twin
+        '8' => '69752', // doble
+        '4' => '74160', // suite 
     ],
-    'paymentType' => '15',
+    'paymentType' => '12',
     'warrantyType' => '2',
-    'programType' => '7',
-    'codpla' => 728,
+    'programType' => '1',
+    'codpla' => 89,
     'tipres' => '2',
 ];

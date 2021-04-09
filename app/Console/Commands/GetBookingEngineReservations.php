@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 class GetBookingEngineReservations extends Command
 {
@@ -39,8 +40,9 @@ class GetBookingEngineReservations extends Command
      */
     public function handle()
     {
-        $class = 'App\\' . studly_case($this->argument('booking-engine')) . '\\' . studly_case($this->argument('booking-engine'));
+        $class = '\\App\\' . studly_case($this->argument('booking-engine')) . '\\' . studly_case($this->argument('booking-engine'));
         $this->bookingEngine = new $class();
+
         //
         $this->info($this->argument('booking-engine'));
 
@@ -48,6 +50,11 @@ class GetBookingEngineReservations extends Command
         $today =  date('Y-m-d', strtotime("+1 days"));
 
         $reservations = $this->bookingEngine->getReservations($yesterday, $today, null, true);
+		
+		if ($reservations['error']) {
+			Log::error('CM Reservas ' . $reservations['data']->error->{'@attributes'}->code . ': ' . $reservations['data']->error->{'@attributes'}->message);
+			return;
+		}
 
         $this->bookingEngine->saveReservations($reservations);
     }
