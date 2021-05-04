@@ -51,10 +51,11 @@ class ModifyBookingEngineInventory extends Command
         //
         if ($this->argument('hotel-code')) {
             $this->setRateGainConfig($this->argument('hotel-code'));
-        }
-
+        } else {
+			return;
+		}
+		
         $typeRoom = config(snake_case(studly_case($this->argument('booking-engine'))) . '.rooms_lc.' . $this->argument('room-class'));
-
 
         if ($typeRoom) {
             $period = new \DatePeriod(
@@ -62,6 +63,7 @@ class ModifyBookingEngineInventory extends Command
                 new \DateInterval('P1D'),
                 new \DateTime($this->argument('end-date'))
             );
+			
             $datesToCheck = [];
 
             foreach ($period as $key => $value) {
@@ -77,6 +79,7 @@ class ModifyBookingEngineInventory extends Command
             // dd($availabilities);
 
             $modifies = [];
+			
             foreach ($availabilities as $availability) {
                 $modifies[] = $this->bookingEngine->modifyInventory(
                     $availability['date'],
@@ -143,7 +146,7 @@ class ModifyBookingEngineInventory extends Command
         }
 
         \Config::set("rategain", [
-            'url' => $instance['rg_api_url'],
+            'url' => $instance['rg_api'],
             'auth' => $instance['rg_auth'],
             'username' => $instance['rg_username'],
             'password' => $instance['rg_password'],

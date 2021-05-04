@@ -288,8 +288,14 @@ class XMLController extends Controller
         $instance = BambooInstance::with('bambooInstanceRooms')
             ->where(
                 'rg_hotel_code', $rgHotelCode
-            )->first()
-            ->toArray();
+            )->first();
+			
+			if (!$instance) {
+				
+				dd('No hotel instance found!');
+			}
+			
+			$instance = $instance->toArray();
 
         \Config::set("database.connections.on_the_fly", [
             "driver" => "mysql",
@@ -336,8 +342,13 @@ class XMLController extends Controller
         $instance = BambooInstance::with('bambooInstanceRooms')
             ->where(
                 'rg_hotel_code', $rgHotelCode
-            )->first()
-            ->toArray();
+            )->first();
+			
+		if (!$instance) {
+			dd('No hotel instance found!');
+		}
+			
+		$instance = $instance->toArray();
 
         $rooms_cl = [];
 

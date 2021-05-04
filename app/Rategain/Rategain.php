@@ -167,13 +167,15 @@ XML;
      */
     public function modifyInventory($startDate = null, $endDate = null, $roomId = null, $hotelId = null, $quantity = null)
     {
+		
+		// dd(config('rategain'));
 
         $hotelId = $hotelId ? $hotelId : config('rategain.hotelCode');
         $sDate = $startDate ? $startDate : date('Y-m-d');
         $eDate = $endDate ? $endDate : date('Y-m-d');
         $room = $roomId;
 
-
+		// dd($hotelId, $sDate, $eDate, $room);
 
         $xml = $this->inventoryModifyRequest;
 
@@ -186,6 +188,7 @@ XML;
 
         $previous = null;
         $dates = [];
+		
         foreach ($daterange as $dt) {
             $current = $dt->format("Y-m-d");
             if (!empty($previous)) {
@@ -198,6 +201,7 @@ XML;
             $previous = $current;
         }
         $return = [];
+		
         foreach ($dates as $date) {
             $thisXml = str_replace('BookingLimit="1"', 'BookingLimit="' . $quantity . '"', $xml);
             $thisXml = str_replace('Start="2020-03-01"', 'Start="' . $date . '"', $thisXml);
@@ -217,6 +221,8 @@ XML;
             curl_setopt($ch, CURLOPT_POST, true);
             $data = curl_exec($ch);
             curl_close($ch);
+			
+			// dd($data, $thisXml);
 
             preg_match_all("|\"><(.*)\s/></OTA_HotelAvailNotifRS>|U", $data, $matches);
 
@@ -496,8 +502,15 @@ XML;
         if (isset($data->POS->Source->BookingChannel->CompanyName->Code)) {
             $bookingChannel = $data->POS->Source->BookingChannel->CompanyName->Code;
         }
+		
+		// dd(config('database.connections.on_the_fly'));
 
-        $bambooBookingChannelCompany = CrChannel::with('empresa')->where('channel_code', $bookingChannel)->first();
+		// \DB::setConnection('on_the_fly');
+		
+        // $bambooBookingChannelCompany = CrChannel::with('empresa')->where('channel_code', $bookingChannel)->first();
+        // $bambooBookingChannelCompany = CrChannel::where('channel_code', $bookingChannel)->first();
+		
+		// dd($bambooBookingChannelCompany->toArray());
 
         if ($bambooBookingChannelCompany) {
             $bambooCompanyNit = $bambooBookingChannelCompany['empresa']['nit'];
@@ -508,11 +521,17 @@ XML;
 			
 			foreach ($guest->Profiles as $profile) {
                 
-                if ($profile->Profile->ProfileType == 1 && isset($profile->Profile->Customer->Email)) {
+                if ($profile->Profile->ProfileType == 1) {
+
+                    if ( !isset($profile->Profile->Customer->Email) || $profile->Profile->Customer->Email == '') {
+                        $profile->Profile->Customer->Email = str_random(16) . '@email.com';
+                    }
             
                     $resGuest = $profile->Profile->Customer;
 
                     $guestExits = Cliente::where('email', $resGuest->Email)->first();
+					
+					// dd($resGuest->Email, $guestExits->toArray());
 
                     if (!$guestExits) {
 

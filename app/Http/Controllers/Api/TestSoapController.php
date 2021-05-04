@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Api;
 use App\BambooInstance;
 use App\bookingEngine\bookingEngine;
 use App\Jobs\ModifyBookingEngineInventory;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Http\Request;
 use App\Http\Controllers\SoapController;
 use DateInterval;
 use DatePeriod;
 use DateTime;
+use App\InventoryUpdate;
 
 class TestSoapController extends SoapController
 {
@@ -129,24 +131,73 @@ class TestSoapController extends SoapController
 
     public function modifyInventoryByDatesAndRoom(Request $request, $startDate, $endDate, $roomTypeId, $oldStartDate = null, $oldEndDate = null)
     {
-        $typeRoom = config( snake_case(studly_case($request->bookingEngine)) . '.rooms_lc.' . $roomTypeId);
+        // $typeRoom = config( snake_case(studly_case($request->bookingEngine)) . '.rooms_lc.' . $roomTypeId);
+		
+		if (!$request->get('hotelId')) {
+			return response()->json([
+				'message' => 'La ID del hotel no es valida.'
+			]);
+		}
 
         if ($request->get('hotelId')) {
             $this->setRateGainConfig($request->get('hotelId'));
         }
-
-
-        if ($typeRoom) {
-
-            $job = (
-                new ModifyBookingEngineInventory($startDate, $endDate, $roomTypeId, $request->bookingEngine, $request->get('hotelId') ? $request->get('hotelId') : null)
+		
+		$typeRoom = config( snake_case(studly_case($request->bookingEngine)) . '.rooms_lc.' . $roomTypeId);
+		
+		$class = 'App\\' . studly_case($request->bookingEngine) . '\\' . studly_case($request->bookingEngine);
+        $bookingEngine = new $class();
+		
+		if ($typeRoom) {
+            $period = new \DatePeriod(
+                new \DateTime($startDate),
+                new \DateInterval('P1D'),
+                new \DateTime($endDate)
             );
+			
+            $datesToCheck = [];
 
-            $this->dispatch($job);
+            foreach ($period as $key => $value) {
+                $datesToCheck[] = $value->format('Y-m-d');
+            }
+
+            foreach ($datesToCheck as $dateToCheck) {
+                $availability = $bookingEngine->getBambooQuantityAvailability($dateToCheck, $dateToCheck, $roomTypeId);
+                $availability['date'] = $dateToCheck;
+                $availabilities[] = $availability;
+            }
+
+            $modifies = [];
+			
+            foreach ($availabilities as $availability) {
+                $modifies[] = $bookingEngine->modifyInventory(
+                    $availability['date'],
+                    $availability['date'],
+                    $availability['class'],
+                    $request->hotelId,
+                    $availability['rooms']
+                );
+            }
+			
+			
+			if ($request->bookingEngine == 'rategain') {
+				foreach ($modifies as $modify) {
+					foreach ($modify as $mod) {
+						InventoryUpdate::create([
+							'booking_engine' => $mod['booking_engine'],
+							'room_class_cloud' => $mod['room'],
+							'room_class_local' => $roomTypeId,
+							'date_updated' => $mod['date'],
+							'quantity' => $mod['quantity'],
+							'xml' => $mod['xml'],
+						]);
+					}
+				}
+			}
 
             return response()->json([
                 'message' => 'OK',
-                'data' => $request->all()
+                'data' => $modifies,
             ]);
         }
 
@@ -189,7 +240,7 @@ class TestSoapController extends SoapController
         }
 
         \Config::set("rategain", [
-            'url' => $instance['rg_api_url'],
+            'url' => $instance['rg_api'],
             'auth' => $instance['rg_auth'],
             'username' => $instance['rg_username'],
             'password' => $instance['rg_password'],

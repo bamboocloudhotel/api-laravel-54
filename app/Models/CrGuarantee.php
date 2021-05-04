@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class CrGuarantee extends Model
 {
 	public $connection = 'on_the_fly';
+	
 	protected $table = 'cr_guarantees';
 	public $incrementing = true;
 	public $timestamps = false;
