@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Database;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\DB;
 
 class BambooReservationsController extends Controller
 {
@@ -34,7 +35,8 @@ class BambooReservationsController extends Controller
         ('$numres','$referencia',{$tdoc},'$Documento','$numero_hab','5','1',curdate(),'$fechauno','$fechados' ,'$fechauno','$numadu','$numnin','$numinf','$observa','$numpre','N','N','$solicita','$forpag',curdate(),'P','1','3','1');
         ");
 
-        $cliente = DB::insert("
+        $cliente = DB::insert(
+            "
             INSERT INTO clientes
             (cedula, tipdoc, lugexp, categoria, accion, nombre, sexo, telefono1, telefono2, email, direccion, locdir, codpai, codciu, fecnac, locnac, codnac, codpro, ultest, numest, feccre, tipcli, credito, tipcre, cupo, diaven, exento, cuepla, clides, actint, tipinf, observacion, soundphone, estado, estsis, ciudades_dian, cat_caja, primer_nombre, segundo_nombre, primer_apellido, segundo_apellido, tipo_regimen_dian, emailfe, regimen_fiscal, tip_per_jur, codigo_postal)
             VALUES
@@ -43,12 +45,12 @@ class BambooReservationsController extends Controller
             [
                 1,
                 'Dayle'
-            ]);
+            ]
+        );
 
         return response()->json([
             'message' => 'OK',
             'data' => $users,
         ]);
-
     }
 }

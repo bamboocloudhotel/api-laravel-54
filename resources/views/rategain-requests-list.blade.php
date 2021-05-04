@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-  
+
 
 @section('content')
 
@@ -9,7 +9,6 @@
         <td>
             <form action="/api-laravel-54/public/index.php/rategain-requests">
                 <input type="text" name="search" value="{{isset($request['search']) ? $request['search'] : ''}}">
-                <br>
                 <button type="submit">
                     Search
                 </button>
@@ -17,13 +16,15 @@
         </td>
     </tr>
 </table>
-  
+
 
 <table class="table table-bordered">
 
     <thead>
 
         <tr>
+
+            <th>Hotel</th>
 
             <th>Name</th>
 
@@ -41,33 +42,35 @@
 
         @if(!empty($rateGainRequests) && $rateGainRequests->count())
 
-            @foreach($rateGainRequests as $key => $value)
+        @foreach($rateGainRequests as $key => $value)
 
-                <tr>
+        <tr>
 
-                    <td>{{ $value->reference }}</td>
+            <td>{{ $value->hotel }}</td>
 
-                    <td>{{ $value->type }}</td>
+            <td>{{ $value->reference }}</td>
 
-                    <td>{{ $value->created_at }}</td>
+            <td>{{ $value->type }}</td>
 
-                    <td>
+            <td>{{ $value->created_at }}</td>
 
-                        <a href="/api-laravel-54/public/index.php/rategain-requests/{{$value->id}}" class="btn btn-info">View</a>
+            <td>
 
-                    </td>
+                <a href="/api-laravel-54/public/index.php/rategain-requests/{{$value->id}}" class="btn btn-info">View</a>
 
-                </tr>
+            </td>
 
-            @endforeach
+        </tr>
+
+        @endforeach
 
         @else
 
-            <tr>
+        <tr>
 
-                <td colspan="10">There are no data.</td>
+            <td colspan="10">There are no data.</td>
 
-            </tr>
+        </tr>
 
         @endif
 
@@ -75,10 +78,10 @@
 
 </table>
 
-   
+
 
 {!! $rateGainRequests->links() !!}
 
-  
+
 
 @endsection

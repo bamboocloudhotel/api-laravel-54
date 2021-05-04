@@ -4,75 +4,76 @@
 
 @section('content')
 
-    <table class="table">
+<table class="table">
+    <tr>
+        <td>
+            <form action="/api-laravel-54/public/index.php/rategain-inventory-updates">
+                <input type="text" name="search" value="{{isset($request['search']) ? $request['search'] : ''}}">
+                <button type="submit">
+                    Search
+                </button>
+            </form>
+        </td>
+    </tr>
+</table>
+
+
+<table class="table table-bordered">
+
+    <thead>
+
         <tr>
-            <td>
-                <form action="/api-laravel-54/public/index.php/rategain-inventory-updates">
-                    <input type="text" name="search" value="{{isset($request['search']) ? $request['search'] : ''}}">
-                    <button type="submit">
-                        Search
-                    </button>
-                </form>
-            </td>
+            <th>Hotel</th>
+            <th>Room</th>
+            <th>Date</th>
+            <th>Quantity</th>
+
+            <th width="300px;">Action</th>
+
         </tr>
-    </table>
 
+    </thead>
 
-    <table class="table table-bordered">
+    <tbody>
 
-        <thead>
+        @if(!empty($rateGainInventoryUpdates) && $rateGainInventoryUpdates->count())
 
-            <tr>
+        @foreach($rateGainInventoryUpdates as $key => $value)
 
-                <th>Room</th>
-                <th>Date</th>
-                <th>Quantity</th>
+        <tr>
 
-                <th width="300px;">Action</th>
+            <td>{{ $value->hotel}}</td>
+            <td>{{ $value->room_class_cloud}}</td>
+            <td>{{ $value->date_updated }}</td>
+            <td>{{ $value->quantity }}</td>
 
-            </tr>
+            <td>
 
-        </thead>
+                <a href="/api-laravel-54/public/index.php/rategain-inventory-updates/{{$value->id}}" class="btn btn-info">View</a>
 
-        <tbody>
+            </td>
 
-            @if(!empty($rateGainInventoryUpdates) && $rateGainInventoryUpdates->count())
+        </tr>
 
-                @foreach($rateGainInventoryUpdates as $key => $value)
+        @endforeach
 
-                    <tr>
+        @else
 
-                        <td>{{ $value->room_class_cloud}}</td>
-                        <td>{{ $value->date_updated }}</td>
-                        <td>{{ $value->quantity }}</td>
+        <tr>
 
-                        <td>
+            <td colspan="10">There are no data.</td>
 
-                            <a href="/api-laravel-54/public/index.php/rategain-inventory-updates/{{$value->id}}" class="btn btn-info">View</a>
+        </tr>
 
-                        </td>
+        @endif
 
-                    </tr>
+    </tbody>
 
-                @endforeach
-
-            @else
-
-                <tr>
-
-                    <td colspan="10">There are no data.</td>
-
-                </tr>
-
-            @endif
-
-        </tbody>
-
-    </table>
+</table>
 
 
 
-    {!! $rateGainInventoryUpdates->links() !!}
+{!! $rateGainInventoryUpdates->links() !!}
 
 
 

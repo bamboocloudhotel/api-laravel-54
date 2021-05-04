@@ -12,6 +12,7 @@ class RategainRequest extends Model
     	'reference',
     	'type',
     	'request',
-    	'xml'
+		'xml',
+		'hotel'
     ];
 }

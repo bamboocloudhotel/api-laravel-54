@@ -19,6 +19,7 @@ class InventoryUpdateController extends Controller
 
         if ($request->get('search')) {
             $rateGainInventoryUpdates->where('room_class_cloud', 'like', '%' . $request->get('search') . '%')
+                ->orWhere('hotel', 'like', '%' . $request->get('search') . '%')
                 ->orWhere('date_updated', 'like', '%' . $request->get('search') . '%')
                 ->orWhere('quantity', 'like', '%' . $request->get('search') . '%');
         }
