@@ -517,12 +517,12 @@ XML;
 
         if ($bambooBookingChannelCompany) {
             $bambooCompanyNit = $bambooBookingChannelCompany['empresa']['nit'];
-            $bambooTipseg = $bambooBookingChannelCompany['tipseg'] ? 'I' : 'A';
+            $bambooTipseg = $bambooBookingChannelCompany['tipseg'] ? 'I' : 'L';
             $bambooTipres = $bambooBookingChannelCompany['tipres'];
             $bambooCodcan = $bambooBookingChannelCompany['channel_code'];
         }
 
-        dd($bambooCodcan, $bambooTipres, $bambooTipseg, $bambooCompanyNit, $bambooBookingChannelCompany);
+        // dd($bambooCodcan, $bambooTipres, $bambooTipseg, $bambooCompanyNit, $bambooBookingChannelCompany);
 		
 		foreach ($data->HotelReservations->HotelReservation->ResGuests->ResGuest as $guest) {
 			
