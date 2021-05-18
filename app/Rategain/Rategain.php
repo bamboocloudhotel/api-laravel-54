@@ -507,15 +507,22 @@ XML;
 
 		// \DB::setConnection('on_the_fly');
 		
-        // $bambooBookingChannelCompany = CrChannel::with('empresa')->where('channel_code', $bookingChannel)->first();
+        $bambooBookingChannelCompany = CrChannel::with('empresa')->where('channel_code', $bookingChannel)->first();
         // $bambooBookingChannelCompany = CrChannel::where('channel_code', $bookingChannel)->first();
 		
 		// dd($bambooBookingChannelCompany->toArray());
 
+        $bambooCompanyNit = null;
+        $bambooTipseg = null;
+        $bambooTipres = null;
+        $bambooCodcan = null;
+
         if ($bambooBookingChannelCompany) {
             $bambooCompanyNit = $bambooBookingChannelCompany['empresa']['nit'];
+            $bambooTipseg = $bambooBookingChannelCompany['tipseg'];
+            $bambooTipres = $bambooBookingChannelCompany['tipres'];
+            $bambooCodcan = $bambooBookingChannelCompany['codcan'];
         }
-
 		
 		foreach ($data->HotelReservations->HotelReservation->ResGuests->ResGuest as $guest) {
 			
@@ -729,8 +736,8 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     'nit' => $bambooCompanyNit ? $bambooCompanyNit : 0, // $nit,
                     'nitage' => $bambooCompanyNit ? $bambooCompanyNit : 0,
                     'numhab' => $numhab,
-                    'tipres' => $tipres,
-					'tipseg' => 'I',
+                    'tipres' => $bambooTipres ? $bambooTipres : $tipres,
+					'tipseg' => $bambooTipseg ? $bambooTipseg : 'I',
                     'fecres' => date('Y-m-d'),
                     'feclle' => $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->Start,
                     'fecsal' => $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->End,
@@ -747,6 +754,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     'tippro' => null,
                     'tipgar' => null,
                     'codven' => null,
+                    'codcan' => $bambooCodcan ? $bambooCodcan : 0,
                     'metadata' => $metadata,
                     'guarantee' => ' ' . $guaranteeText,
                     'confirmationid' => $confirmationid,

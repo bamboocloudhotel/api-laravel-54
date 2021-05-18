@@ -14,8 +14,11 @@ class CrChannel extends Model
 	protected $fillable = [
 		'channel_code',
 		'NIT',
+		'tipseg',
+		'tipres',
+		'codcan',
 	];
-	
+
 	
 	public function empresa() {
 		return $this->hasOne(\App\Models\Empresa::class, 'nit', 'NIT');
