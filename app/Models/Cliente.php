@@ -61,6 +61,7 @@ use Illuminate\Database\Eloquent\Model;
 class Cliente extends Model
 {
 	protected $connection = 'on_the_fly';
+	
 	protected $table = 'clientes';
 	protected $primaryKey = 'cedula';
 	public $incrementing = false;

@@ -19,7 +19,7 @@ class TestSoapController extends SoapController
 
     public function __construct(Request $request)
     {
-        if (!$request->bookingEngine) {
+        if(!$request->bookingEngine) {
             die('El parametro bookingEngine debe estar presente!');
         }
 
@@ -126,34 +126,35 @@ class TestSoapController extends SoapController
             return response()->json($soapRequest['data'], 400);
         }
         return response()->json($soapRequest['data']);
+
     }
 
     public function modifyInventoryByDatesAndRoom(Request $request, $startDate, $endDate, $roomTypeId, $oldStartDate = null, $oldEndDate = null)
     {
         // $typeRoom = config( snake_case(studly_case($request->bookingEngine)) . '.rooms_lc.' . $roomTypeId);
-
-        if (!$request->get('hotelId')) {
-            return response()->json([
-                'message' => 'La ID del hotel no es valida.'
-            ]);
-        }
+		
+		if (!$request->get('hotelId')) {
+			return response()->json([
+				'message' => 'La ID del hotel no es valida.'
+			]);
+		}
 
         if ($request->get('hotelId')) {
             $this->setRateGainConfig($request->get('hotelId'));
         }
-
-        $typeRoom = config(snake_case(studly_case($request->bookingEngine)) . '.rooms_lc.' . $roomTypeId);
-
-        $class = 'App\\' . studly_case($request->bookingEngine) . '\\' . studly_case($request->bookingEngine);
+		
+		$typeRoom = config( snake_case(studly_case($request->bookingEngine)) . '.rooms_lc.' . $roomTypeId);
+		
+		$class = 'App\\' . studly_case($request->bookingEngine) . '\\' . studly_case($request->bookingEngine);
         $bookingEngine = new $class();
-
-        if ($typeRoom) {
+		
+		if ($typeRoom) {
             $period = new \DatePeriod(
                 new \DateTime($startDate),
                 new \DateInterval('P1D'),
                 new \DateTime($endDate)
             );
-
+			
             $datesToCheck = [];
 
             foreach ($period as $key => $value) {
@@ -167,7 +168,7 @@ class TestSoapController extends SoapController
             }
 
             $modifies = [];
-
+			
             foreach ($availabilities as $availability) {
                 $modifies[] = $bookingEngine->modifyInventory(
                     $availability['date'],
@@ -177,22 +178,22 @@ class TestSoapController extends SoapController
                     $availability['rooms']
                 );
             }
-
-
-            if ($request->bookingEngine == 'rategain') {
-                foreach ($modifies as $modify) {
-                    foreach ($modify as $mod) {
-                        InventoryUpdate::create([
-                            'booking_engine' => $mod['booking_engine'],
-                            'room_class_cloud' => $mod['room'],
-                            'room_class_local' => $roomTypeId,
-                            'date_updated' => $mod['date'],
-                            'quantity' => $mod['quantity'],
-                            'xml' => $mod['xml'],
-                        ]);
-                    }
-                }
-            }
+			
+			
+			if ($request->bookingEngine == 'rategain') {
+				foreach ($modifies as $modify) {
+					foreach ($modify as $mod) {
+						InventoryUpdate::create([
+							'booking_engine' => $mod['booking_engine'],
+							'room_class_cloud' => $mod['room'],
+							'room_class_local' => $roomTypeId,
+							'date_updated' => $mod['date'],
+							'quantity' => $mod['quantity'],
+							'xml' => $mod['xml'],
+						]);
+					}
+				}
+			}
 
             return response()->json([
                 'message' => 'OK',
@@ -203,16 +204,25 @@ class TestSoapController extends SoapController
         return response()->json([
             'message' => 'Esta habitación no sincroniza inventario.'
         ]);
+
     }
 
     public function setRateGainConfig($rgHotelCode)
     {
+
         $instance = BambooInstance::with('bambooInstanceRooms')
             ->where(
-                'rg_hotel_code',
-                $rgHotelCode
-            )->first()
-            ->toArray();
+                'rg_hotel_code', $rgHotelCode
+            )->first();
+			
+		if (!$instance) {
+			return response()->json([
+				'message' => 'No se encontro la instancia'
+			], 400);
+			die();
+		}
+		
+		$instance = $instance->toArray();
 
         \Config::set("database.connections.on_the_fly", [
             "driver" => "mysql",

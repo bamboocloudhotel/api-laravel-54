@@ -27,6 +27,16 @@ Route::any('test', function(Request $request) {
 });
 
 Route::post('view-guarantee', function (Request $request) {
+	
+	$xmlController = new \App\Http\Controllers\XMLController();
+
+    if (!$request->get('hotelCode')) {
+        return response()->json([
+            'message' => 'Debe enviar el código del hotel!'
+        ], 404);
+    }
+
+    $xmlController->getInstance($request->get('hotelCode'));
 
     $xmlController = new \App\Http\Controllers\XMLController();
 

@@ -50,6 +50,9 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Empresa extends Model
 {
+	
+	public $connection = 'on_the_fly';
+	
 	protected $table = 'empresas';
 	protected $primaryKey = 'nit';
 	public $incrementing = false;
