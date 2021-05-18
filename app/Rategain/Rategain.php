@@ -517,7 +517,7 @@ XML;
 
         if ($bambooBookingChannelCompany) {
             $bambooCompanyNit = $bambooBookingChannelCompany['empresa']['nit'];
-            $bambooTipseg = $bambooBookingChannelCompany['tipseg'] ? $bambooBookingChannelCompany['tipseg'] : 'L';
+            $bambooTipseg = $bambooBookingChannelCompany['tipseg'] ? $bambooBookingChannelCompany['tipseg'] : 'I';
             $bambooTipres = $bambooBookingChannelCompany['tipres'];
             $bambooCodcan = $bambooBookingChannelCompany['codcan'];
         }
