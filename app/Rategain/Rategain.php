@@ -496,7 +496,6 @@ XML;
         $company = null;
 
         $bookingChannel = null;
-
         $bambooCompanyNit = null;
 
         if (isset($data->POS->Source->BookingChannel->CompanyName->Code)) {
@@ -512,7 +511,6 @@ XML;
 		
 		// dd($bambooBookingChannelCompany->toArray());
 
-        $bambooCompanyNit = null;
         $bambooTipseg = null;
         $bambooTipres = null;
         $bambooCodcan = null;
@@ -521,7 +519,7 @@ XML;
             $bambooCompanyNit = $bambooBookingChannelCompany['empresa']['nit'];
             $bambooTipseg = $bambooBookingChannelCompany['tipseg'];
             $bambooTipres = $bambooBookingChannelCompany['tipres'];
-            $bambooCodcan = $bambooBookingChannelCompany['codcan'];
+            $bambooCodcan = $bambooBookingChannelCompany['channel_code'];
         }
 
         dd($bambooCodcan, $bambooTipres, $bambooTipseg, $bambooCompanyNit, $bambooBookingChannelCompany);
