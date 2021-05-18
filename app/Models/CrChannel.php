@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class CrChannel extends Model
 {
 	public $connection = 'on_the_fly';
-	
+
 	protected $table = 'cr_channels';
 	public $incrementing = false;
     public $timestamps = false;

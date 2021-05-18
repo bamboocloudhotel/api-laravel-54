@@ -38,10 +38,20 @@ Route::post('view-guarantee', function (Request $request) {
 
     $xmlController->getInstance($request->get('hotelCode'));
 
+    $xmlController = new \App\Http\Controllers\XMLController();
+
+    if (!$request->get('hotelCode')) {
+        return response()->json([
+            'message' => 'Debe enviar el código del hotel!'
+        ], 404);
+    }
+
+    $xmlController->getInstance($request->get('hotelCode'));
+
     $dathot = Dathot::firstOrFail();
 
     if ($dathot->guarantee_password == $request->get('guarantee_password')) {
-		
+
         $guarantee = CrGuarantee::where('numres', $request->get('numres'))->first();
 
         if (!$guarantee) {

@@ -524,9 +524,10 @@ XML;
                 if ($profile->Profile->ProfileType == 1) {
 
                     if ( !isset($profile->Profile->Customer->Email) || $profile->Profile->Customer->Email == '') {
-                        $profile->Profile->Customer->Email = str_random(16) . '@email.com';
+
+                        $profile->Profile->Customer->Email = str_random(14) . '@email.com';
                     }
-            
+
                     $resGuest = $profile->Profile->Customer;
 
                     $guestExits = Cliente::where('email', $resGuest->Email)->first();
@@ -543,7 +544,7 @@ XML;
                                 'cedula' => $cedula,
                                 'tipdoc' => 1,
                                 'nombre' => $resGuest->PersonName->GivenName . ' ' . $resGuest->PersonName->Surname,
-                                'telefono1' => $resGuest->Telephone->PhoneNumber,
+                                'telefono1' => $resGuest->Telephone->PhoneNumber ? $resGuest->Telephone->PhoneNumber : '123456',
                                 'email' => $resGuest->Email,
                                 'primer_nombre' => $resGuest->PersonName->GivenName,
                                 'primer_apellido' => $resGuest->PersonName->Surname,

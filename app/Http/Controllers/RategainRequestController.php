@@ -20,6 +20,7 @@ class RategainRequestController extends Controller
 
     	if ($request->get('search')) {
     	    $rateGainRequests->where('type', 'like', '%' . $request->get('search') . '%')
+                ->orWhere('hotel', 'like', '%' . $request->get('search') . '%')
                 ->orWhere('reference', 'like', '%' . $request->get('search') . '%');
         }
 

@@ -61,7 +61,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Dathot extends Model
 {
-    protected $connection = 'hhotel5';
+    protected $connection = 'on_the_fly';
+
 	protected $table = 'dathot';
 	protected $primaryKey = 'nit';
 	public $incrementing = false;

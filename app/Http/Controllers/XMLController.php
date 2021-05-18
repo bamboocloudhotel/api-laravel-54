@@ -46,10 +46,11 @@ class XMLController extends Controller
                         'reference' => 'Rategain ' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Type . ' ' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Value . ' - ' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Type . ' ' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value,
                         'type' => 'commit',
                         'request' => json_encode($reservationObject),
-                        'xml' => $xml
+                        'xml' => $xml,
+                        'hotel' => $reservationObject->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode
                     ]);
 
-                } catch (Exception $exception) {
+                } catch (\Exception $exception) {
                     dd($exception->getMessage());
                 }
 
@@ -75,10 +76,11 @@ class XMLController extends Controller
                         'reference' => 'Rategain ' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Type . ' ' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Value . ' - ' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Type . ' ' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value,
                         'type' => 'modify',
                         'request' => json_encode($reservationObject),
-                        'xml' => $xml
+                        'xml' => $xml,
+                        'hotel' => $reservationObject->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode
                     ]);
 
-                } catch (Exception $exception) {
+                } catch (\Exception $exception) {
                     dd($exception->getMessage());
 
                 }
@@ -111,10 +113,11 @@ class XMLController extends Controller
                         'reference' => 'Rategain ' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Type . ' ' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Value . ' - ' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Type . ' ' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value,
                         'type' => 'cancellation',
                         'request' => json_encode($reservationObject),
-                        'xml' => $xml
+                        'xml' => $xml,
+                        'hotel' => $reservationObject->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode
                     ]);
 
-                } catch (Exception $exception) {
+                } catch (\Exception $exception) {
                     dd($exception->getMessage());
                 }
 

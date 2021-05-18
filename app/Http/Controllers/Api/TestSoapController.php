@@ -209,11 +209,20 @@ class TestSoapController extends SoapController
 
     public function setRateGainConfig($rgHotelCode)
     {
+
         $instance = BambooInstance::with('bambooInstanceRooms')
             ->where(
                 'rg_hotel_code', $rgHotelCode
-            )->first()
-            ->toArray();
+            )->first();
+			
+		if (!$instance) {
+			return response()->json([
+				'message' => 'No se encontro la instancia'
+			], 400);
+			die();
+		}
+		
+		$instance = $instance->toArray();
 
         \Config::set("database.connections.on_the_fly", [
             "driver" => "mysql",

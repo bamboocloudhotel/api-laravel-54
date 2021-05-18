@@ -17,7 +17,7 @@ class CreateBambooInstanceRoomsTable extends Migration
             $table->increments('id');
             $table->unsignedInteger('bamboo_instance_id')->comment('ID de la instancia bamboo');
             $table->integer('bb_room')->comment('ID de la clase de habitación en bamboo');
-            $table->string('rg_room')->comment('ID de la calse de habitación en RateGain');
+            $table->string('rg_room')->comment('ID de la clase de habitación en RateGain');
             $table->timestamps();
         });
     }
