@@ -523,6 +523,8 @@ XML;
             $bambooTipres = $bambooBookingChannelCompany['tipres'];
             $bambooCodcan = $bambooBookingChannelCompany['codcan'];
         }
+
+        dd($bambooCodcan, $bambooTipres, $bambooTipseg, $bambooCompanyNit, $bambooBookingChannelCompany);
 		
 		foreach ($data->HotelReservations->HotelReservation->ResGuests->ResGuest as $guest) {
 			
