@@ -382,7 +382,7 @@ class CmReservas
 
                 $sqlFolio = "
             INSERT INTO folio
-            (numfol, numres, codeve, tipdoc, cedula, nit, nitage, locpro, codpai, codciu, paides, locdes, ciudes, codtra, trasal, codmot, numhab, usuout, codusu, fecres, feclle, fecsal, hora, horsal, numadu, numnin, numinf, nota, notaayb, equipaje, placa, trahot, estpai, corregir, forpag, estado, walkin, tippro, tipgar, codven, idresweb, idcanal, idclifre)
+            (numfol, numres, codeve, tipdoc, cedula, nit, nitage, locpro, codpai, codciu, paides, locdes, ciudes, codtra, trasal, codmot, numhab, usuout, codusu, fecres, feclle, fecsal, hora, horsal, numadu, numnin, numinf, nota, notaayb, equipaje, placa, trahot, estpai, corregir, forpag, estado, walkin, tippro, tipgar, codven, idresweb, idcanal, idclifre, comentario_en_linea)
             VALUES(
             {$numfolio->fol}, 
             {$numres->res}, 
@@ -426,7 +426,8 @@ class CmReservas
             0, 
             null,
             null,
-            null           
+            null,
+            {$observacion}           
             );
             ";
 

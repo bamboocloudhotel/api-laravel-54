@@ -13,6 +13,7 @@ class InventoryUpdate extends Model
         'room_class_local',
         'date_updated',
         'quantity',
-        'xml'
+        'xml',
+        'hotel'
     ];
 }

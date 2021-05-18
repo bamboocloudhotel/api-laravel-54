@@ -141,6 +141,7 @@ class Folio extends Model
 		'idresweb',
 		'idcanal',
 		'idclifre',
-		'firma'
+		'firma',
+		'comentario_en_linea'
 	];
 }
