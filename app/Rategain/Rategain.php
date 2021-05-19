@@ -506,7 +506,7 @@ XML;
 
 		// \DB::setConnection('on_the_fly');
 		
-        $bambooBookingChannelCompany = CrChannel::with('empresa')->where('channel_code', $bookingChannel)->first()->toArray();
+        $bambooBookingChannelCompany = CrChannel::with('empresa')->where('channel_code', $bookingChannel)->first();
         // $bambooBookingChannelCompany = CrChannel::where('channel_code', $bookingChannel)->first();
 		
 		// dd($bambooBookingChannelCompany->toArray());
@@ -516,6 +516,7 @@ XML;
         $bambooCodcan = null;
 
         if ($bambooBookingChannelCompany) {
+            $bambooBookingChannelCompany = $bambooBookingChannelCompany->toArray();
             $bambooCompanyNit = $bambooBookingChannelCompany['empresa']['nit'];
             $bambooTipseg = $bambooBookingChannelCompany['tipseg'] ? $bambooBookingChannelCompany['tipseg'] : 'I';
             $bambooTipres = $bambooBookingChannelCompany['tipres'];
