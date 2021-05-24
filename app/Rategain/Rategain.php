@@ -531,12 +531,18 @@ XML;
                 
                 if ($profile->Profile->ProfileType == 1) {
 
-                    if ( !isset($profile->Profile->Customer->Email) || $profile->Profile->Customer->Email == '') {
+                    if ( 
+							!isset($profile->Profile->Customer->Email) || 
+							$profile->Profile->Customer->Email == '' ||
+							!filter_var($profile->Profile->Customer->Email, FILTER_VALIDATE_EMAIL)
+						) {
 
                         $profile->Profile->Customer->Email = str_random(14) . '@email.com';
                     }
 
                     $resGuest = $profile->Profile->Customer;
+					
+					// dd($resGuest->Email);
 
                     $guestExits = Cliente::where('email', $resGuest->Email)->first();
 					
@@ -572,7 +578,18 @@ XML;
 
                 }
                 if ($guest->Profiles->ProfileInfo->Profile->ProfileType == 18) {
-                    $booker = $guest->Profiles->ProfileInfo->Profile->Customer;
+					
+					// dd($guest->Profiles->ProfileInfo->Profile->Customer->Email);
+					if ( 
+							!isset($guest->Profiles->ProfileInfo->Profile->Customer->Email) || 
+							$guest->Profiles->ProfileInfo->Profile->Customer->Email == '' ||
+							!filter_var($guest->Profiles->ProfileInfo->Profile->Customer->Email, FILTER_VALIDATE_EMAIL)
+						) {
+
+                        $guest->Profiles->ProfileInfo->Profile->Customer->Email = str_random(14) . '@email.com';
+                    }
+                    $booker = $guest->Profiles->ProfileInfo->Profile;
+					// dd($guest->Profiles->ProfileInfo);
                     $bookerExists = CrBooker::where('email', $booker->Email)->first();
                     if (!$bookerExists) {
                         try {
