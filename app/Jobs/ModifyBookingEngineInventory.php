@@ -86,6 +86,7 @@ class ModifyBookingEngineInventory implements ShouldQueue
                                 'date_updated' => $mod['date'],
                                 'quantity' => $mod['quantity'],
                                 'xml' => $mod['xml'],
+                                'hotel' => $this->hotelId
                             ]);
                         } catch (\Exception $exception) {
 					        \DB::rollBack();

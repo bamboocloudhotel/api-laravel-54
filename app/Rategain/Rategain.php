@@ -1016,7 +1016,8 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     'idresweb' => null,
                     'idcanal' => null,
                     'idclifre' => null,
-                    'firma' => null
+                    'firma' => null,
+                    'comentario_en_linea' => (isset($roomStay->Comments) ? '' . (is_array($roomStay->Comments->Comment) ? json_encode($roomStay->Comments->Comment) : $roomStay->Comments->Comment->Text) : '') . ($company ? "\n" . $company['name'] . " - " . $company['id'] : "")
                 ]);
 				
 			} catch(Exception $exception) {
@@ -1080,7 +1081,10 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                 $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->Start,
                 $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->End,
                 $roomClass,
-                'rategain')
+                'rategain',
+                $data->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode
+
+            )
         );
 
         dispatch($job);
