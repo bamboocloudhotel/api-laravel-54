@@ -64,6 +64,8 @@ class XMLController extends Controller
 
 
                 $this->getInstance($reservationObject->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode);
+				
+				// dd($reservationObject->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode);
 
                 $response = $this->rategain->saveReservation($reservationObject);
                 return response()->xml($response);

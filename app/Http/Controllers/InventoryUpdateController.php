@@ -24,7 +24,7 @@ class InventoryUpdateController extends Controller
                 ->orWhere('quantity', 'like', '%' . $request->get('search') . '%');
         }
 
-        $rateGainInventoryUpdates = $rateGainInventoryUpdates->paginate(20);
+        $rateGainInventoryUpdates = $rateGainInventoryUpdates->orderBy('id', 'desc')->paginate(20);
 
         return view('rategain-inventory-updates-list', ['rateGainInventoryUpdates' => $rateGainInventoryUpdates, 'request' => $request->all()]);
     }
