@@ -59,12 +59,18 @@ class InventoryUpdateController extends Controller
     public function show($id)
     {
         //
-        $rateGainInventoryUpdate = InventoryUpdate::find($id);
+        $rateGainInventoryUpdate = InventoryUpdate::findOrFail($id);
 
         // dd($rategainRequest->toArray());
+		
+		try {
+			$sxe = new \SimpleXMLElement($rateGainInventoryUpdate->xml);
+			$sxe = json_encode($sxe);
+		} catch(\Exception $e) {
+			$sxe = "{}";
+		}
 
-        $sxe = new \SimpleXMLElement($rateGainInventoryUpdate->xml);
-        $sxe = json_encode($sxe);
+        
 
         return view('rategain-inventory-updates-view', ['rateGainInventoryUpdate' => $rateGainInventoryUpdate, 'sxe' => $sxe]);
     }
