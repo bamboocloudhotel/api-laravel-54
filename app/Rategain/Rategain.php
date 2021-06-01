@@ -259,6 +259,7 @@ XML;
                 WHERE blohab.fecini <= '{$end}' AND blohab.fecfin >= '{$start}'
                 AND blohab.fecdes IS NULL
                 AND habitacion.codcla = {$class}
+                AND habitacion.tipo = 'V'
             "));
 
         foreach ($roomsBlocked as $roomBlocked) {
@@ -272,6 +273,7 @@ XML;
                 WHERE reserva.feclle < '{$end}' AND reserva.fecsal > '{$start}'
                 AND reserva.estado IN ('P','G')
                 AND habitacion.codcla = {$class}
+                AND habitacion.tipo = 'V'
             "));
 
         foreach ($roomsReserved as $roomReserved) {
@@ -287,6 +289,7 @@ XML;
                 AND reserva.estado IN ('H')
                 AND folio.estado IN ('I')
                 AND habitacion.codcla = {$class}
+                AND habitacion.tipo = 'V'
             "));
 
         foreach ($roomsHosted as $roomHosted) {
@@ -300,6 +303,7 @@ XML;
             from habitacion 
             where habitacion.numhab not in ('{$roomsOccupied}')
             AND habitacion.codcla = {$class}
+            AND habitacion.tipo = 'V'
             "));
 
         return $numhab->toArray();
@@ -323,6 +327,7 @@ XML;
                 WHERE blohab.fecini <= '$out' AND blohab.fecfin >= '$in'
                 AND blohab.fecdes IS NULL
                 AND habitacion.codcla = {$roomClass}
+                AND habitacion.tipo = 'V'
             "));
 
         foreach ($roomsBlocked as $roomBlocked) {
@@ -336,6 +341,7 @@ XML;
                 WHERE reserva.feclle <= '$out' AND reserva.fecsal > '$in'
                 AND reserva.estado IN ('P','G')
                 AND habitacion.codcla = {$roomClass}
+                AND habitacion.tipo = 'V'
             "));
 
         foreach ($roomsReserved as $roomReserved) {
@@ -349,6 +355,7 @@ XML;
                 WHERE folio.feclle <= '$out' AND folio.fecsal > '$in'
                 AND folio.estado IN ('I')
                 AND habitacion.codcla = {$roomClass}
+                AND habitacion.tipo = 'V'
             "));
 
         foreach ($roomsHosted as $roomHosted) {
@@ -358,10 +365,11 @@ XML;
         $roomsOccupied = implode('\',\'', $roomsOccupied);
 
         $numhabs = collect(\DB::connection('on_the_fly')->select("
-            select habitacion.numhab, habitacion.numcam
-            from habitacion 
-            where habitacion.numhab not in ('{$roomsOccupied}')
+            SELECT habitacion.numhab, habitacion.numcam
+            FROM habitacion 
+            WHERE habitacion.numhab NOT IN ('{$roomsOccupied}')
             AND habitacion.codcla = {$roomClass}
+            AND habitacion.tipo = 'V'
             "));
 
         $availability = [

@@ -481,6 +481,7 @@ class CmReservas
                 WHERE blohab.fecini <= '$reservationAttributes->checkout' AND blohab.fecfin >= '$reservationAttributes->checkin'
                 AND blohab.fecdes IS NULL
                 AND habitacion.codcla = {$roomClass}
+                AND habitacion.tipo = 'V'
             "));
 
         foreach ($roomsBlocked as $roomBlocked) {
@@ -495,6 +496,7 @@ class CmReservas
                 AND reserva.estado IN ('P','G')
                 AND reserva.estado IN ('P','G')
                 AND habitacion.codcla = {$roomClass}
+                AND habitacion.tipo = 'V'
             "));
 
         foreach ($roomsReserved as $roomReserved) {
@@ -510,6 +512,7 @@ class CmReservas
                 AND reserva.estado IN ('H')
                 AND folio.estado IN ('I')
                 AND habitacion.codcla = {$roomClass}
+                AND habitacion.tipo = 'V'
             "));
 
         foreach ($roomsHosted as $roomHosted) {
@@ -523,6 +526,7 @@ class CmReservas
             from habitacion 
             where habitacion.numhab not in ('{$roomsOccupied}')
             AND habitacion.codcla = {$roomClass}
+            AND habitacion.tipo = 'V'
             "))->first();
 
         return $numhab;
@@ -543,6 +547,7 @@ class CmReservas
                 WHERE blohab.fecini <= '$out' AND blohab.fecfin >= '$in'
                 AND blohab.fecdes IS NULL
                 AND habitacion.codcla = {$roomClass}
+                AND habitacion.tipo = 'V'
             "));
 
         foreach ($roomsBlocked as $roomBlocked) {
@@ -556,6 +561,7 @@ class CmReservas
                 WHERE reserva.feclle <= '$out' AND reserva.fecsal > '$in'
                 AND reserva.estado IN ('P','G')
                 AND habitacion.codcla = {$roomClass}
+                AND habitacion.tipo = 'V'
             "));
 
         foreach ($roomsReserved as $roomReserved) {
@@ -569,6 +575,7 @@ class CmReservas
                 WHERE folio.feclle < '$out' AND folio.fecsal > '$in'
                 AND folio.estado IN ('I')
                 AND habitacion.codcla = {$roomClass}
+                AND habitacion.tipo = 'V'
             "));
 
         foreach ($roomsHosted as $roomHosted) {
@@ -582,6 +589,7 @@ class CmReservas
             from habitacion 
             where habitacion.numhab not in ('{$roomsOccupied}')
             AND habitacion.codcla = {$roomClass}
+            AND habitacion.tipo = 'V'
             "));
 
         $availability = [
