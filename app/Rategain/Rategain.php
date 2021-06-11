@@ -18,6 +18,7 @@ use App\Models\Tipdoc;
 use App\Models\Valcar;
 use App\Models\Empresa;
 use App\Models\CrChannel;
+use App\Models\Valmon;
 
 class Rategain
 {
@@ -849,6 +850,16 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
 
                     $amount = $amountBT ? $amountBT : $amountAT;
 
+                    $currency = isset($dayPrice->Base->CurrencyCode) ? $dayPrice->Base->CurrencyCode : 'COP';
+
+                    $valmon = null;
+
+                    if ($currency != 'COP') {
+                      $valmon = Valmon::where('moneda', 2)->orderBy('fecha', ' asc')->first();
+
+                      $amount = $amount * $valmon->valor;
+                    }
+
                     try {
                         Plares::create([
                             'numres' => $numres,
@@ -873,6 +884,17 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                 $amountBT = isset($roomStay->RoomRates->RoomRate->Rates->Rate->Base->AmountBeforeTax) ? $roomStay->RoomRates->RoomRate->Rates->Rate->Base->AmountBeforeTax : 0;
                 $amountAT = isset($roomStay->RoomRates->RoomRate->Rates->Rate->Base->AmountAfterTax) ? $roomStay->RoomRates->RoomRate->Rates->Rate->Base->AmountAfterTax : 0;
                 $amount = $amountBT ? $amountBT : $amountAT;
+
+              $currency = isset($dayPrice->Base->CurrencyCode) ? $dayPrice->Base->CurrencyCode : 'COP';
+
+              $valmon = null;
+
+              if ($currency != 'COP') {
+                $valmon = Valmon::where('moneda', 2)->orderBy('fecha', ' asc')->first();
+
+                $amount = $amount * $valmon->valor;
+              }
+
                 try {
                     Plares::create([
                         'numres' => $numres,
