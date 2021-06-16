@@ -2,6 +2,7 @@
 
   namespace App\Rategain;
 
+  use App\Http\Controllers\Api\TestSoapController;
   use App\Jobs\ModifyBookingEngineInventory;
   use App\Models\Dathot;
   use App\Models\Detrec;
@@ -996,8 +997,8 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
 
           /*$dathot = Dathot::first();
 
-  $dathot->update([
-      'numrec' => $nNumrec
+            $dathot->update([
+            'numrec' => $nNumrec
          ]);*/
 
         } catch (Exception $exception) {
@@ -1116,18 +1117,33 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
       );
 
       $job = (
-      new ModifyBookingEngineInventory(
-        $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->Start,
-        $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->End,
-        $roomClass,
-        'rategain',
-        $data->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode
-
-      )
+        new ModifyBookingEngineInventory(
+          $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->Start,
+          $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->End,
+          $roomClass,
+          'rategain',
+          $data->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode
+        )
       );
 
-      dispatch($job);
+      $testRequest = new \Illuminate\Http\Request();
 
+      $testRequest->setMethod('POST');
+      $testRequest->request->add(['bookingEngine' => 'rategain']);
+      $testRequest->request->add(['hotelId' => $data->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode]);
+
+      $soapCtrl = new TestSoapController($testRequest);
+
+      $res = $soapCtrl->modifyInventoryByDatesAndRoom(
+        $testRequest,
+        $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->Start,
+        $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->End,
+        $roomClass
+      );
+
+      dd($res);
+
+      // dispatch($job);
 
       return $returnSuccess;
 

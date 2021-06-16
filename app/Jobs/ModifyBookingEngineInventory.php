@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Jobs;
+  namespace App\Jobs;
 
-use App\InventoryUpdate;
-use Illuminate\Bus\Queueable;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
+  use App\InventoryUpdate;
+  use Illuminate\Bus\Queueable;
+  use Illuminate\Queue\SerializesModels;
+  use Illuminate\Queue\InteractsWithQueue;
+  use Illuminate\Contracts\Queue\ShouldQueue;
+  use Illuminate\Foundation\Bus\Dispatchable;
 
-class ModifyBookingEngineInventory implements ShouldQueue
-{
+  class ModifyBookingEngineInventory implements ShouldQueue
+  {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     private $bookingEngine;
@@ -27,12 +27,12 @@ class ModifyBookingEngineInventory implements ShouldQueue
      */
     public function __construct($startDate, $endDate, $roomClass, $bookingEngineCode, $hotelId = null)
     {
-        //
-        $this->hotelId = $hotelId;
-        $this->startDate = $startDate;
-        $this->endDate = $endDate;
-        $this->roomClass = $roomClass;
-        $this->bookingEngineCode = $bookingEngineCode;
+      //
+      $this->hotelId = $hotelId;
+      $this->startDate = $startDate;
+      $this->endDate = $endDate;
+      $this->roomClass = $roomClass;
+      $this->bookingEngineCode = $bookingEngineCode;
     }
 
     /**
@@ -43,62 +43,61 @@ class ModifyBookingEngineInventory implements ShouldQueue
      */
     public function handle()
     {
-        $class = 'App\\' . studly_case($this->bookingEngineCode) . '\\' . studly_case($this->bookingEngineCode);
-        $this->bookingEngine = new $class();
-        //
+      $class = 'App\\' . studly_case($this->bookingEngineCode) . '\\' . studly_case($this->bookingEngineCode);
+      $this->bookingEngine = new $class();
+      //
 
-        $typeRoom = config( snake_case(studly_case($this->bookingEngineCode)) . '.rooms_lc.' . $this->roomClass);
+      $typeRoom = config(snake_case(studly_case($this->bookingEngineCode)) . '.rooms_lc.' . $this->roomClass);
 
-        if ($typeRoom) {
-            $period = new \DatePeriod(
-                new \DateTime($this->startDate),
-                new \DateInterval('P1D'),
-                new \DateTime($this->endDate)
-            );
-            $datesToCheck = [];
+      if ($typeRoom) {
+        $period = new \DatePeriod(
+          new \DateTime($this->startDate),
+          new \DateInterval('P1D'),
+          new \DateTime($this->endDate)
+        );
+        $datesToCheck = [];
 
-            foreach ($period as $key => $value) {
-                $datesToCheck[] = $value->format('Y-m-d');
-            }
-
-            foreach ($datesToCheck as $dateToCheck) {
-                $availability = $this->bookingEngine->getBambooQuantityAvailability($dateToCheck, $dateToCheck, $this->roomClass);
-                $availability['date'] = $dateToCheck;
-                $availabilities[] = $availability;
-            }
-
-            $modifies = [];
-            foreach ($availabilities as $availability) {
-                $modifies[] = $this->bookingEngine->modifyInventory($availability['date'], $availability['date'], $availability['class'], null, $availability['rooms']);
-            }
-
-            if ($this->bookingEngineCode == 'rategain') {
-
-
-				foreach ($modifies as $modify) {
-					foreach ($modify as $mod) {
-					    \DB::beginTransaction();
-					    try {
-                            InventoryUpdate::create([
-                                'booking_engine' => $mod['booking_engine'],
-                                'room_class_cloud' => $mod['room'],
-                                'room_class_local' => $this->roomClass,
-                                'date_updated' => $mod['date'],
-                                'quantity' => $mod['quantity'],
-                                'xml' => $mod['xml'],
-                                'hotel' => $this->hotelId
-                            ]);
-                        } catch (\Exception $exception) {
-					        \DB::rollBack();
-					        dd($exception->getMessage());
-                        }
-                        \DB::commit();
-					}
-				}
-			}
-
-            return;
+        foreach ($period as $key => $value) {
+          $datesToCheck[] = $value->format('Y-m-d');
         }
+
+        foreach ($datesToCheck as $dateToCheck) {
+          $availability = $this->bookingEngine->getBambooQuantityAvailability($dateToCheck, $dateToCheck, $this->roomClass);
+          $availability['date'] = $dateToCheck;
+          $availabilities[] = $availability;
+        }
+
+        $modifies = [];
+        foreach ($availabilities as $availability) {
+          $modifies[] = $this->bookingEngine->modifyInventory($availability['date'], $availability['date'], $availability['class'], null, $availability['rooms']);
+        }
+
+        if ($this->bookingEngineCode == 'rategain') {
+
+          foreach ($modifies as $modify) {
+            foreach ($modify as $mod) {
+              \DB::beginTransaction();
+              try {
+                InventoryUpdate::create([
+                  'booking_engine' => $mod['booking_engine'],
+                  'room_class_cloud' => $mod['room'],
+                  'room_class_local' => $this->roomClass,
+                  'date_updated' => $mod['date'],
+                  'quantity' => $mod['quantity'],
+                  'xml' => $mod['xml'],
+                  'hotel' => $this->hotelId
+                ]);
+              } catch (\Exception $exception) {
+                \DB::rollBack();
+                dd($exception->getMessage());
+              }
+              \DB::commit();
+            }
+          }
+        }
+
+        return;
+      }
     }
-}
+  }
 
