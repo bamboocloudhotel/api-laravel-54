@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Valmon extends Model
 {
+	protected $connection = 'on_the_fly';
 	protected $table = 'valmon';
 	public $incrementing = false;
 	public $timestamps = false;

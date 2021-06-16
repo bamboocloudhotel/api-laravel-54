@@ -18,6 +18,7 @@ use App\Models\Tipdoc;
 use App\Models\Valcar;
 use App\Models\Empresa;
 use App\Models\CrChannel;
+use App\Models\Valmon;
 
 class Rategain
 {
@@ -762,6 +763,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     'nit' => $bambooCompanyNit ? $bambooCompanyNit : 0, // $nit,
                     'nitage' => $bambooCompanyNit ? $bambooCompanyNit : 0,
                     'numhab' => $numhab,
+					
                     'tipres' => $bambooTipres ? $bambooTipres : $tipres,
 					'tipseg' => $bambooTipseg ? $bambooTipseg : 'I',
                     'fecres' => date('Y-m-d'),
@@ -786,7 +788,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     'confirmationid' => $confirmationid,
 					'onlinecomment' => (isset($roomStay->Comments) ? '' . (is_array($roomStay->Comments->Comment) ? json_encode($roomStay->Comments->Comment) : $roomStay->Comments->Comment->Text) : '') . ($company ? "\n" . $company['name'] . " - " . $company['id'] : ""),
 					'cancellationid' => null,
-                    'idclifre' => $booker ? $booker->givenname . ' ' . $booker->surname . ' - ' . $booker->phone : null,
+                    'idclifre' => $booker ? ($booker->givenname . ' ' . $booker->surname . ' - ' . $booker->phone) : $data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->GivenName . ' ' . $data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->Surname},
                 ]);
             } catch (\Exception $exception) {
 				dd($exception->getMessage());
@@ -848,6 +850,19 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     $amountAT = isset($dayPrice->Base->AmountAfterTax) ? $dayPrice->Base->AmountAfterTax : 0;
 
                     $amount = $amountBT ? $amountBT : $amountAT;
+					
+					$currency = isset($dayPrice->Base->CurrencyCode) ? $dayPrice->Base->CurrencyCode : 'COP';
+
+				    $valmon = null;
+
+				    if ($currency != 'COP') {
+					  $valmon = Valmon::where('moneda', 2)->orderBy('fecha', ' asc')->first();
+                     
+					  if ($valmon) {
+					    $amount = $amount * $valmon->valor;
+					  }
+				    }
+					
 
                     try {
                         Plares::create([
@@ -873,6 +888,19 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                 $amountBT = isset($roomStay->RoomRates->RoomRate->Rates->Rate->Base->AmountBeforeTax) ? $roomStay->RoomRates->RoomRate->Rates->Rate->Base->AmountBeforeTax : 0;
                 $amountAT = isset($roomStay->RoomRates->RoomRate->Rates->Rate->Base->AmountAfterTax) ? $roomStay->RoomRates->RoomRate->Rates->Rate->Base->AmountAfterTax : 0;
                 $amount = $amountBT ? $amountBT : $amountAT;
+				
+				$currency = isset($dayPrice->Base->CurrencyCode) ? $dayPrice->Base->CurrencyCode : 'COP';
+
+				$valmon = null;
+
+				if ($currency != 'COP') {
+				  $valmon = Valmon::where('moneda', 2)->orderBy('fecha', ' asc')->first();
+				 
+				  if ($valmon) {
+					$amount = $amount * $valmon->valor;
+				  }
+				}
+				
                 try {
                     Plares::create([
                         'numres' => $numres,
