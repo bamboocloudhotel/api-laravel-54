@@ -2,6 +2,7 @@
 
   namespace App\Jobs;
 
+  use App\Http\Controllers\Api\TestSoapController;
   use App\InventoryUpdate;
   use Illuminate\Bus\Queueable;
   use Illuminate\Queue\SerializesModels;
@@ -50,53 +51,20 @@
       $typeRoom = config(snake_case(studly_case($this->bookingEngineCode)) . '.rooms_lc.' . $this->roomClass);
 
       if ($typeRoom) {
-        $period = new \DatePeriod(
-          new \DateTime($this->startDate),
-          new \DateInterval('P1D'),
-          new \DateTime($this->endDate)
+        $testRequest = new \Illuminate\Http\Request();
+
+        $testRequest->setMethod('POST');
+        $testRequest->request->add(['bookingEngine' => $this->bookingEngineCode]);
+        $testRequest->request->add(['hotelId' => $this->hotelId]);
+
+        $soapCtrl = new TestSoapController($testRequest);
+
+        $soapCtrl->modifyInventoryByDatesAndRoom(
+          $testRequest,
+          $this->startDate,
+          $this->endDate,
+          $this->roomClass
         );
-        $datesToCheck = [];
-
-        foreach ($period as $key => $value) {
-          $datesToCheck[] = $value->format('Y-m-d');
-        }
-
-        foreach ($datesToCheck as $dateToCheck) {
-          $availability = $this->bookingEngine->getBambooQuantityAvailability($dateToCheck, $dateToCheck, $this->roomClass);
-          $availability['date'] = $dateToCheck;
-          $availabilities[] = $availability;
-        }
-
-        $modifies = [];
-        foreach ($availabilities as $availability) {
-          $modifies[] = $this->bookingEngine->modifyInventory($availability['date'], $availability['date'], $availability['class'], null, $availability['rooms']);
-        }
-
-        if ($this->bookingEngineCode == 'rategain') {
-
-          foreach ($modifies as $modify) {
-            foreach ($modify as $mod) {
-              \DB::beginTransaction();
-              try {
-                InventoryUpdate::create([
-                  'booking_engine' => $mod['booking_engine'],
-                  'room_class_cloud' => $mod['room'],
-                  'room_class_local' => $this->roomClass,
-                  'date_updated' => $mod['date'],
-                  'quantity' => $mod['quantity'],
-                  'xml' => $mod['xml'],
-                  'hotel' => $this->hotelId
-                ]);
-              } catch (\Exception $exception) {
-                \DB::rollBack();
-                dd($exception->getMessage());
-              }
-              \DB::commit();
-            }
-          }
-        }
-
-        return;
       }
     }
   }

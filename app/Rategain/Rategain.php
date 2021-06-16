@@ -1126,22 +1126,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
         )
       );
 
-      $testRequest = new \Illuminate\Http\Request();
-
-      $testRequest->setMethod('POST');
-      $testRequest->request->add(['bookingEngine' => 'rategain']);
-      $testRequest->request->add(['hotelId' => $data->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode]);
-
-      $soapCtrl = new TestSoapController($testRequest);
-
-      $soapCtrl->modifyInventoryByDatesAndRoom(
-        $testRequest,
-        $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->Start,
-        $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->End,
-        $roomClass
-      );
-
-      // dispatch($job);
+      dispatch($job);
 
       return $returnSuccess;
 
