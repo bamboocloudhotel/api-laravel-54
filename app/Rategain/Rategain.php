@@ -1134,14 +1134,12 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
 
       $soapCtrl = new TestSoapController($testRequest);
 
-      $res = $soapCtrl->modifyInventoryByDatesAndRoom(
+      $soapCtrl->modifyInventoryByDatesAndRoom(
         $testRequest,
         $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->Start,
         $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->End,
         $roomClass
       );
-
-      dd($res);
 
       // dispatch($job);
 
