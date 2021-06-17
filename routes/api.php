@@ -156,7 +156,7 @@ Route::get('test/availabilities', function(Request $request) {
             AND habitacion.tipo = 'V'
             "));
 
-  dd($roomsBlocked, $roomsReserved, $roomsHosted, $roomsOccupied, $numhab->first());
+  dd($roomsBlocked, $roomsReserved, $roomsHosted, $roomsOccupied, $numhab->toArray());
 });
 
 
