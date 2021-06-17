@@ -287,7 +287,7 @@ XML;
                 FROM `reserva`
                 INNER JOIN habitacion ON reserva.numhab = habitacion.numhab
                 INNER JOIN folio ON reserva.numhab = folio.numres
-                WHERE reserva.feclle < '{$end}' AND reserva.fecsal > '{$start}'
+                WHERE reserva.feclle <= '{$start}' AND reserva.fecsal >= '{$end}'
                 AND reserva.estado IN ('H')
                 AND folio.estado IN ('I')
                 AND habitacion.codcla = {$class}
@@ -308,7 +308,7 @@ XML;
             AND habitacion.tipo = 'V'
             "));
 
-      return $numhab->toArray();
+      return $numhab->sort()->toArray();
     }
 
     /**
