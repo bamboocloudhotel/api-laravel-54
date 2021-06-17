@@ -96,4 +96,8 @@ Route::get('soap/cr-reservas/modify-inventory', 'Api\TestSoapController@modifyIn
 
 Route::get('soap/bamboo/availability/{startDate?}/{endDate?}/{hotelId?}', 'Api\TestSoapController@getBambooQuantityAvailability');
 
+Route::get('test/availabilities', function(Request $request) {
+  dd($request->all());
+});
+
 

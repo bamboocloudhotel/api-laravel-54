@@ -511,14 +511,11 @@ XML;
       if (isset($data->POS->Source->BookingChannel->CompanyName->Code)) {
         $bookingChannel = $data->POS->Source->BookingChannel->CompanyName->Code;
       }
-
       // dd(config('database.connections.on_the_fly'));
-
       // \DB::setConnection('on_the_fly');
 
       $bambooBookingChannelCompany = CrChannel::with('empresa')->where('channel_code', $bookingChannel)->first();
       // $bambooBookingChannelCompany = CrChannel::where('channel_code', $bookingChannel)->first();
-
       // dd($bambooBookingChannelCompany->toArray());
 
       $bambooTipseg = null;
@@ -707,8 +704,6 @@ XML;
           if (isset($guarantee->GuaranteesAccepted)) {
             $guaranteeText .= json_encode($guarantee->GuaranteesAccepted, true);
           }
-
-
         }
 
         if (isset($data->HotelReservations->HotelReservation->ResGlobalInfo->EncodedCCInfo)) {
@@ -1117,13 +1112,13 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
       );
 
       $job = (
-        new ModifyBookingEngineInventory(
-          $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->Start,
-          $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->End,
-          $roomClass,
-          'rategain',
-          $data->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode
-        )
+      new ModifyBookingEngineInventory(
+        $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->Start,
+        $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->End,
+        $roomClass,
+        'rategain',
+        $data->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode
+      )
       );
 
       dispatch($job);
