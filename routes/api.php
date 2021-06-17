@@ -105,7 +105,7 @@ Route::get('test/availabilities', function(Request $request) {
   $roomsBlocked = collect(\DB::connection('on_the_fly')->select("
                 SELECT blohab.numhab
                 FROM blohab
-                INNER JOIN habitacion ON blohab.numhab = habitacion.numhab
+                LEFT JOIN habitacion ON blohab.numhab = habitacion.numhab
                 WHERE blohab.fecini <= '{$request->get('end')}' AND blohab.fecfin >= '{$request->get('start')}'
                 AND blohab.fecdes IS NULL
                 AND habitacion.codcla = {$request->get('class')}
@@ -119,7 +119,7 @@ Route::get('test/availabilities', function(Request $request) {
   $roomsReserved = collect(\DB::connection('on_the_fly')->select("
                 SELECT reserva.numres, reserva.numhab, reserva.estado, habitacion.codcla
                 FROM `reserva`
-                INNER JOIN habitacion ON reserva.numhab = habitacion.numhab
+                LEFT JOIN habitacion ON reserva.numhab = habitacion.numhab
                 WHERE reserva.feclle >= '{$request->get('start')}' AND reserva.fecsal <= '{$request->get('end')}'
                 AND reserva.estado IN ('P','G', 'H')
                 AND habitacion.codcla = {$request->get('class')}
