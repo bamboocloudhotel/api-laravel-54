@@ -894,7 +894,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
               'tipdes' => 'P',
               // 'subsidio' => null,
               // 'valor' => 0,
-              'valornoche' => $valor,
+              'valornoche' => $value,
               'codigocr' => $roomStay->RoomRates->RoomRate->RatePlanCode
             ]);
             $dayPriceCnt++;
