@@ -136,7 +136,7 @@ Route::get('test/availabilities', function(Request $request) {
                 FROM `reserva`
                 INNER JOIN habitacion ON reserva.numhab = habitacion.numhab
                 INNER JOIN folio ON reserva.numres = folio.numres
-                WHERE reserva.feclle >= '{$request->get('start')}' AND reserva.fecsal <= '{$request->get('end')}'
+                WHERE reserva.feclle <= '{$request->get('end')}' AND reserva.fecsal >= '{$request->get('start')}'
                 AND reserva.estado IN ('H')
                 AND folio.estado IN ('I')
                 AND habitacion.codcla = {$request->get('class')}
