@@ -146,7 +146,7 @@ Route::get('test/availabilities', function(Request $request) {
     $roomsOccupied[] = $roomHosted->numhab;
   }
 
-  $roomsOccupied = sort($roomsOccupied);
+  $roomsOccupied = sort($roomsOccupied, SORT_STRING);
 
   dd($roomsOccupied);
 
