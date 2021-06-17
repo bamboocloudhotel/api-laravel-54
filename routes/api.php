@@ -98,7 +98,7 @@ Route::get('soap/bamboo/availability/{startDate?}/{endDate?}/{hotelId?}', 'Api\T
 
 Route::get('test/availabilities', function(Request $request) {
 
-  $testSoapController = new \App\Http\Controllers\Api\TestSoapController();
+  $testSoapController = new \App\Http\Controllers\Api\TestSoapController($request);
 
   $testSoapController->setRateGainConfig($request->get('hotelId'));
 
