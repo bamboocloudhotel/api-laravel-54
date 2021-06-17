@@ -124,6 +124,7 @@ Route::get('test/availabilities', function(Request $request) {
                 AND reserva.estado IN ('P','G', 'H')
                 AND habitacion.codcla = {$request->get('class')}
                 AND habitacion.tipo = 'V'
+                ORDER BY reserva.numhab ASC
             "));
 
   foreach ($roomsReserved as $roomReserved) {
