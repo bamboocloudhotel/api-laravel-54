@@ -131,6 +131,20 @@ Route::get('test/availabilities', function(Request $request) {
     $roomsOccupied[] = $roomReserved->numhab;
   }
 
+  $sql = "
+                SELECT reserva.numres, reserva.numhab, reserva.estado, habitacion.codcla, folio.numfol, folio.estado
+                FROM `reserva`
+                INNER JOIN habitacion ON reserva.numhab = habitacion.numhab
+                INNER JOIN folio ON reserva.numres = folio.numres
+                WHERE reserva.feclle >= '{$request->get('start')}' AND reserva.fecsal <= '{$request->get('end')}'
+                AND reserva.estado IN ('H')
+                AND folio.estado IN ('I')
+                AND habitacion.codcla = {$request->get('class')}
+                AND habitacion.tipo = 'V'
+            ";
+
+  dd($sql);
+
   $roomsHosted = collect(\DB::connection('on_the_fly')->select("
                 SELECT reserva.numres, reserva.numhab, reserva.estado, habitacion.codcla, folio.numfol, folio.estado
                 FROM `reserva`
