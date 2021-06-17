@@ -146,10 +146,6 @@ Route::get('test/availabilities', function(Request $request) {
     $roomsOccupied[] = $roomHosted->numhab;
   }
 
-  $roomsOccupied = sort($roomsOccupied, SORT_STRING);
-
-  dd($roomsOccupied);
-
   $roomsOccupied = implode('\',\'', $roomsOccupied);
 
   $numhab = collect(\DB::connection('on_the_fly')->select("
