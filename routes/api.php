@@ -97,7 +97,26 @@ Route::get('soap/cr-reservas/modify-inventory', 'Api\TestSoapController@modifyIn
 Route::get('soap/bamboo/availability/{startDate?}/{endDate?}/{hotelId?}', 'Api\TestSoapController@getBambooQuantityAvailability');
 
 Route::get('test/availabilities', function(Request $request) {
-  dd($request->all());
+
+  $testSoapController = new \App\Http\Controllers\Api\TestSoapController();
+
+  $testSoapController->setRateGainConfig($request->get('hotelId'));
+
+  $roomsBlocked = collect(\DB::connection('on_the_fly')->select("
+                SELECT blohab.numhab
+                FROM blohab
+                INNER JOIN habitacion ON blohab.numhab = habitacion.numhab
+                WHERE blohab.fecini <= '{$request->get('end')}' AND blohab.fecfin >= '{$request->get('start')}'
+                AND blohab.fecdes IS NULL
+                AND habitacion.codcla = {$request->get('class')}
+                AND habitacion.tipo = 'V'
+            "));
+
+  foreach ($roomsBlocked as $roomBlocked) {
+    $roomsOccupied[] = $roomBlocked->numhab;
+  }
+
+  dd($roomsOccupied);
 });
 
 
