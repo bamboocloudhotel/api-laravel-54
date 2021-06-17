@@ -146,7 +146,17 @@ Route::get('test/availabilities', function(Request $request) {
     $roomsOccupied[] = $roomHosted->numhab;
   }
 
-  dd($roomsOccupied);
+  $roomsOccupied = implode('\',\'', $roomsOccupied);
+
+  $numhab = collect(\DB::connection('on_the_fly')->select("
+            select habitacion.numhab 
+            from habitacion 
+            where habitacion.numhab not in ('{$roomsOccupied}')
+            AND habitacion.codcla = {$request->get('class')}
+            AND habitacion.tipo = 'V'
+            "));
+
+  dd($roomsOccupied, $numhab->first());
 });
 
 
