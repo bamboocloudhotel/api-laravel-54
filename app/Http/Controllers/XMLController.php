@@ -97,6 +97,8 @@ class XMLController extends Controller
                     $returnSuccess
                 );
 
+                $this->getInstance($reservationObject->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode);
+
                 $reserva = Reserva::where('referencia', 'LIKE', '%' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value)->get();
 
                 foreach ($reserva as $res) {
