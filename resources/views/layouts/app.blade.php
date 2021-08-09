@@ -140,7 +140,11 @@
             $(document).on('click', '#removeRow', function () {
                 $(this).closest('#inputFormRow').remove();
             });
+
+
         </script>
+
+        @yield('script')
 
     </body>
 </html>

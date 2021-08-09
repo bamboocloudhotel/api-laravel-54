@@ -151,8 +151,7 @@ Route::get('test/availabilities', function(Request $request) {
 
   $roomsOccupied = collect($roomsOccupied);
 
-
-  $roomsOccupied = implode('\',\'', $roomsOccupied->sort()->values()->all());
+  $roomsOccupied = implode('\',\'', $roomsOccupied->sort()->unique()->values()->all());
 
   $numhab = collect(\DB::connection('on_the_fly')->select("
             select habitacion.numhab 
@@ -162,7 +161,16 @@ Route::get('test/availabilities', function(Request $request) {
             AND habitacion.tipo = 'V'
             "));
 
-  dd($roomsBlocked, $roomsReserved, $roomsHosted, $roomsOccupied, $numhab->toArray());
+  $roomsAvailable = implode('\',\'', $numhab->pluck('numhab')->unique()->sort()->values()->all());
+
+  // dd($roomsBlocked, $roomsReserved, $roomsHosted, $roomsOccupied, $roomsAvailable);
+
+  return response()->json([
+    'message' => "OK",
+    'available' => $roomsAvailable,
+    'notAvailable' => $roomsOccupied
+  ]);
+
 });
 
 
