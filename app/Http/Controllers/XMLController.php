@@ -199,7 +199,8 @@ class XMLController extends Controller
     public function doValidation($reservationObject, $data)
     {
         $this->setRateGainConfig($reservationObject->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode);
-        if (!is_array($reservationObject->HotelReservations->HotelReservation->RoomStays->RoomStay)) {
+        
+		if (!is_array($reservationObject->HotelReservations->HotelReservation->RoomStays->RoomStay)) {
             $validation = \Validator::make($data, [
                 'method' => 'required|in:OTA_HotelResNotifRQ',
                 'data.ResStatus' => 'in:Commit,Modify,Cancel',

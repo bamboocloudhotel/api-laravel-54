@@ -240,6 +240,101 @@ XML;
 
       return $return;
     }
+	
+	/**
+     * @param $reservationAttributes
+     * @param $roomClass
+     * @return mixed
+     */
+    public function getAvailability($start, $end, $roomClass = null)
+    {
+      $roomsOccupied = [];
+
+      $end = $end;
+      $start = $start;
+      $class = $roomClass ? (int)$roomClass : null;
+	  // dd($end, $start, $roomClass, $class);
+	  
+		$rBlockedQry = "
+			SELECT blohab.numhab
+			FROM blohab
+			INNER JOIN habitacion ON blohab.numhab = habitacion.numhab
+			WHERE blohab.fecini <= '{$end}' AND blohab.fecfin >= '{$start}'
+			AND blohab.fecdes IS NULL
+			AND habitacion.tipo = 'V'
+		";
+		
+		if ($class) {
+			$rBlockedQry .= "AND habitacion.codcla = {$class}";
+		}
+	  
+
+      $roomsBlocked = collect(\DB::connection('on_the_fly')->select($rBlockedQry));
+
+      foreach ($roomsBlocked as $roomBlocked) {
+        $roomsOccupied[] = $roomBlocked->numhab;
+      }
+	  
+	  $rReservedQry = "
+                SELECT reserva.numres, reserva.numhab, reserva.estado, habitacion.codcla
+                FROM `reserva`
+                INNER JOIN habitacion ON reserva.numhab = habitacion.numhab
+                WHERE reserva.feclle <= '{$end}' AND reserva.fecsal >= '{$start}'
+                AND reserva.estado IN ('P','G')
+                AND habitacion.tipo = 'V'
+            ";
+		
+		if ($class) {
+			$rReservedQry .= "AND habitacion.codcla = {$class}";
+		}
+
+      $roomsReserved = collect(\DB::connection('on_the_fly')->select($rReservedQry));
+
+      foreach ($roomsReserved as $roomReserved) {
+        $roomsOccupied[] = $roomReserved->numhab;
+      }
+	  
+	  $rHostedQry = "
+                SELECT reserva.numres, reserva.numhab, reserva.estado, habitacion.codcla, folio.numfol, folio.estado
+                FROM `reserva`
+                INNER JOIN habitacion ON reserva.numhab = habitacion.numhab
+                INNER JOIN folio ON reserva.numhab = folio.numres
+                WHERE reserva.feclle <= '{$start}' AND reserva.fecsal >= '{$end}'
+                AND reserva.estado IN ('H')
+                AND folio.estado IN ('I')
+                AND habitacion.tipo = 'V'
+            ";
+		
+		if ($class) {
+			$rHostedQry .= "AND habitacion.codcla = {$class}";
+		}
+
+      $roomsHosted = collect(\DB::connection('on_the_fly')->select($rHostedQry));
+
+      foreach ($roomsHosted as $roomHosted) {
+        $roomsOccupied[] = $roomHosted->numhab;
+      }
+
+      $roomsOccupied = "'" . implode('\',\'', $roomsOccupied) . "'";
+	  // dd($roomsOccupied);
+	  
+	  $numhabQry = "
+			select habitacion.numhab 
+            from habitacion 
+            where habitacion.numhab not in ({$roomsOccupied})
+            AND habitacion.tipo = 'V'
+		";
+		
+		if ($class) {
+			$numhabQry .= "AND habitacion.codcla = {$class}";
+		}
+
+      $numhab = collect(\DB::connection('on_the_fly')->select($numhabQry));
+			
+			// dd($numhab->sort()->toArray());
+
+      return $numhab->sort()->toArray();
+    }
 
     /**
      * @param $reservationAttributes
@@ -253,6 +348,8 @@ XML;
       $end = $reservationAttributes->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->End;
       $start = $reservationAttributes->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->Start;
       $class = (int)$roomClass;
+	  
+	  // dd($start, $end, $class);
 
       $roomsBlocked = collect(\DB::connection('on_the_fly')->select("
                 SELECT blohab.numhab
@@ -272,7 +369,7 @@ XML;
                 SELECT reserva.numres, reserva.numhab, reserva.estado, habitacion.codcla
                 FROM `reserva`
                 INNER JOIN habitacion ON reserva.numhab = habitacion.numhab
-                WHERE reserva.feclle < '{$end}' AND reserva.fecsal > '{$start}'
+                WHERE reserva.feclle <= '{$end}' AND reserva.fecsal >= '{$start}'
                 AND reserva.estado IN ('P','G')
                 AND habitacion.codcla = {$class}
                 AND habitacion.tipo = 'V'
@@ -298,7 +395,9 @@ XML;
         $roomsOccupied[] = $roomHosted->numhab;
       }
 
-      $roomsOccupied = implode('\',\'', $roomsOccupied);
+      $roomsOccupied = implode('\',\'', array_unique($roomsOccupied));
+	  
+	  // dd($roomsOccupied);
 
       $numhab = collect(\DB::connection('on_the_fly')->select("
             select habitacion.numhab 
@@ -307,6 +406,8 @@ XML;
             AND habitacion.codcla = {$class}
             AND habitacion.tipo = 'V'
             "));
+			
+			// dd($numhab->sort()->toArray());
 
       return $numhab->sort()->toArray();
     }
@@ -340,7 +441,7 @@ XML;
                 SELECT reserva.numres, reserva.numhab, reserva.estado, habitacion.codcla
                 FROM reserva
                 INNER JOIN habitacion ON reserva.numhab = habitacion.numhab
-                WHERE reserva.feclle <= '$out' AND reserva.fecsal > '$in'
+                WHERE reserva.feclle <= '{$out}' AND reserva.fecsal >= '{$in}'
                 AND reserva.estado IN ('P','G')
                 AND habitacion.codcla = {$roomClass}
                 AND habitacion.tipo = 'V'
@@ -354,7 +455,7 @@ XML;
                 SELECT folio.numres, folio.numhab, folio.estado, habitacion.codcla, folio.numfol
                 FROM folio
                 INNER JOIN habitacion ON folio.numhab = habitacion.numhab
-                WHERE folio.feclle <= '$out' AND folio.fecsal > '$in'
+                WHERE folio.feclle <= '{$out}' AND folio.fecsal > '{$in}'
                 AND folio.estado IN ('I')
                 AND habitacion.codcla = {$roomClass}
                 AND habitacion.tipo = 'V'
@@ -714,16 +815,29 @@ XML;
         $numnin = 0;
 
         if (isset($roomStay->GuestCounts)) {
-          foreach ($roomStay->GuestCounts as $guestCount) {
-            if (isset($guestCount->AgeQualifyingCode) && $guestCount->AgeQualifyingCode == 10) {
-              $numadu = $guestCount->Count;
-            }
+			if(is_array($roomStay->GuestCounts->GuestCount)) {
+				foreach ($roomStay->GuestCounts->GuestCount as $guestCount) {
+					if (isset($guestCount->AgeQualifyingCode) && $guestCount->AgeQualifyingCode == "10") {
+					  $numadu = $guestCount->Count;
+					}
 
-            if (isset($guestCount->AgeQualifyingCode) && $guestCount->AgeQualifyingCode == 8) {
-              $numnin = $guestCount->Count;
-            }
-          }
+					if (isset($guestCount->AgeQualifyingCode) && $guestCount->AgeQualifyingCode == "8") {
+					  $numnin = $guestCount->Count;
+					}
+				  }
+			} else {
+				if (isset($roomStay->GuestCounts->GuestCount->AgeQualifyingCode) && $roomStay->GuestCounts->GuestCount->AgeQualifyingCode == "10") {
+				  $numadu = $roomStay->GuestCounts->GuestCount->Count;
+				}
+
+				if (isset($roomStay->GuestCounts->GuestCount->AgeQualifyingCode) && $roomStay->GuestCounts->GuestCount->AgeQualifyingCode == "8") {
+				  $numnin = $roomStay->GuestCounts->GuestCount->Count;
+				}
+			}
+          
         }
+		
+		// dd($numadu, $numnin);
 
         $roomClass = config('rategain.rooms_cl.' . $roomStay->RoomRates->RoomRate->RoomTypeCode);
         $numres = collect(\DB::connection('on_the_fly')->select('select MAX(numres)+1 as res from reserva limit 1'))->first();
@@ -848,7 +962,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
 
             $value = $amount;
 
-            if ($dayPrice->Base->CurrencyCode != 'COP') {
+            if (isset($dayPrice->Base->CurrencyCode) && $dayPrice->Base->CurrencyCode && $dayPrice->Base->CurrencyCode === 'USD') {
               $usd = Valmon::orderBy('fecha', 'DESC')->first();
               $value = $value * $usd->valor;
             }
@@ -879,7 +993,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
           $amount = $amountBT ? $amountBT : $amountAT;
           $value = $amount;
 
-          if ($dayPrice->Base->CurrencyCode != 'COP') {
+          if (isset($dayPrice->Base->CurrencyCode) && $dayPrice->Base->CurrencyCode && $dayPrice->Base->CurrencyCode === 'USD') {
             $usd = Valmon::orderBy('fecha', 'DESC')->first();
             $value = $value * $usd->valor;
           }

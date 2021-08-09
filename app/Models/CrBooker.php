@@ -6,10 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class CrBooker extends Model
 {
-	public $connection = 'on_the_fly';
+	protected $connection = 'on_the_fly';
 	protected $table = 'cr_bookers';
 	public $incrementing = true;
-    public $timestamps = false;
+        public $timestamps = false;
 	protected $fillable = [
 		'givenname',
 		'surname',

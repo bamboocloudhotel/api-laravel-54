@@ -90,7 +90,7 @@ Route::get('soap/cr-reservas/rates/{hotelId?}', 'Api\TestSoapController@getRates
 Route::get('soap/cr-reservas/rooms/{hotelId?}', 'Api\TestSoapController@getRooms');
 Route::get('soap/cr-reservas/portals/{hotelId?}', 'Api\TestSoapController@getPortals');
 Route::get('soap/cr-reservas/reservations/{startDate?}/{endDate?}/{hotelId?}/{dlm?}', 'Api\TestSoapController@getReservations');
-Route::get('soap/cr-reservas/availability/{startDate?}/{endDate?}/{hotelId?}', 'Api\TestSoapController@getAvailability');
+Route::get('soap/cr-reservas/availability/{startDate?}/{endDate?}/{hotelId?}/{clahab?}', 'Api\TestSoapController@getAvailability');
 Route::get('soap/cr-reservas/modify-inventory/{startDate}/{endDate}/{roomTypeId}/{oldStartDate?}/{oldEndDate?}', 'Api\TestSoapController@modifyInventoryByDatesAndRoom');
 Route::get('soap/cr-reservas/modify-inventory', 'Api\TestSoapController@modifyInventory');
 

@@ -99,17 +99,34 @@
     /**
      * The reservations function let the client retrieve reservations from the RoomCloud local database.
      */
-    public function getAvailability($startDate = null, $endDate = null, $hotelId = null)
+    public function getAvailability($startDate = null, $endDate = null, $hotelId = null, $clahab = null)
     {
+		
+		if (!$hotelId) {
+			return response()->json([
+			'message' => 'La ID del hotel no es valida.'
+			]);
+		}
+
+		if ($hotelId) {
+			$this->setRateGainConfig($hotelId);
+		}
+		
       $sDate = $startDate ? $startDate : date('Y-m-d');
       $eDate = $endDate ? $endDate : date('Y-m-d');
 
-      $soapRequest = $this->bookingEngine->getAvailability($startDate, $endDate, $hotelId);
+      $soapRequest = $this->bookingEngine->getAvailability($startDate, $endDate, $clahab);
+	  
+	  // dd($soapRequest);
 
-      if ($soapRequest['error']) {
-        return response()->json($soapRequest['data'], 400);
-      }
-      return response()->json($soapRequest['data']);
+		if ($soapRequest['error']) {
+			return response()->json([
+				'error' => $soapRequest['error']
+			], 400);
+		}
+		return response()->json([
+			'data' => $soapRequest
+		]);
     }
 
     public function modifyInventory(Request $request)
