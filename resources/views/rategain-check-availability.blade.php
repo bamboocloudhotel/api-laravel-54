@@ -117,9 +117,9 @@
             axios.get('http://45.32.223.244/api-laravel-54/public/index.php/api/test/availability?bookingEngine=rategain&hotelId=' + $('#instance').val() + '&feclle=' + $('#start').val() + '&fecsal=' + $('#end').val() + '&codcla=' + $('#room').val())
                 .then(function (response) {
                     console.log(response);
-                    $('#available').html(response.data.available.join(','));
+                    $('#available').html(response.data.available.join(', '));
                     $('#availableTotal').html(response.data.availableCount);
-                    $('#notAvailable').html(response.data.notAvailable.join(','));
+                    $('#notAvailable').html(response.data.notAvailable.join(', '));
                     $('#notAvailableTotal').html(response.data.notAvailableCount);
                     loading = false;
                     $('#searchAvailability').attr('disabled', false);
