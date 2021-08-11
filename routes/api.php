@@ -132,16 +132,16 @@ Route::get('test/availabilities', function(Request $request) {
   }
 
   $sql = "
-                SELECT reserva.numres, reserva.numhab, reserva.estado, habitacion.codcla, folio.numfol, folio.estado
-                FROM `reserva`
-                INNER JOIN habitacion ON reserva.numhab = habitacion.numhab
-                INNER JOIN folio ON reserva.numres = folio.numres
-                WHERE reserva.feclle <= '{$request->get('end')}' AND reserva.fecsal >= '{$request->get('start')}'
-                AND reserva.estado IN ('H')
-                AND folio.estado IN ('I')
-                AND habitacion.codcla = {$request->get('class')}
-                AND habitacion.tipo = 'V'
-            ";
+    SELECT reserva.numres, reserva.numhab, reserva.estado, habitacion.codcla, folio.numfol, folio.estado
+    FROM `reserva`
+    INNER JOIN habitacion ON reserva.numhab = habitacion.numhab
+    INNER JOIN folio ON reserva.numres = folio.numres
+    WHERE reserva.feclle <= '{$request->get('start')}' AND reserva.fecsal >= '{$request->get('end')}'
+    AND reserva.estado IN ('H')
+    AND folio.estado IN ('I')
+    AND habitacion.codcla = {$request->get('class')}
+    AND habitacion.tipo = 'V'
+  ";
 
   $roomsHosted = collect(\DB::connection('on_the_fly')->select($sql));
 
@@ -154,12 +154,12 @@ Route::get('test/availabilities', function(Request $request) {
   $roomsOccupied = implode('\',\'', $roomsOccupied->sort()->unique()->values()->all());
 
   $numhab = collect(\DB::connection('on_the_fly')->select("
-            select habitacion.numhab 
-            from habitacion 
-            where habitacion.numhab not in ('{$roomsOccupied}')
-            AND habitacion.codcla = {$request->get('class')}
-            AND habitacion.tipo = 'V'
-            "));
+    select habitacion.numhab 
+    from habitacion 
+    where habitacion.numhab not in ('{$roomsOccupied}')
+    AND habitacion.codcla = {$request->get('class')}
+    AND habitacion.tipo = 'V'
+  "));
 
   $roomsAvailable = implode('\',\'', $numhab->pluck('numhab')->unique()->sort()->values()->all());
 
