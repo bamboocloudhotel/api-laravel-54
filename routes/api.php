@@ -137,14 +137,23 @@
     }
 
     $sql = "
-    SELECT folio.numfol, folio.estado, folio.numhab FROM folio
-    INNER JOIN habitacion ON folio.numhab = habitacion.numhab
-    WHERE folio.numhab = 915
-    AND folio.feclle <= '{$request->get('start')}' AND folio.fecsal >= '{$request->get('end')}'
+    SELECT reserva.numres, reserva.numhab, reserva.estado, habitacion.codcla, folio.numfol, folio.estado
+    FROM `reserva`
+    INNER JOIN habitacion ON reserva.numhab = habitacion.numhab
+    INNER JOIN folio ON reserva.numres = folio.numres
+    WHERE folio.feclle <= '{$request->get('start')}' AND folio.fecsal >= '{$request->get('end')}'
+    AND reserva.estado IN ('H')
     AND folio.estado IN ('I')
     AND habitacion.codcla = {$request->get('class')}
     AND habitacion.tipo = 'V'
-    ORDER BY numfol 
+    -- SELECT folio.numfol, folio.estado, folio.numhab FROM folio
+    -- INNER JOIN habitacion ON folio.numhab = habitacion.numhab
+    -- WHERE folio.numhab = 915
+    -- AND folio.feclle <= '{$request->get('start')}' AND folio.fecsal >= '{$request->get('end')}'
+    -- AND folio.estado IN ('I')
+    -- AND habitacion.codcla = {$request->get('class')}
+    -- AND habitacion.tipo = 'V'
+    -- ORDER BY numfol 
     ";
 
     $roomsHosted = collect(\DB::connection('on_the_fly')->select($sql));
