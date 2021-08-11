@@ -174,8 +174,8 @@
 
     return response()->json([
       'message' => "OK",
-      'available' => $roomsAvailable,
-      'notAvailable' => $roomsOccupied
+      'available' => $roomsAvailable == '\'\'' ? null : $roomsAvailable,
+      'notAvailable' => $roomsOccupied == '\'\'' ? null : $roomsOccupied
     ]);
 
   });
