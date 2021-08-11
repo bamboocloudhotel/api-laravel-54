@@ -207,7 +207,6 @@
       AND reserva.estado IN ('P','G')
       AND habitacion.codcla = {$codcla}
       AND habitacion.tipo = 'V'
-      ORDER BY reserva.numhab
     )
     AND numhab NOT IN(
       SELECT folio.numhab 
@@ -230,7 +229,7 @@
       AND habitacion.codcla = {$codcla}
       AND habitacion.tipo = 'V'
     )
-    AND codcla =  {$codcla}
+    AND codcla = {$codcla}
     AND tipo = 'V'
     ";
 
@@ -246,7 +245,6 @@
       AND reserva.estado IN ('P','G')
       AND habitacion.codcla = {$codcla}
       AND habitacion.tipo = 'V'
-      ORDER BY reserva.numhab
     )
     OR numhab IN(
       SELECT folio.numhab 
@@ -269,7 +267,7 @@
       AND habitacion.codcla = {$codcla}
       AND habitacion.tipo = 'V'
     )
-    AND codcla =  {$codcla}
+    AND codcla = {$codcla}
     AND tipo = 'V'
     ";
 
