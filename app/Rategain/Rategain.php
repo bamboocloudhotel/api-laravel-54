@@ -354,8 +354,9 @@ XML;
       $roomsBlocked = collect(\DB::connection('on_the_fly')->select("
                 SELECT blohab.numhab
                 FROM blohab
-                INNER JOIN habitacion ON blohab.numhab = habitacion.numhab
-                WHERE blohab.fecini <= '{$end}' AND blohab.fecfin >= '{$start}'
+                LEFT JOIN habitacion ON blohab.numhab = habitacion.numhab
+                WHERE '{$start}' <= blohab.fecfin 
+                AND '{$end}' >= blohab.fecini
                 AND blohab.fecdes IS NULL
                 AND habitacion.codcla = {$class}
                 AND habitacion.tipo = 'V'
@@ -366,10 +367,11 @@ XML;
       }
 
       $roomsReserved = collect(\DB::connection('on_the_fly')->select("
-                SELECT reserva.numres, reserva.numhab, reserva.estado, habitacion.codcla
-                FROM `reserva`
+                SELECT reserva.numhab 
+                FROM reserva 
                 INNER JOIN habitacion ON reserva.numhab = habitacion.numhab
-                WHERE reserva.feclle <= '{$end}' AND reserva.fecsal >= '{$start}'
+                WHERE '{$start}' < reserva.fecsal 
+                AND '{$end}' > reserva.feclle 
                 AND reserva.estado IN ('P','G')
                 AND habitacion.codcla = {$class}
                 AND habitacion.tipo = 'V'
@@ -380,12 +382,12 @@ XML;
       }
 
       $roomsHosted = collect(\DB::connection('on_the_fly')->select("
-                SELECT reserva.numres, reserva.numhab, reserva.estado, habitacion.codcla, folio.numfol, folio.estado
-                FROM `reserva`
-                INNER JOIN habitacion ON reserva.numhab = habitacion.numhab
-                INNER JOIN folio ON reserva.numhab = folio.numres
-                WHERE reserva.feclle <= '{$start}' AND reserva.fecsal >= '{$end}'
-                AND reserva.estado IN ('H')
+                SELECT folio.numhab 
+                FROM folio
+                INNER JOIN habitacion ON folio.numhab = habitacion.numhab
+                INNER JOIN reserva ON folio.numres = reserva.numres
+                WHERE '{$start}' < folio.fecsal 
+                AND '{$end}' > folio.feclle 
                 AND folio.estado IN ('I')
                 AND habitacion.codcla = {$class}
                 AND habitacion.tipo = 'V'
@@ -426,8 +428,9 @@ XML;
       $roomsBlocked = collect(\DB::connection('on_the_fly')->select("
                 SELECT blohab.numhab
                 FROM blohab
-                INNER JOIN habitacion ON blohab.numhab = habitacion.numhab
-                WHERE blohab.fecini <= '$out' AND blohab.fecfin >= '$in'
+                LEFT JOIN habitacion ON blohab.numhab = habitacion.numhab
+                WHERE '{$in}' <= blohab.fecfin 
+                AND '{$out}' >= blohab.fecini
                 AND blohab.fecdes IS NULL
                 AND habitacion.codcla = {$roomClass}
                 AND habitacion.tipo = 'V'
@@ -438,10 +441,11 @@ XML;
       }
 
       $roomsReserved = collect(\DB::connection('on_the_fly')->select("
-                SELECT reserva.numres, reserva.numhab, reserva.estado, habitacion.codcla
-                FROM reserva
+                SELECT reserva.numhab 
+                FROM reserva 
                 INNER JOIN habitacion ON reserva.numhab = habitacion.numhab
-                WHERE reserva.feclle <= '{$out}' AND reserva.fecsal >= '{$in}'
+                WHERE '{$in}' < reserva.fecsal 
+                AND '{$out}' > reserva.feclle 
                 AND reserva.estado IN ('P','G')
                 AND habitacion.codcla = {$roomClass}
                 AND habitacion.tipo = 'V'
@@ -452,10 +456,12 @@ XML;
       }
 
       $roomsHosted = collect(\DB::connection('on_the_fly')->select("
-                SELECT folio.numres, folio.numhab, folio.estado, habitacion.codcla, folio.numfol
+                SELECT folio.numhab 
                 FROM folio
                 INNER JOIN habitacion ON folio.numhab = habitacion.numhab
-                WHERE folio.feclle <= '{$out}' AND folio.fecsal > '{$in}'
+                INNER JOIN reserva ON folio.numres = reserva.numres
+                WHERE '{$in}' < folio.fecsal 
+                AND '{$out}' > folio.feclle 
                 AND folio.estado IN ('I')
                 AND habitacion.codcla = {$roomClass}
                 AND habitacion.tipo = 'V'
