@@ -181,4 +181,109 @@
 
   });
 
+  Route::get('test/availability', function (Request $request) {
+
+    $testSoapController = new \App\Http\Controllers\Api\TestSoapController($request);
+
+    $testSoapController->setRateGainConfig($request->get('hotelId'));
+
+    $feclle = $request->get('feclle');
+    $fecsal = $request->get('fecsal');
+    $codcla = $request->get('codcla');
+
+    if (!$fecsal) {
+      $fecsal = date('Y-m-d', strtotime($request->get('feclle'). '+ 1 days'));
+    }
+
+    $sqlAvailable = "
+    SELECT * 
+    FROM habitacion 
+    WHERE numhab NOT IN(
+      SELECT reserva.numhab 
+      FROM reserva 
+      INNER JOIN habitacion ON reserva.numhab = habitacion.numhab
+      WHERE '{$feclle}' < reserva.fecsal 
+      AND '{$fecsal}' > reserva.feclle 
+      AND reserva.estado IN ('P','G')
+      AND habitacion.codcla = {$codcla}
+      AND habitacion.tipo = 'V'
+      ORDER BY reserva.numhab
+    )
+    AND numhab NOT IN(
+      SELECT folio.numhab 
+      FROM folio
+      INNER JOIN habitacion ON folio.numhab = habitacion.numhab
+      INNER JOIN reserva ON folio.numres = reserva.numres
+      WHERE '{$feclle}' < folio.fecsal 
+      AND '{$fecsal}' > folio.feclle 
+      AND folio.estado IN ('I')
+      AND habitacion.codcla = {$codcla}
+      AND habitacion.tipo = 'V'
+    )
+    AND numhab NOT IN(
+      SELECT blohab.numhab
+      FROM blohab
+      LEFT JOIN habitacion ON blohab.numhab = habitacion.numhab
+      WHERE '{$feclle}' <= blohab.fecfin 
+      AND '{$fecsal}' >= blohab.fecini
+      AND blohab.fecdes IS NULL
+      AND habitacion.codcla = {$codcla}
+      AND habitacion.tipo = 'V'
+    )
+    AND codcla =  {$codcla}
+    AND tipo = 'V'
+    ";
+
+    $sqlOccupied = "
+    SELECT * 
+    FROM habitacion 
+    WHERE numhab IN(
+      SELECT reserva.numhab 
+      FROM reserva 
+      INNER JOIN habitacion ON reserva.numhab = habitacion.numhab
+      WHERE '{$feclle}' < reserva.fecsal 
+      AND '{$fecsal}' > reserva.feclle 
+      AND reserva.estado IN ('P','G')
+      AND habitacion.codcla = {$codcla}
+      AND habitacion.tipo = 'V'
+      ORDER BY reserva.numhab
+    )
+    OR numhab IN(
+      SELECT folio.numhab 
+      FROM folio
+      INNER JOIN habitacion ON folio.numhab = habitacion.numhab
+      INNER JOIN reserva ON folio.numres = reserva.numres
+      WHERE '{$feclle}' < folio.fecsal 
+      AND '{$fecsal}' > folio.feclle 
+      AND folio.estado IN ('I')
+      AND habitacion.codcla = {$codcla}
+      AND habitacion.tipo = 'V'
+    )
+    OR numhab IN(
+      SELECT blohab.numhab
+      FROM blohab
+      LEFT JOIN habitacion ON blohab.numhab = habitacion.numhab
+      WHERE '{$feclle}' <= blohab.fecfin 
+      AND '{$fecsal}' >= blohab.fecini
+      AND blohab.fecdes IS NULL
+      AND habitacion.codcla = {$codcla}
+      AND habitacion.tipo = 'V'
+    )
+    AND codcla =  {$codcla}
+    AND tipo = 'V'
+    ";
+
+    $roomsOccupied = collect(\DB::connection('on_the_fly')->select($sqlOccupied));
+    $roomsAvailable = collect(\DB::connection('on_the_fly')->select($sqlAvailable));
+
+    return response()->json([
+      'message' => "OK",
+      'available' => $roomsAvailable->pluck('numhab'),
+      'availableCount' => $roomsAvailable->pluck('numhab')->count(),
+      'notAvailable' => $roomsOccupied->pluck('numhab'),
+      'notAvailableCount' => $roomsOccupied->pluck('numhab')->count()
+    ]);
+
+  });
+
 

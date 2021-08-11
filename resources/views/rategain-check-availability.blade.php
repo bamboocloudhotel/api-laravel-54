@@ -114,13 +114,13 @@
         function getAvailability() {
             loading = true;
             $('#searchAvailability').attr('disabled', true);
-            axios.get('http://45.32.223.244/api-laravel-54/public/index.php/api/test/availabilities?bookingEngine=rategain&hotelId=' + $('#instance').val() + '&start=' + $('#start').val() + '&end=' + $('#end').val() + '&class=' + $('#room').val())
+            axios.get('http://45.32.223.244/api-laravel-54/public/index.php/api/test/availability?bookingEngine=rategain&hotelId=' + $('#instance').val() + '&start=' + $('#start').val() + '&end=' + $('#end').val() + '&class=' + $('#room').val())
                 .then(function (response) {
                     console.log(response);
-                    $('#available').html('\'' + response.data.available + '\'');
-                    $('#availableTotal').html('\'' + response.data.available.split(',').length + '\'');
-                    $('#notAvailable').html('\'' + response.data.notAvailable + '\'');
-                    $('#notAvailableTotal').html('\'' + response.data.notAvailable.split(',').length + '\'');
+                    $('#available').html(response.data.available);
+                    $('#availableTotal').html(response.data.availableCount);
+                    $('#notAvailable').html(response.data.notAvailable);
+                    $('#notAvailableTotal').html(response.data.notAvailableCount);
                     loading = false;
                     $('#searchAvailability').attr('disabled', false);
                 })
