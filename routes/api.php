@@ -120,7 +120,7 @@ Route::get('test/availabilities', function(Request $request) {
                 SELECT reserva.numres, reserva.numhab, reserva.estado, habitacion.codcla
                 FROM `reserva`
                 LEFT JOIN habitacion ON reserva.numhab = habitacion.numhab
-                WHERE reserva.feclle >= '{$request->get('start')}' AND reserva.fecsal <= '{$request->get('end')}'
+                WHERE reserva.feclle <= '{$request->get('start')}' AND reserva.fecsal >= '{$request->get('end')}'
                 AND reserva.estado IN ('P','G')
                 AND habitacion.codcla = {$request->get('class')}
                 AND habitacion.tipo = 'V'
