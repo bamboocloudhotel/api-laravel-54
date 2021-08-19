@@ -240,8 +240,8 @@ XML;
 
       return $return;
     }
-	
-	/**
+
+    /**
      * @param $reservationAttributes
      * @param $roomClass
      * @return mixed
@@ -253,9 +253,9 @@ XML;
       $end = $end;
       $start = $start;
       $class = $roomClass ? (int)$roomClass : null;
-	  // dd($end, $start, $roomClass, $class);
-	  
-		$rBlockedQry = "
+      // dd($end, $start, $roomClass, $class);
+
+      $rBlockedQry = "
 			SELECT blohab.numhab
 			FROM blohab
 			INNER JOIN habitacion ON blohab.numhab = habitacion.numhab
@@ -263,19 +263,19 @@ XML;
 			AND blohab.fecdes IS NULL
 			AND habitacion.tipo = 'V'
 		";
-		
-		if ($class) {
-			$rBlockedQry .= "AND habitacion.codcla = {$class}";
-		}
-	  
+
+      if ($class) {
+        $rBlockedQry .= "AND habitacion.codcla = {$class}";
+      }
+
 
       $roomsBlocked = collect(\DB::connection('on_the_fly')->select($rBlockedQry));
 
       foreach ($roomsBlocked as $roomBlocked) {
         $roomsOccupied[] = $roomBlocked->numhab;
       }
-	  
-	  $rReservedQry = "
+
+      $rReservedQry = "
                 SELECT reserva.numres, reserva.numhab, reserva.estado, habitacion.codcla
                 FROM `reserva`
                 INNER JOIN habitacion ON reserva.numhab = habitacion.numhab
@@ -283,18 +283,18 @@ XML;
                 AND reserva.estado IN ('P','G')
                 AND habitacion.tipo = 'V'
             ";
-		
-		if ($class) {
-			$rReservedQry .= "AND habitacion.codcla = {$class}";
-		}
+
+      if ($class) {
+        $rReservedQry .= "AND habitacion.codcla = {$class}";
+      }
 
       $roomsReserved = collect(\DB::connection('on_the_fly')->select($rReservedQry));
 
       foreach ($roomsReserved as $roomReserved) {
         $roomsOccupied[] = $roomReserved->numhab;
       }
-	  
-	  $rHostedQry = "
+
+      $rHostedQry = "
                 SELECT reserva.numres, reserva.numhab, reserva.estado, habitacion.codcla, folio.numfol, folio.estado
                 FROM `reserva`
                 INNER JOIN habitacion ON reserva.numhab = habitacion.numhab
@@ -304,10 +304,10 @@ XML;
                 AND folio.estado IN ('I')
                 AND habitacion.tipo = 'V'
             ";
-		
-		if ($class) {
-			$rHostedQry .= "AND habitacion.codcla = {$class}";
-		}
+
+      if ($class) {
+        $rHostedQry .= "AND habitacion.codcla = {$class}";
+      }
 
       $roomsHosted = collect(\DB::connection('on_the_fly')->select($rHostedQry));
 
@@ -316,22 +316,22 @@ XML;
       }
 
       $roomsOccupied = "'" . implode('\',\'', $roomsOccupied) . "'";
-	  // dd($roomsOccupied);
-	  
-	  $numhabQry = "
+      // dd($roomsOccupied);
+
+      $numhabQry = "
 			select habitacion.numhab 
             from habitacion 
             where habitacion.numhab not in ({$roomsOccupied})
             AND habitacion.tipo = 'V'
 		";
-		
-		if ($class) {
-			$numhabQry .= "AND habitacion.codcla = {$class}";
-		}
+
+      if ($class) {
+        $numhabQry .= "AND habitacion.codcla = {$class}";
+      }
 
       $numhab = collect(\DB::connection('on_the_fly')->select($numhabQry));
-			
-			// dd($numhab->sort()->toArray());
+
+      // dd($numhab->sort()->toArray());
 
       return $numhab->sort()->toArray();
     }
@@ -348,8 +348,8 @@ XML;
       $end = $reservationAttributes->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->End;
       $start = $reservationAttributes->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->Start;
       $class = (int)$roomClass;
-	  
-	  // dd($start, $end, $class);
+
+      // dd($start, $end, $class);
 
       $roomsBlocked = collect(\DB::connection('on_the_fly')->select("
                 SELECT blohab.numhab
@@ -398,8 +398,8 @@ XML;
       }
 
       $roomsOccupied = implode('\',\'', array_unique($roomsOccupied));
-	  
-	  // dd($roomsOccupied);
+
+      // dd($roomsOccupied);
 
       $numhab = collect(\DB::connection('on_the_fly')->select("
             select habitacion.numhab 
@@ -408,8 +408,8 @@ XML;
             AND habitacion.codcla = {$class}
             AND habitacion.tipo = 'V'
             "));
-			
-			// dd($numhab->sort()->toArray());
+
+      // dd($numhab->sort()->toArray());
 
       return $numhab->sort()->toArray();
     }
@@ -802,7 +802,7 @@ XML;
         $guarantee = null;
 
         if (
-        isset($data->HotelReservations->HotelReservation->ResGlobalInfo->Guarantee)
+          isset($data->HotelReservations->HotelReservation->ResGlobalInfo->Guarantee)
         ) {
 
           $guarantee = $data->HotelReservations->HotelReservation->ResGlobalInfo->Guarantee;
@@ -821,29 +821,29 @@ XML;
         $numnin = 0;
 
         if (isset($roomStay->GuestCounts)) {
-			if(is_array($roomStay->GuestCounts->GuestCount)) {
-				foreach ($roomStay->GuestCounts->GuestCount as $guestCount) {
-					if (isset($guestCount->AgeQualifyingCode) && $guestCount->AgeQualifyingCode == "10") {
-					  $numadu = $guestCount->Count;
-					}
+          if (is_array($roomStay->GuestCounts->GuestCount)) {
+            foreach ($roomStay->GuestCounts->GuestCount as $guestCount) {
+              if (isset($guestCount->AgeQualifyingCode) && $guestCount->AgeQualifyingCode == "10") {
+                $numadu = $guestCount->Count;
+              }
 
-					if (isset($guestCount->AgeQualifyingCode) && $guestCount->AgeQualifyingCode == "8") {
-					  $numnin = $guestCount->Count;
-					}
-				  }
-			} else {
-				if (isset($roomStay->GuestCounts->GuestCount->AgeQualifyingCode) && $roomStay->GuestCounts->GuestCount->AgeQualifyingCode == "10") {
-				  $numadu = $roomStay->GuestCounts->GuestCount->Count;
-				}
+              if (isset($guestCount->AgeQualifyingCode) && $guestCount->AgeQualifyingCode == "8") {
+                $numnin = $guestCount->Count;
+              }
+            }
+          } else {
+            if (isset($roomStay->GuestCounts->GuestCount->AgeQualifyingCode) && $roomStay->GuestCounts->GuestCount->AgeQualifyingCode == "10") {
+              $numadu = $roomStay->GuestCounts->GuestCount->Count;
+            }
 
-				if (isset($roomStay->GuestCounts->GuestCount->AgeQualifyingCode) && $roomStay->GuestCounts->GuestCount->AgeQualifyingCode == "8") {
-				  $numnin = $roomStay->GuestCounts->GuestCount->Count;
-				}
-			}
-          
+            if (isset($roomStay->GuestCounts->GuestCount->AgeQualifyingCode) && $roomStay->GuestCounts->GuestCount->AgeQualifyingCode == "8") {
+              $numnin = $roomStay->GuestCounts->GuestCount->Count;
+            }
+          }
+
         }
-		
-		// dd($numadu, $numnin);
+
+        // dd($numadu, $numnin);
 
         $roomClass = config('rategain.rooms_cl.' . $roomStay->RoomRates->RoomRate->RoomTypeCode);
         $numres = collect(\DB::connection('on_the_fly')->select('select MAX(numres)+1 as res from reserva limit 1'))->first();
