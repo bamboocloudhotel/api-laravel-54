@@ -214,6 +214,8 @@ XML;
         $printDate = date('Y-m-d');
         $printTime = date('H:i:s');
 
+        dd($thisXml);
+
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_USERPWD, config('rategain.username') . ":" . config('rategain.password'));
         curl_setopt($ch, CURLOPT_POSTFIELDS, $thisXml);
@@ -227,6 +229,8 @@ XML;
         // dd($data, $thisXml);
 
         preg_match_all("|\"><(.*)\s/></OTA_HotelAvailNotifRS>|U", $data, $matches);
+
+        // dd($data);
 
         $return[] = [
           'room' => $room,
