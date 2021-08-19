@@ -212,7 +212,6 @@
       SELECT folio.numhab 
       FROM folio
       INNER JOIN habitacion ON folio.numhab = habitacion.numhab
-      INNER JOIN reserva ON folio.numres = reserva.numres
       WHERE '{$feclle}' < folio.fecsal 
       AND '{$fecsal}' > folio.feclle 
       AND folio.estado IN ('I')
@@ -250,7 +249,6 @@
       SELECT folio.numhab 
       FROM folio
       INNER JOIN habitacion ON folio.numhab = habitacion.numhab
-      INNER JOIN reserva ON folio.numres = reserva.numres
       WHERE '{$feclle}' < folio.fecsal 
       AND '{$fecsal}' > folio.feclle 
       AND folio.estado IN ('I')
