@@ -226,7 +226,7 @@ XML;
         $data = curl_exec($ch);
         curl_close($ch);
 
-        dd($data, $thisXml);
+        // dd($data, $thisXml);
 
         preg_match_all("|\"><(.*)\s/></OTA_HotelAvailNotifRS>|U", $data, $matches);
 
