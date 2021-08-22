@@ -254,7 +254,16 @@ XML;
         new \DateTime($fecsal)
       );
 
-      dd($period);
+      $dates = [];
+
+      foreach ($period as $key => $value) {
+        $dates[] = $value->format('Y-m-d');
+      }
+
+      return response([
+        'message' => 'Test',
+        'data' => $dates,
+      ]);
 
       $sqlAvailable = "
       SELECT * 
