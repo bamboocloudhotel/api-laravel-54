@@ -190,7 +190,7 @@
 
     $testSoapController->sendInventory($request->get('hotelId'), $feclle, $fecsal);
 
-    dd($request->all());
+    // dd($request->all());
   });
 
   Route::get('test/availability', function (Request $request) {
