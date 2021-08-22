@@ -197,6 +197,8 @@
 
     $testSoapController->setRateGainConfig($request->get('hotelId'));
 
+    $testSoapController->sendInventory($request->get('hotelId'));
+
     $feclle = $request->get('feclle');
     $fecsal = $request->get('fecsal');
     $codcla = $request->get('codcla');

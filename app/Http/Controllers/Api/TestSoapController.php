@@ -31,6 +31,12 @@
       $this->bookingEngine = new $class();
     }
 
+    public function sendInventory($instance) {
+      $instance = BambooInstance::where('name', $instance)->with('bambooInstanceRooms')->get();
+      
+      dd($instance->toArray());
+    }
+
     /**
      * This method return the list of all hotels associated to an username/password.
      */
@@ -128,6 +134,8 @@
 			'data' => $soapRequest
 		]);
     }
+
+
 
     public function modifyInventory(Request $request)
     {
