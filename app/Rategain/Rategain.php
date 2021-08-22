@@ -248,6 +248,14 @@ XML;
     public function sendAvailability($feclle, $fecsal, $codcla)
     {
 
+      $period = new \DatePeriod(
+        new \DateTime($feclle),
+        new \DateInterval('P1D'),
+        new \DateTime($fecsal)
+      );
+
+      dd($period);
+
       $sqlAvailable = "
       SELECT * 
       FROM habitacion 
