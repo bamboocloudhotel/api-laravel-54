@@ -37,7 +37,6 @@
 
       if ($instance) {
         foreach ($instance['bamboo_instance_rooms'] as $room) {
-          dd($room);
           $this->bookingEngine->sendAvailability($start, $end, $room['bb_room']);
         }
       }
