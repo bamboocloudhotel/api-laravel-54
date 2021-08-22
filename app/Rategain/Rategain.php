@@ -248,6 +248,8 @@ XML;
     public function sendAvailability($feclle, $fecsal, $codcla)
     {
 
+      $fecsal = date('Y-m-d H:i:s', strtotime($fecsal . ' +1 day'));
+
       $period = new \DatePeriod(
         new \DateTime($feclle),
         new \DateInterval('P1D'),
