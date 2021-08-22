@@ -33,7 +33,7 @@
 
     public function sendInventory($instance, $start, $end)
     {
-      $instance = BambooInstance::where('rg_hotel_code', $instance)->with('bambooInstanceRooms')->get()->toArray();
+      $instance = BambooInstance::where('rg_hotel_code', $instance)->with('bambooInstanceRooms')->first()->toArray();
 
       dd($instance);
 
