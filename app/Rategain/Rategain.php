@@ -260,7 +260,7 @@ XML;
         $dates[] = $value->format('Y-m-d');
       }
 
-      return response([
+      return response()->json([
         'message' => 'Test',
         'data' => $dates,
       ]);
