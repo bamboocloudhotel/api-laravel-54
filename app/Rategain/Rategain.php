@@ -260,10 +260,7 @@ XML;
         $dates[] = $value->format('Y-m-d');
       }
 
-      return response()->json([
-        'message' => 'Test',
-        'data' => $dates,
-      ]);
+      dd($dates);
 
       $sqlAvailable = "
       SELECT * 
