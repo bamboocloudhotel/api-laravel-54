@@ -188,7 +188,7 @@
     $fecsal = $request->get('fecsal');
     $codcla = $request->get('codcla');
 
-    $testSoapController->sendInventory($request->get('hotelId'));
+    $testSoapController->sendInventory($request->get('hotelId'), $feclle, $fecsal);
 
     dd($request->all());
   });

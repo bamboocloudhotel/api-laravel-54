@@ -31,11 +31,19 @@
       $this->bookingEngine = new $class();
     }
 
-    public function sendInventory($instance)
+    public function sendInventory($instance, $start, $end)
     {
-      $instance = BambooInstance::where('rg_hotel_code', $instance)->with('bambooInstanceRooms')->get();
+      $instance = BambooInstance::where('rg_hotel_code', $instance)->with('bambooInstanceRooms')->get()->toArray();
 
-      dd($instance->toArray());
+      if ($instance) {
+        foreach ($instance['bamboo_instance_rooms'] as $room) {
+          $this->bookingEngine->sendAvailability($start, $end, $room['bb_room']);
+        }
+      }
+
+      return response()->json([
+        'message' => 'No se encontro la instancia!',
+      ], 400);
     }
 
     /**
