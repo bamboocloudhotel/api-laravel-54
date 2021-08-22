@@ -262,6 +262,8 @@ XML;
         $dates[] = $value->format('Y-m-d');
       }
 
+      $return = [];
+
       foreach ($dates as $date) {
         $start = $date;
         $end = date('Y-m-d H:i:s', strtotime($date . ' +1 day'));
@@ -304,9 +306,43 @@ XML;
 
         $roomsAvailable = collect(\DB::connection('on_the_fly')->select($sqlAvailable));
 
-        dd($roomsAvailable->toArray());
+        $xml = $this->inventoryModifyRequest;
+
+        $thisXml = str_replace('BookingLimit="1"', 'BookingLimit="' . $roomsAvailable->count() . '"', $xml);
+        $thisXml = str_replace('Start="2020-03-01"', 'Start="' . $date . '"', $thisXml);
+        $thisXml = str_replace('End="2020-03-01"', 'End="' . $date . '"', $thisXml);
+        $thisXml = str_replace('InvCode="SGL"', 'InvCode="' . $codcla . '"', $thisXml);
+        $thisXml = str_replace('ID="1"', 'ID="' . $this->uniqidReal() . '"', $thisXml);
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_USERPWD, config('rategain.username') . ":" . config('rategain.password'));
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $thisXml);
+        curl_setopt($ch, CURLOPT_URL, config('rategain.url'));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        $data = curl_exec($ch);
+        curl_close($ch);
+
+        // dd($data, $thisXml);
+
+        preg_match_all("|\"><(.*)\s/></OTA_HotelAvailNotifRS>|U", $data, $matches);
+
+        $return[] = [
+          'room' => $codcla,
+          'date' => $date,
+          'quantity' => $roomsAvailable->count(),
+          'updated' => isset($matches[1][0]) ? $matches[1][0] : 'Undefined',
+          'booking_engine' => 'rategain',
+          'xml' => $data,
+        ];
 
       }
+
+      return response()->json([
+        'message' => 'OK',
+        'data' => $return
+      ]);
 
     }
 

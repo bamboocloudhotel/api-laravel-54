@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Console\Commands;
+  namespace App\Console\Commands;
 
-use App\BambooInstance;
-use App\InventoryUpdate;
-use Illuminate\Console\Command;
+  use App\BambooInstance;
+  use App\InventoryUpdate;
+  use Illuminate\Console\Command;
 
-class ModifyBookingEngineInventory extends Command
-{
+  class ModifyBookingEngineInventory extends Command
+  {
     private $bookingEngine;
 
     /**
@@ -36,7 +36,7 @@ class ModifyBookingEngineInventory extends Command
      */
     public function __construct()
     {
-        parent::__construct();
+      parent::__construct();
     }
 
     /**
@@ -46,118 +46,118 @@ class ModifyBookingEngineInventory extends Command
      */
     public function handle()
     {
-        $class = 'App\\' . studly_case($this->argument('booking-engine')) . '\\' . studly_case($this->argument('booking-engine'));
-        $this->bookingEngine = new $class();
-        //
-        if ($this->argument('hotel-code')) {
-            $this->setRateGainConfig($this->argument('hotel-code'));
-        } else {
-			return;
-		}
-		
-        $typeRoom = config(snake_case(studly_case($this->argument('booking-engine'))) . '.rooms_lc.' . $this->argument('room-class'));
+      $class = 'App\\' . studly_case($this->argument('booking-engine')) . '\\' . studly_case($this->argument('booking-engine'));
+      $this->bookingEngine = new $class();
+      //
+      if ($this->argument('hotel-code')) {
+        $this->setRateGainConfig($this->argument('hotel-code'));
+      } else {
+        return;
+      }
 
-        if ($typeRoom) {
-            $period = new \DatePeriod(
-                new \DateTime($this->argument('start-date')),
-                new \DateInterval('P1D'),
-                new \DateTime($this->argument('end-date'))
-            );
-			
-            $datesToCheck = [];
+      $typeRoom = config(snake_case(studly_case($this->argument('booking-engine'))) . '.rooms_lc.' . $this->argument('room-class'));
 
-            foreach ($period as $key => $value) {
-                $datesToCheck[] = $value->format('Y-m-d');
+      if ($typeRoom) {
+        $period = new \DatePeriod(
+          new \DateTime($this->argument('start-date')),
+          new \DateInterval('P1D'),
+          new \DateTime($this->argument('end-date'))
+        );
+
+        $datesToCheck = [];
+
+        foreach ($period as $key => $value) {
+          $datesToCheck[] = $value->format('Y-m-d');
+        }
+
+        foreach ($datesToCheck as $dateToCheck) {
+          $availability = $this->bookingEngine->getBambooQuantityAvailability($dateToCheck, $dateToCheck, $this->argument('room-class'));
+          $availability['date'] = $dateToCheck;
+          $availabilities[] = $availability;
+        }
+
+        // dd($availabilities);
+
+        $modifies = [];
+
+        foreach ($availabilities as $availability) {
+          $modifies[] = $this->bookingEngine->modifyInventory(
+            $availability['date'],
+            $availability['date'],
+            $availability['class'],
+            $this->argument('hotel-code'),
+            $availability['rooms']
+          );
+        }
+
+        // dd($modifies);
+
+        if ($this->argument('booking-engine') == 'rategain') {
+          foreach ($modifies as $modify) {
+            foreach ($modify as $mod) {
+              InventoryUpdate::create([
+                'booking_engine' => $mod['booking_engine'],
+                'room_class_cloud' => $mod['room'],
+                'room_class_local' => $this->argument('room-class'),
+                'date_updated' => $mod['date'],
+                'quantity' => $mod['quantity'],
+                'xml' => $mod['xml'],
+              ]);
             }
-
-            foreach ($datesToCheck as $dateToCheck) {
-                $availability = $this->bookingEngine->getBambooQuantityAvailability($dateToCheck, $dateToCheck, $this->argument('room-class'));
-                $availability['date'] = $dateToCheck;
-                $availabilities[] = $availability;
-            }
-
-            // dd($availabilities);
-
-            $modifies = [];
-			
-            foreach ($availabilities as $availability) {
-                $modifies[] = $this->bookingEngine->modifyInventory(
-                    $availability['date'],
-                    $availability['date'],
-                    $availability['class'],
-                    $this->argument('hotel-code'),
-                    $availability['rooms']
-                );
-            }
-			
-			// dd($modifies);
-			
-			if ($this->argument('booking-engine') == 'rategain') {
-				foreach ($modifies as $modify) {
-					foreach ($modify as $mod) {
-						InventoryUpdate::create([
-							'booking_engine' => $mod['booking_engine'],
-							'room_class_cloud' => $mod['room'],
-							'room_class_local' => $this->argument('room-class'),
-							'date_updated' => $mod['date'],
-							'quantity' => $mod['quantity'],
-							'xml' => $mod['xml'],
-						]);
-					}
-				}
-			}
-
-            return;
+          }
         }
 
         return;
+      }
+
+      return;
     }
 
     public function setRateGainConfig($rgHotelCode)
     {
-        $instance = BambooInstance::with('bambooInstanceRooms')
-            ->where(
-                'rg_hotel_code', $rgHotelCode
-            )->first()
-            ->toArray();
+      $instance = BambooInstance::with('bambooInstanceRooms')
+        ->where(
+          'rg_hotel_code', $rgHotelCode
+        )->first()
+        ->toArray();
 
-        \Config::set("database.connections.on_the_fly", [
-            "driver" => "mysql",
-            "host" => $instance['db_host'],
-            "port" => $instance['db_password'],
-            "database" => $instance['db_database'],
-            "username" => $instance['db_username'],
-            "password" => $instance['db_password'],
-            "unix_socket" => "",
-            "charset" => "utf8",
-            "collation" => "utf8_general_ci",
-            "prefix" => "",
-            "strict" => true,
-            "engine" => null,
-        ]);
+      \Config::set("database.connections.on_the_fly", [
+        "driver" => "mysql",
+        "host" => $instance['db_host'],
+        "port" => $instance['db_password'],
+        "database" => $instance['db_database'],
+        "username" => $instance['db_username'],
+        "password" => $instance['db_password'],
+        "unix_socket" => "",
+        "charset" => "utf8",
+        "collation" => "utf8_general_ci",
+        "prefix" => "",
+        "strict" => true,
+        "engine" => null,
+      ]);
 
-        $rooms_cl = [];
+      $rooms_cl = [];
 
-        $rooms_lc = [];
+      $rooms_lc = [];
 
-        foreach ($instance['bamboo_instance_rooms'] as $key => $value) {
-            $rooms_cl[$value['rg_room']] = $value['bb_room'];
-            $rooms_lc[$value['bb_room']] = $value['rg_room'];
-        }
+      foreach ($instance['bamboo_instance_rooms'] as $key => $value) {
+        $rooms_cl[$value['rg_room']] = $value['bb_room'];
+        $rooms_lc[$value['bb_room']] = $value['rg_room'];
+      }
 
-        \Config::set("rategain", [
-            'url' => $instance['rg_api'],
-            'auth' => $instance['rg_auth'],
-            'username' => $instance['rg_username'],
-            'password' => $instance['rg_password'],
-            'hotelCode' => $instance['rg_hotel_code'],
-            'rooms_cl' => $rooms_cl,
-            'rooms_lc' => $rooms_lc,
-            'paymentType' => $instance['payment_type'],
-            'warrantyType' => $instance['warranty_type'],
-            'programType' => $instance['program_type'],
-            'codpla' => $instance['codpla'],
-            'tipres' => $instance['tipres'],
-        ]);
+      \Config::set("rategain", [
+        'url' => $instance['rg_api'],
+        'auth' => $instance['rg_auth'],
+        'username' => $instance['rg_username'],
+        'password' => $instance['rg_password'],
+        'hotelCode' => $instance['rg_hotel_code'],
+        'rooms_cl' => $rooms_cl,
+        'rooms_lc' => $rooms_lc,
+        'paymentType' => $instance['payment_type'],
+        'warrantyType' => $instance['warranty_type'],
+        'programType' => $instance['program_type'],
+        'codpla' => $instance['codpla'],
+        'tipres' => $instance['tipres'],
+      ]);
     }
-}
+  }
