@@ -260,6 +260,8 @@ XML;
         $dates[] = $value->format('Y-m-d');
       }
 
+      dd($dates);
+
       $sqlAvailable = "
       SELECT * 
       FROM habitacion 
