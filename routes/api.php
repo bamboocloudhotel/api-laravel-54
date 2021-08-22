@@ -188,9 +188,12 @@
     $fecsal = $request->get('fecsal');
     $codcla = $request->get('codcla');
 
-    $testSoapController->sendInventory($request->get('hotelId'), $feclle, $fecsal);
+    $return = $testSoapController->sendInventory($request->get('hotelId'), $feclle, $fecsal);
 
-    // dd($request->all());
+    return response()->json([
+      'message' => 'OK',
+      'data' => $return
+    ], 200);
   });
 
   Route::get('test/availability', function (Request $request) {

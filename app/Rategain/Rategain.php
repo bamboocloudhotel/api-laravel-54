@@ -339,10 +339,7 @@ XML;
 
       }
 
-      return response()->json([
-        'message' => 'End Inventory OK',
-        'data' => $return
-      ]);
+      return $return;
 
     }
 
