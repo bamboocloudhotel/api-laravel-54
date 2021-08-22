@@ -262,46 +262,51 @@ XML;
         $dates[] = $value->format('Y-m-d');
       }
 
-      dd($dates);
+      foreach ($dates as $date) {
+        $start = $date;
+        $end = date('Y-m-d H:i:s', strtotime($date . ' +1 day'));
+        $sqlAvailable = "
+          SELECT * 
+          FROM habitacion 
+          WHERE numhab NOT IN(
+            SELECT reserva.numhab 
+            FROM reserva 
+            INNER JOIN habitacion ON reserva.numhab = habitacion.numhab
+            WHERE '{$start}' < reserva.fecsal 
+            AND '{$end}' > reserva.feclle 
+            AND reserva.estado IN ('P','G')
+            AND habitacion.codcla = {$codcla}
+            AND habitacion.tipo = 'V'
+          )
+          AND numhab NOT IN(
+            SELECT folio.numhab 
+            FROM folio
+            INNER JOIN habitacion ON folio.numhab = habitacion.numhab
+            WHERE '{$start}' < folio.fecsal 
+            AND '{$end}' > folio.feclle 
+            AND folio.estado IN ('I')
+            AND habitacion.codcla = {$codcla}
+            AND habitacion.tipo = 'V'
+          )
+          AND numhab NOT IN(
+            SELECT blohab.numhab
+            FROM blohab
+            LEFT JOIN habitacion ON blohab.numhab = habitacion.numhab
+            WHERE '{$start}' <= blohab.fecfin 
+            AND '{$end}' >= blohab.fecini
+            AND blohab.fecdes IS NULL
+            AND habitacion.codcla = {$codcla}
+            AND habitacion.tipo = 'V'
+          )
+          AND codcla = {$codcla}
+          AND tipo = 'V'
+        ";
 
-      $sqlAvailable = "
-      SELECT * 
-      FROM habitacion 
-      WHERE numhab NOT IN(
-        SELECT reserva.numhab 
-        FROM reserva 
-        INNER JOIN habitacion ON reserva.numhab = habitacion.numhab
-        WHERE '{$feclle}' < reserva.fecsal 
-        AND '{$fecsal}' > reserva.feclle 
-        AND reserva.estado IN ('P','G')
-        AND habitacion.codcla = {$codcla}
-        AND habitacion.tipo = 'V'
-      )
-      AND numhab NOT IN(
-        SELECT folio.numhab 
-        FROM folio
-        INNER JOIN habitacion ON folio.numhab = habitacion.numhab
-        WHERE '{$feclle}' < folio.fecsal 
-        AND '{$fecsal}' > folio.feclle 
-        AND folio.estado IN ('I')
-        AND habitacion.codcla = {$codcla}
-        AND habitacion.tipo = 'V'
-      )
-      AND numhab NOT IN(
-        SELECT blohab.numhab
-        FROM blohab
-        LEFT JOIN habitacion ON blohab.numhab = habitacion.numhab
-        WHERE '{$feclle}' <= blohab.fecfin 
-        AND '{$fecsal}' >= blohab.fecini
-        AND blohab.fecdes IS NULL
-        AND habitacion.codcla = {$codcla}
-        AND habitacion.tipo = 'V'
-      )
-      AND codcla = {$codcla}
-      AND tipo = 'V'
-      ";
+        $roomsAvailable = collect(\DB::connection('on_the_fly')->select($sqlAvailable));
 
-      dd($sqlAvailable);
+        dd($roomsAvailable->toArray());
+
+      }
 
     }
 
