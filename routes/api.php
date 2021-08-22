@@ -181,7 +181,7 @@
 
   });
 
-  Route::post('test/set-availability', function (Request $request) {
+  Route::get('test/set-availability', function (Request $request) {
     $testSoapController = new \App\Http\Controllers\Api\TestSoapController($request);
     $testSoapController->setRateGainConfig($request->get('hotelId'));
     $feclle = $request->get('feclle');
