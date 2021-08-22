@@ -15,19 +15,23 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Auth::routes();
+Auth::routes([
+  'register' => false,
+  'reset' => false,
+  'verify' => false,
+]);
 
-Route::get('/rategain-requests', 'RategainRequestController@index');
-Route::get('/rategain-requests/{id}', 'RategainRequestController@show');
-Route::get('/rategain-inventory-updates', 'InventoryUpdateController@index');
-Route::get('/rategain-inventory-updates/{id}', 'InventoryUpdateController@show');
-Route::get('/rategain-bamboo-instances', 'BambooInstancesController@index');
-Route::get('/rategain-bamboo-instances/{id}', 'BambooInstancesController@show');
-Route::post('/rategain-bamboo-instances', 'BambooInstancesController@store');
-Route::post('/rategain-bamboo-instances/{id}', 'BambooInstancesController@update');
-Route::get('/rategain-availability', 'AvailabilityController@index');
-Route::put('/rategain-availability', 'AvailabilityController@check');
-Route::post('/rategain-availability', 'AvailabilityController@send');
+Route::get('/rategain-requests', 'RategainRequestController@index')->middleware('auth');
+Route::get('/rategain-requests/{id}', 'RategainRequestController@show')->middleware('auth');
+Route::get('/rategain-inventory-updates', 'InventoryUpdateController@index')->middleware('auth');
+Route::get('/rategain-inventory-updates/{id}', 'InventoryUpdateController@show')->middleware('auth');
+Route::get('/rategain-bamboo-instances', 'BambooInstancesController@index')->middleware('auth');
+Route::get('/rategain-bamboo-instances/{id}', 'BambooInstancesController@show')->middleware('auth');
+Route::post('/rategain-bamboo-instances', 'BambooInstancesController@store')->middleware('auth');
+Route::post('/rategain-bamboo-instances/{id}', 'BambooInstancesController@update')->middleware('auth');
+Route::get('/rategain-availability', 'AvailabilityController@index')->middleware('auth');
+Route::put('/rategain-availability', 'AvailabilityController@check')->middleware('auth');
+Route::post('/rategain-availability', 'AvailabilityController@send')->middleware('auth');
 // Route::resource('rategain-requests', 'RategainRequestController');
 
 Route::get('/logs', '\Rap2hpoutre\LaravelLogViewer\LogViewerController@index');

@@ -11,7 +11,7 @@
         <meta name="csrf-token"
               content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        <title>RateGain Integration</title>
 
         <!-- Styles -->
         <link href="{{ asset('css/app.css') }}"
@@ -37,16 +37,33 @@
                         <!-- Branding Image -->
                         <a class="navbar-brand"
                            href="{{ url('/') }}">
-                            {{ config('app.name', 'Laravel') }}
+                            RateGain Integration
                         </a>
                     </div>
 
                     <div class="collapse navbar-collapse"
                          id="app-navbar-collapse">
                         <!-- Left Side Of Navbar -->
+                        @if(Auth::user())
                         <ul class="nav navbar-nav">
+                            <li>
+                                <a href="{{url('/rategain-bamboo-instances')}}">Instances</a>
+                            </li>
+
+                            <li>
+                                <a href="{{url('/rategain-requests')}}">Requests</a>
+                            </li>
+
+                            <li>
+                                <a href="{{url('/rategain-availability')}}">Inventory</a>
+                            </li>
+
+                            <li>
+                                <a href="{{url('/rategain-inventory-updates')}}">Inventory updates</a>
+                            </li>
                             &nbsp;
                         </ul>
+                        @endif
 
                         <!-- Right Side Of Navbar -->
                         <ul class="nav navbar-nav navbar-right">
@@ -55,9 +72,9 @@
                                 <li>
                                     <a href="{{ route('login') }}">Login</a>
                                 </li>
-                                <li>
+<!--                                <li>
                                     <a href="{{ route('register') }}">Register</a>
-                                </li>
+                                </li>-->
                             @else
                                 <li class="dropdown">
                                     <a href="#"

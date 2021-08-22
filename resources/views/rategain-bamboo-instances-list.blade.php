@@ -2,6 +2,10 @@
 
 @section('content')
 
+    <div class="col-12" style="padding-left: 2rem;">
+        <h3>Instances</h3>
+    </div>
+
     <table class="table">
         <tr>
             <td>

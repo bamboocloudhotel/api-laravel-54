@@ -4,8 +4,8 @@
 
     <div class="container">
         <div class="row">
-            <div class="col">
-                <h4>Disponibilidad de inventario</h4>
+            <div class="col-12">
+                <h3>Check inventory availability</h3>
             </div>
         </div>
         <div class="row">
@@ -124,7 +124,7 @@
             var start = $('#start').val();
             var end = $('#end').val();
             if (!instance || !start | !end) {
-                alert('You must select a instance start date and end date!');
+                alert('You must select a instance, start date and end date!');
                 $('#sendHotelAvailability').attr('disabled', false);
                 return;
             }
