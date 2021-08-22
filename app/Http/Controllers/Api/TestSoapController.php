@@ -31,9 +31,9 @@
       $this->bookingEngine = new $class();
     }
 
-    public function sendInventory($instance) {
-      dd($instance);
-      $instance = BambooInstance::where('name', $instance)->with('bambooInstanceRooms')->get();
+    public function sendInventory($instance)
+    {
+      $instance = BambooInstance::where('rg_hotel_code', $instance)->with('bambooInstanceRooms')->get();
 
       dd($instance->toArray());
     }
