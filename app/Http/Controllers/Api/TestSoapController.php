@@ -35,8 +35,6 @@
     {
       $instance = BambooInstance::where('rg_hotel_code', $instance)->with('bambooInstanceRooms')->first()->toArray();
 
-      dd($instance);
-
       if ($instance) {
         foreach ($instance['bamboo_instance_rooms'] as $room) {
           $this->bookingEngine->sendAvailability($start, $end, $room['bb_room']);
