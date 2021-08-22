@@ -139,7 +139,7 @@
             var start = $('#start').val();
             var end = $('#end').val();
 
-            $('#searchAvailability').attr('disabled', true);
+            $('#sendHotelAvailability').attr('disabled', true);
             axios.get('http://45.32.223.244/api-laravel-54/public/index.php/api/test/set-availability?bookingEngine=rategain&hotelId=' + instance + '&feclle=' + start + '&fecsal=' + end)
                 .then(function (response) {
                     console.log(response);
