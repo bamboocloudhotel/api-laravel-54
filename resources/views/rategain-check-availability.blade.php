@@ -74,6 +74,12 @@
                         onclick="getAvailability()"
                         class="btn btn-info">Search
                 </button>
+
+                <button id="sendHotelAvailability"
+                        type="button"
+                        onclick="sendHotelAvailability()"
+                        class="btn btn-success">Send Hotel Availibility
+                </button>
             </div>
         </div>
 
@@ -111,12 +117,47 @@
             return '';
         }
 
+        function sendHotelAvailability() {
+            loading = true;
+            $('#sendHotelAvailability').attr('disabled', true);
+            var instance = $('#instance').val();
+            var start = $('#start').val();
+            var end = $('#end').val();
+            if (!instance || !start | !end) {
+                alert('You must select a instance start date and end date!');
+                $('#sendHotelAvailability').attr('disabled', false);
+                return;
+            }
+
+            sendAvailability();
+
+        }
+
+        function sendAvailability() {
+
+            var instance = $('#instance').val();
+            var start = $('#start').val();
+            var end = $('#end').val();
+
+            $('#searchAvailability').attr('disabled', true);
+            axios.get('http://45.32.223.244/api-laravel-54/public/index.php/api/test/set-availability?bookingEngine=rategain&hotelId=' + instance + '&feclle=' + start + '&fecsal=' + end)
+                .then(function (response) {
+                    console.log(response);
+                    loading = false;
+                    $('#sendHotelAvailability').attr('disabled', false);
+                })
+                .catch(function (error) {
+                    console.log(error);
+                    loading = false;
+                    $('#sendHotelAvailability').attr('disabled', false);
+                });
+        }
+
         function getAvailability() {
             loading = true;
             $('#searchAvailability').attr('disabled', true);
             axios.get('http://45.32.223.244/api-laravel-54/public/index.php/api/test/availability?bookingEngine=rategain&hotelId=' + $('#instance').val() + '&feclle=' + $('#start').val() + '&fecsal=' + $('#end').val() + '&codcla=' + $('#room').val())
                 .then(function (response) {
-                    console.log(response);
                     $('#available').html(response.data.available.join(', '));
                     $('#availableTotal').html(response.data.availableCount);
                     $('#notAvailable').html(response.data.notAvailable.join(', '));

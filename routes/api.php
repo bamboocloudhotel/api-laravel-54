@@ -181,6 +181,16 @@
 
   });
 
+  Route::post('test/send-availability', function (Request $request) {
+    $testSoapController = new \App\Http\Controllers\Api\TestSoapController($request);
+    $testSoapController->setRateGainConfig($request->get('hotelId'));
+    $feclle = $request->get('feclle');
+    $fecsal = $request->get('fecsal');
+    $codcla = $request->get('codcla');
+
+    dd($request->all());
+  });
+
   Route::get('test/availability', function (Request $request) {
 
     $testSoapController = new \App\Http\Controllers\Api\TestSoapController($request);
