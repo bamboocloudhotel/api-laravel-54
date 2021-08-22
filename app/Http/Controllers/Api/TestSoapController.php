@@ -32,8 +32,9 @@
     }
 
     public function sendInventory($instance) {
+      dd($instance);
       $instance = BambooInstance::where('name', $instance)->with('bambooInstanceRooms')->get();
-      
+
       dd($instance->toArray());
     }
 
@@ -245,7 +246,6 @@
         return response()->json([
           'message' => 'No se encontro la instancia'
         ], 400);
-        die();
       }
 
       $instance = $instance->toArray();
