@@ -975,6 +975,36 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
         $metadata = json_encode($data);
 
         try {
+          $rateList = "";
+          if (is_array($roomStay->RoomRates->RoomRate->Rates->Rate)) {
+
+            foreach ($roomStay->RoomRates->RoomRate->Rates->Rate as $dayPrice) {
+
+              $amountBT = isset($dayPrice->Base->AmountBeforeTax) ? $dayPrice->Base->AmountBeforeTax : 0;
+              $amountAT = isset($dayPrice->Base->AmountAfterTax) ? $dayPrice->Base->AmountAfterTax : 0;
+
+              $amount = $amountBT ? $amountBT : $amountAT;
+
+              $value = $amount;
+
+              $item = $dayPrice->EffectiveDate . " - " . $value;
+
+              $rateList = $rateList . $item . "/n";
+
+            }
+
+          } else {
+
+            $amountBT = isset($roomStay->RoomRates->RoomRate->Rates->Rate->Base->AmountBeforeTax) ? $roomStay->RoomRates->RoomRate->Rates->Rate->Base->AmountBeforeTax : 0;
+            $amountAT = isset($roomStay->RoomRates->RoomRate->Rates->Rate->Base->AmountAfterTax) ? $roomStay->RoomRates->RoomRate->Rates->Rate->Base->AmountAfterTax : 0;
+            $amount = $amountBT ? $amountBT : $amountAT;
+            $value = $amount;
+
+            $item = $roomStay->RoomRates->RoomRate->Rates->Rate->Base->EffectiveDate . " - " . $value;
+
+            $rateList = $rateList . $item . "/n";
+
+          }
           Reserva::create([
             'numres' => $numres,
             'referencia' => 'RateGain ' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Type . ' ' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Value . ' - ' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Type . ' ' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value,
@@ -1024,6 +1054,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
             'cancellationid' => null,
             'rateplanname' => null,
             'rateplancode' => isset($roomStay->RatePlans->RatePlan->RatePlanCode) ? $roomStay->RatePlans->RatePlan->RatePlanCode : '',
+            'ratelist' => $rateList,
             'idclifre' => $booker ? ($booker->givenname . ' ' . $booker->surname . ' - ' . $booker->email) : "{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->GivenName} {$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->Surname}",
           ]);
         } catch (\Exception $exception) {
