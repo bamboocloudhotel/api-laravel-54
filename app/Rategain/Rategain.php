@@ -1006,7 +1006,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
 
           }
 
-          dd($rateList);
+          // dd($rateList);
 
           Reserva::create([
             'numres' => $numres,
