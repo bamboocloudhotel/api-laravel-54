@@ -213,10 +213,10 @@ class XMLController extends Controller
                 'data.HotelReservations.HotelReservation.RoomStays.RoomStay.RoomStayStatus' => 'in:new,Book,modified',
                 'data.HotelReservations.HotelReservation.RoomStays.RoomStay.RoomRates.RoomRate.RoomTypeCode' => 'required|in:' . implode(',', array_keys(config('rategain.rooms_cl'))),
                 'data.HotelReservations.HotelReservation.RoomStays.RoomStay.RoomRates.RoomRate.NumberOfUnits' => 'required',
-                'data.HotelReservations.HotelReservation.RoomStays.RoomStay.RoomRates.RoomRate.Rates.Rate.*.EffectiveDate' => 'after:' . date('Y-m-d', strtotime('-1 day')),
-                'data.HotelReservations.HotelReservation.RoomStays.RoomStay.RoomRates.RoomRate.Rates.Rate.*.ExpireDate' => 'after:data.HotelReservations.HotelReservation.RoomStays.RoomStay.RoomRates.RoomRate.Rates.Rate.*.EffectiveDate',
-                'data.HotelReservations.HotelReservation.ResGlobalInfo.TimeSpan.Start' => 'after:' . date('Y-m-d', strtotime('-1 day')),
-                'data.HotelReservations.HotelReservation.ResGlobalInfo.TimeSpan.End' => 'after:data.HotelReservations.HotelReservation.ResGlobalInfo.TimeSpan.Start',
+                // 'data.HotelReservations.HotelReservation.RoomStays.RoomStay.RoomRates.RoomRate.Rates.Rate.*.EffectiveDate' => 'after:' . date('Y-m-d', strtotime('-1 day')),
+                // 'data.HotelReservations.HotelReservation.RoomStays.RoomStay.RoomRates.RoomRate.Rates.Rate.*.ExpireDate' => 'after:data.HotelReservations.HotelReservation.RoomStays.RoomStay.RoomRates.RoomRate.Rates.Rate.*.EffectiveDate',
+                // 'data.HotelReservations.HotelReservation.ResGlobalInfo.TimeSpan.Start' => 'after:' . date('Y-m-d', strtotime('-1 day')),
+                // 'data.HotelReservations.HotelReservation.ResGlobalInfo.TimeSpan.End' => 'after:data.HotelReservations.HotelReservation.ResGlobalInfo.TimeSpan.Start',
             ], [
                 'data.ResStatus.in' => 'data.ResStatus',
                 'data.POS.Source.BookingChannel.CompanyName.Code.required' => 'data.POS.Source.BookingChannel.CompanyName.Code',
@@ -227,10 +227,10 @@ class XMLController extends Controller
                 'data.HotelReservations.HotelReservation.RoomStays.RoomRates.RoomRate.RoomTypeCode.required' => 'data.HotelReservations.HotelReservation.RoomStays.RoomRates.RoomRate.RoomTypeCode',
                 'data.HotelReservations.HotelReservation.RoomStays.RoomRates.RoomRate.NumberOfUnits.required' => 'data.HotelReservations.HotelReservation.RoomStays.RoomRates.RoomRate.NumberOfUnits',
                 'data.HotelReservations.HotelReservation.RoomStays.RoomStay.RoomRates.RoomRate.Rates.Rate.*.EffectiveDate.after' => 'data.HotelReservations.HotelReservation.RoomStays.RoomStay.RoomRates.RoomRate.Rates.Rate.*.EffectiveDate',
-                'data.HotelReservations.HotelReservation.RoomStays.RoomStay.RoomRates.RoomRate.Rates.Rate.*.ExpireDate.after' => 'data.HotelReservations.HotelReservation.RoomStays.RoomStay.RoomRates.RoomRate.Rates.Rate.*.ExpireDate',
-                'data.HotelReservations.HotelReservation.ResGlobalInfo.TimeSpan.Start.after' => 'data.HotelReservations.HotelReservation.ResGlobalInfo.TimeSpan.Start',
-                'data.HotelReservations.HotelReservation.ResGlobalInfo.TimeSpan.End.after' => 'data.HotelReservations.HotelReservation.ResGlobalInfo.TimeSpan.End',
-                'data.HotelReservations.HotelReservation.RoomStays.RoomStay.RoomRates.RoomRate.RoomTypeCode.in' => 'data.HotelReservations.HotelReservation.RoomStays.RoomRates.RoomRate.RoomTypeCode',
+                // 'data.HotelReservations.HotelReservation.RoomStays.RoomStay.RoomRates.RoomRate.Rates.Rate.*.ExpireDate.after' => 'data.HotelReservations.HotelReservation.RoomStays.RoomStay.RoomRates.RoomRate.Rates.Rate.*.ExpireDate',
+                // 'data.HotelReservations.HotelReservation.ResGlobalInfo.TimeSpan.Start.after' => 'data.HotelReservations.HotelReservation.ResGlobalInfo.TimeSpan.Start',
+                // 'data.HotelReservations.HotelReservation.ResGlobalInfo.TimeSpan.End.after' => 'data.HotelReservations.HotelReservation.ResGlobalInfo.TimeSpan.End',
+                // 'data.HotelReservations.HotelReservation.RoomStays.RoomStay.RoomRates.RoomRate.RoomTypeCode.in' => 'data.HotelReservations.HotelReservation.RoomStays.RoomRates.RoomRate.RoomTypeCode',
             ]);
         }
 
