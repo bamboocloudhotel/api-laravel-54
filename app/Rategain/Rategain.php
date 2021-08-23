@@ -802,9 +802,13 @@ XML;
 
               $guest->Profiles->ProfileInfo->Profile->Customer->Email = str_random(14) . '@email.com';
             }
-            $booker = $guest->Profiles->ProfileInfo->Profile;
+            $booker = $guest->Profiles->ProfileInfo->Profile->Customer;
+
+            $bookerOr = $guest->Profiles->ProfileInfo->Profile->Customer;
+
             // dd($guest->Profiles->ProfileInfo);
             $bookerExists = CrBooker::where('email', $booker->Email)->first();
+
             if (!$bookerExists) {
               try {
                 $booker = [
