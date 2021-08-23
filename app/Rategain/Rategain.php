@@ -1001,7 +1001,22 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
             'metadata' => $metadata,
             'guarantee' => ' ' . $guaranteeText,
             'confirmationid' => $confirmationid,
-            'onlinecomment' => (isset($roomStay->Comments) ? '' . (is_array($roomStay->Comments->Comment) ? json_encode($roomStay->Comments->Comment) : $roomStay->Comments->Comment->Text) : '') . ($company ? "\n" . $company['name'] . " - " . $company['id'] : ""),
+            'onlinecomment' => (
+              isset($roomStay->Comments) ?
+                '' . (is_array($roomStay->Comments->Comment) ?
+                  json_encode($roomStay->Comments->Comment) :
+                  $roomStay->Comments->Comment->Text) :
+                '') . (
+                  $company ?
+                    "\n" . $company['name'] . " - " . $company['id'] :
+                    "\n"
+                ) . (
+              isset($roomStay->SpecialRequests) ?
+                '' . (is_array($roomStay->SpecialRequests->SpecialRequest) ?
+                  json_encode($roomStay->SpecialRequests->SpecialRequest) :
+                  $roomStay->SpecialRequests->SpecialRequest) :
+                "\n"
+              ),
             'cancellationid' => null,
             'idclifre' => $booker ? $booker->givenname . ' ' . $booker->surname . ' - ' . $booker->phone : "{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->GivenName} {$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->Surname}",
           ]);
