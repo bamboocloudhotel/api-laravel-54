@@ -1005,6 +1005,9 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
             $rateList = $rateList . $item . "/n";
 
           }
+
+          dd($rateList);
+
           Reserva::create([
             'numres' => $numres,
             'referencia' => 'RateGain ' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Type . ' ' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Value . ' - ' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Type . ' ' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value,
