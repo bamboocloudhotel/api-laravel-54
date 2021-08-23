@@ -987,7 +987,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
 
               $value = $amount;
 
-              $item = $dayPrice->EffectiveDate . " - " . $value;
+              $item = $dayPrice->EffectiveDate . " - " . number_format($value, 0, ',', '.');
 
               $rateList = $rateList . $item . "/n";
 
@@ -1000,7 +1000,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
             $amount = $amountBT ? $amountBT : $amountAT;
             $value = $amount;
 
-            $item = $roomStay->RoomRates->RoomRate->Rates->Rate->Base->EffectiveDate . " - " . $value;
+            $item = $roomStay->RoomRates->RoomRate->Rates->Rate->EffectiveDate . " - " . number_format($value, 0, ',', '.');
 
             $rateList = $rateList . $item . "/n";
 
