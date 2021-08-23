@@ -1018,9 +1018,9 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                 "\n"
               ),
             'cancellationid' => null,
-            'rateplancode' => null,
-            'rateplanname' => isset($roomStay->RatePlans->RatePlan->RatePlanCode) ? $roomStay->RatePlans->RatePlan->RatePlanCode : '',
-            'idclifre' => $booker ? $booker->givenname . ' ' . $booker->surname . ' - ' . $booker->phone : "{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->GivenName} {$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->Surname}",
+            'rateplanname' => null,
+            'rateplancode' => isset($roomStay->RatePlans->RatePlan->RatePlanCode) ? $roomStay->RatePlans->RatePlan->RatePlanCode : '',
+            'idclifre' => $booker ? ($booker->givenname . ' ' . $booker->surname . ' - ' . $booker->phone) : "{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->GivenName} {$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->Surname}",
           ]);
         } catch (\Exception $exception) {
           dd($exception->getMessage());

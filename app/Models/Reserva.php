@@ -146,6 +146,6 @@
       'cancellationid',
       'modifyid',
       'rateplancode',
-      'rateplanname'
+      'reteplanname'
     ];
   }
