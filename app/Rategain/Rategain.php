@@ -899,8 +899,6 @@ XML;
       $roomStayCnt = 0;
       foreach ($data->HotelReservations->HotelReservation->RoomStays->RoomStay as $roomStay) {
 
-        dd($roomStay->RatePlans->RatePlan->RatePlanCode);
-
         $guarantee = null;
 
         if (
