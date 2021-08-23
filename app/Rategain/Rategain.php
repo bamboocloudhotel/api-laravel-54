@@ -1051,7 +1051,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
               isset($roomStay->SpecialRequests) ?
                 '' . (is_array($roomStay->SpecialRequests->SpecialRequest) ?
                   json_encode($roomStay->SpecialRequests->SpecialRequest) :
-                  $roomStay->SpecialRequests->SpecialRequest) :
+                  json_encode($roomStay->SpecialRequests->SpecialRequest)) :
                 "\n"
               ),
             'cancellationid' => null,
