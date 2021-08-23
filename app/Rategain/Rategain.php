@@ -989,7 +989,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
 
               $item = $dayPrice->EffectiveDate . " - " . number_format($value, 0, ',', '.');
 
-              $rateList = $rateList . $item . "/n";
+              $rateList .= $rateList . $item . "\n";
 
             }
 
@@ -1002,7 +1002,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
 
             $item = $roomStay->RoomRates->RoomRate->Rates->Rate->EffectiveDate . " - " . number_format($value, 0, ',', '.');
 
-            $rateList = $rateList . $item . "/n";
+            $rateList = $rateList . $item . "\n";
 
           }
 
