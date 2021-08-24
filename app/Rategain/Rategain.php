@@ -1149,12 +1149,20 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
             }
           }
         } else {
-          $amountBT = isset($roomStay->RoomRates->RoomRate->Rates->Rate->Base->AmountBeforeTax) ? $roomStay->RoomRates->RoomRate->Rates->Rate->Base->AmountBeforeTax : 0;
-          $amountAT = isset($roomStay->RoomRates->RoomRate->Rates->Rate->Base->AmountAfterTax) ? $roomStay->RoomRates->RoomRate->Rates->Rate->Base->AmountAfterTax : 0;
+          $amountBT = isset($roomStay->RoomRates->RoomRate->Rates->Rate->Base->AmountBeforeTax) ?
+            $roomStay->RoomRates->RoomRate->Rates->Rate->Base->AmountBeforeTax :
+            0;
+          $amountAT = isset($roomStay->RoomRates->RoomRate->Rates->Rate->Base->AmountAfterTax) ?
+            $roomStay->RoomRates->RoomRate->Rates->Rate->Base->AmountAfterTax :
+            0;
           $amount = $amountBT ? $amountBT : $amountAT;
           $value = $amount;
 
-          if (isset($dayPrice->Base->CurrencyCode) && $dayPrice->Base->CurrencyCode && $dayPrice->Base->CurrencyCode === 'USD') {
+          if (
+            isset($roomStay->RoomRates->RoomRate->Rates->Rate->Base->CurrencyCode) &&
+            $roomStay->RoomRates->RoomRate->Rates->Rate->Base->CurrencyCode &&
+            $roomStay->RoomRates->RoomRate->Rates->Rate->Base->CurrencyCode === 'USD'
+          ) {
             $usd = Valmon::orderBy('fecha', 'DESC')->first();
             $value = $value * $usd->valor;
           }
