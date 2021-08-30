@@ -18,7 +18,7 @@ class BambooReservationsController extends Controller
 
         if (!$database) {
             return response()->json([
-                'message' => 'No se encontro la base de datos: ' . $request->database . ' en el host: ' . $request->host,
+                'message' => 'No se encontró la base de datos: ' . $request->database . ' en el host: ' . $request->host,
             ], 404);
         }
 
