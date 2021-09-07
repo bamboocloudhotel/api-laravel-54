@@ -49,7 +49,7 @@ class TestSoapController extends SoapController
                         'booking_engine' => 'rategain',
                         'room_class_cloud' => $room['rg_room'],
                         'room_class_local' => $room['bb_room'],
-                        'date_updated' => $start,
+                        'date_updated' => $res['date'],
                         'quantity' => $res['quantity'],
                         'xml' => $res['xml'],
                         'hotel' => $instance['name']
