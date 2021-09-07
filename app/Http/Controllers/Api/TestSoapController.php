@@ -44,6 +44,8 @@ class TestSoapController extends SoapController
 
                 $return[] = $resp;
 
+                dd($resp);
+
                 InventoryUpdate::create([
                     'booking_engine' => 'rategain',
                     'room_class_cloud' => $room['rg_room'],
