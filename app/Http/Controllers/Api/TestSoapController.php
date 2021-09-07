@@ -44,17 +44,19 @@ class TestSoapController extends SoapController
 
                 $return[] = $resp;
 
-                dd($resp);
+                foreach ($resp as $res) {
+                    InventoryUpdate::create([
+                        'booking_engine' => 'rategain',
+                        'room_class_cloud' => $room['rg_room'],
+                        'room_class_local' => $room['bb_room'],
+                        'date_updated' => $start,
+                        'quantity' => $res['quantity'],
+                        'xml' => $res['xml'],
+                        'hotel' => $instance['name']
+                    ]);
+                }
 
-                InventoryUpdate::create([
-                    'booking_engine' => 'rategain',
-                    'room_class_cloud' => $room['rg_room'],
-                    'room_class_local' => $room['bb_room'],
-                    'date_updated' => $start,
-                    'quantity' => $resp['quantity'],
-                    'xml' => $resp['xml'],
-                    'hotel' => $instance['name']
-                ]);
+
             }
 
             return $return;
