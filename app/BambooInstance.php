@@ -26,7 +26,6 @@ class BambooInstance extends Model
         'tipres',
     ];
 
-
     public function bambooInstanceRooms()
     {
         return $this->hasMany(BambooInstanceRoom::class);
