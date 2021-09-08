@@ -64,7 +64,7 @@ class XMLController extends Controller
 
 
                 $this->getInstance($reservationObject->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode);
-				
+
 				// dd($reservationObject->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode);
 
                 $response = $this->rategain->saveReservation($reservationObject);
@@ -201,12 +201,12 @@ class XMLController extends Controller
     public function doValidation($reservationObject, $data)
     {
         $this->setRateGainConfig($reservationObject->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode);
-        
+
 		if (!is_array($reservationObject->HotelReservations->HotelReservation->RoomStays->RoomStay)) {
             $validation = \Validator::make($data, [
                 'method' => 'required|in:OTA_HotelResNotifRQ',
                 'data.ResStatus' => 'in:Commit,Modify,Cancel',
-                'data.POS.Source.BookingChannel.CompanyName.Code' => 'required',
+                // 'data.POS.Source.BookingChannel.CompanyName.Code' => 'required',
                 'data.HotelReservations.HotelReservation.ResStatus' => 'in:Commit,Modify,Cancel',
                 'data.HotelReservations.HotelReservation.UniqueID.ID' => 'required',
                 'data.HotelReservations.HotelReservation.BasicPropertyInfo.HotelCode' => 'in:' . config('rategain.hotelCode'),
@@ -219,7 +219,7 @@ class XMLController extends Controller
                 // 'data.HotelReservations.HotelReservation.ResGlobalInfo.TimeSpan.End' => 'after:data.HotelReservations.HotelReservation.ResGlobalInfo.TimeSpan.Start',
             ], [
                 'data.ResStatus.in' => 'data.ResStatus',
-                'data.POS.Source.BookingChannel.CompanyName.Code.required' => 'data.POS.Source.BookingChannel.CompanyName.Code',
+                // 'data.POS.Source.BookingChannel.CompanyName.Code.required' => 'data.POS.Source.BookingChannel.CompanyName.Code',
                 'data.HotelReservations.HotelReservation.ResStatus.in' => 'data.HotelReservations.HotelReservation.ResStatus',
                 'data.HotelReservations.HotelReservation.UniqueID.ID.required' => 'data.HotelReservations.HotelReservation.UniqueID.ID',
                 'data.HotelReservations.HotelReservation.BasicPropertyInfo.HotelCode.in' => 'data.HotelReservations.HotelReservation.BasicPropertyInfo.HotelCode',
@@ -238,7 +238,7 @@ class XMLController extends Controller
             $validation = \Validator::make($data, [
                 'method' => 'required|in:OTA_HotelResNotifRQ',
                 'data.ResStatus' => 'in:Commit,Modify,Cancel',
-                'data.POS.Source.BookingChannel.CompanyName.Code' => 'required',
+                // 'data.POS.Source.BookingChannel.CompanyName.Code' => 'required',
                 'data.HotelReservations.HotelReservation.ResStatus' => 'in:Commit,Modify,Cancel',
                 'data.HotelReservations.HotelReservation.UniqueID.ID' => 'required',
                 'data.HotelReservations.HotelReservation.BasicPropertyInfo.HotelCode' => 'in:' . config('rategain.hotelCode'),
@@ -251,7 +251,7 @@ class XMLController extends Controller
                 'data.HotelReservations.HotelReservation.ResGlobalInfo.TimeSpan.End' => 'after:data.HotelReservations.HotelReservation.ResGlobalInfo.TimeSpan.Start',
             ], [
                 'data.ResStatus.in' => 'data.ResStatus',
-                'data.POS.Source.BookingChannel.CompanyName.Code.required' => 'data.POS.Source.BookingChannel.CompanyName.Code',
+                // 'data.POS.Source.BookingChannel.CompanyName.Code.required' => 'data.POS.Source.BookingChannel.CompanyName.Code',
                 'data.HotelReservations.HotelReservation.ResStatus.in' => 'data.HotelReservations.HotelReservation.ResStatus',
                 'data.HotelReservations.HotelReservation.UniqueID.ID.required' => 'data.HotelReservations.HotelReservation.UniqueID.ID',
                 'data.HotelReservations.HotelReservation.BasicPropertyInfo.HotelCode.in' => 'data.HotelReservations.HotelReservation.BasicPropertyInfo.HotelCode',
@@ -297,12 +297,12 @@ class XMLController extends Controller
             ->where(
                 'rg_hotel_code', $rgHotelCode
             )->first();
-			
+
 			if (!$instance) {
-				
+
 				dd('No hotel instance found!');
 			}
-			
+
 			$instance = $instance->toArray();
 
         \Config::set("database.connections.on_the_fly", [
@@ -351,11 +351,11 @@ class XMLController extends Controller
             ->where(
                 'rg_hotel_code', $rgHotelCode
             )->first();
-			
+
 		if (!$instance) {
 			dd('No hotel instance found!');
 		}
-			
+
 		$instance = $instance->toArray();
 
         $rooms_cl = [];
