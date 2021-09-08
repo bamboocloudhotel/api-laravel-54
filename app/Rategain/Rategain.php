@@ -253,7 +253,7 @@ XML;
      * @return array
      * @throws \Exception
      */
-    public function sendAvailability($feclle, $fecsal, $codcla)
+    public function sendAvailability($feclle, $fecsal, $codcla, $codrg)
     {
 
         $fecsal = date('Y-m-d H:i:s', strtotime($fecsal . ' +1 day'));
@@ -319,7 +319,7 @@ XML;
             $thisXml = str_replace('BookingLimit="1"', 'BookingLimit="' . $roomsAvailable->count() . '"', $xml);
             $thisXml = str_replace('Start="2020-03-01"', 'Start="' . $date . '"', $thisXml);
             $thisXml = str_replace('End="2020-03-01"', 'End="' . $date . '"', $thisXml);
-            $thisXml = str_replace('InvCode="SGL"', 'InvCode="' . $codcla . '"', $thisXml);
+            $thisXml = str_replace('InvCode="SGL"', 'InvCode="' . $codrg . '"', $thisXml);
             $thisXml = str_replace('ID="1"', 'ID="' . $this->uniqidReal() . '"', $thisXml);
 
             $ch = curl_init();

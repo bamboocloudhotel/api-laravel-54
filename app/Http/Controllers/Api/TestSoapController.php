@@ -40,7 +40,7 @@ class TestSoapController extends SoapController
         if ($instance) {
             foreach ($instance['bamboo_instance_rooms'] as $room) {
 
-                $resp = $this->bookingEngine->sendAvailability($start, $end, $room['bb_room']);
+                $resp = $this->bookingEngine->sendAvailability($start, $end, $room['bb_room'], $room['rg_room']);
 
                 $return[] = $resp;
 
@@ -55,8 +55,6 @@ class TestSoapController extends SoapController
                         'hotel' => $instance['name']
                     ]);
                 }
-
-
             }
 
             return $return;
