@@ -732,8 +732,8 @@ XML;
         $bookingChannel = null;
         $bambooCompanyNit = null;
 
-        if (isset($data->POS->Source->BookingChannel->CompanyName->Code)) {
-            $bookingChannel = $data->POS->Source->BookingChannel->CompanyName->Code;
+        if (isset($data->POS->Source->BookingChannel->CompanyName)) {
+            $bookingChannel = $data->POS->Source->BookingChannel->CompanyName;
         }
         // dd(config('database.connections.on_the_fly'));
         // \DB::setConnection('on_the_fly');
