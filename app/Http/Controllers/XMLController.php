@@ -86,6 +86,7 @@ class XMLController extends Controller
                     dd($exception->getMessage());
 
                 }
+
                 $returnSuccess = str_replace(
                     '<HotelReservationID ResID_Type="3" ResID_Value="123456789" />',
                     '<HotelReservationID ResID_Type="3" ResID_Value="' . $confirmationid . '" />',
@@ -103,11 +104,14 @@ class XMLController extends Controller
 
                 foreach ($reserva as $res) {
                     $res->update([
+                        'estado' => 'C',
                         'modifyid' => $confirmationid
                     ]);
                 }
 
-                return response()->xml($returnSuccess);
+                $response = $this->rategain->saveReservation($reservationObject, $confirmationid);
+
+                return response()->xml($response);
                 break;
             case 'Cancel':
 

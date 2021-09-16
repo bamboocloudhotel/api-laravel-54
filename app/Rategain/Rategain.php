@@ -719,7 +719,7 @@ XML;
      * @return array|string|string[]|void
      * @throws \Exception
      */
-    public function saveReservation($data)
+    public function saveReservation($data, $confirmationId = null)
     {
 
         $resGuest = null;
@@ -914,7 +914,12 @@ XML;
             return $this->getReservationError(['noAvailabilities']);
         }
         $tipDoc = Tipdoc::where('detalle', 'CEDULA CIUDADANIA')->first();
-        $confirmationid = $this->uniqidReal(16);
+
+        if (!$confirmationId) {
+            $confirmationid = $this->uniqidReal(16);
+        }
+
+
         $guaranteeText = "";
 
         $roomStayCnt = 0;
