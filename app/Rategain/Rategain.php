@@ -1077,9 +1077,9 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                             "\n"
                         ),
                     'cancellationid' => null,
-                    'rateplanname' => null,
-                    'rateplancode' => isset($roomStay->RatePlans->RatePlan->RatePlanCode) ? $roomStay->RatePlans->RatePlan->RatePlanCode : '',
-                    'ratelist' => $rateList,
+                    //'rateplanname' => null,
+                    //'rateplancode' => isset($roomStay->RatePlans->RatePlan->RatePlanCode) ? $roomStay->RatePlans->RatePlan->RatePlanCode : '',
+                    //'ratelist' => $rateList,
                     'idclifre' => $booker ? ($booker->givenname . ' ' . $booker->surname . ' - ' . $booker->email) : "{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->GivenName} {$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->Surname}",
                 ]);
             } catch (\Exception $exception) {
