@@ -211,7 +211,6 @@ XML;
             $thisXml = str_replace('Start="2020-03-01"', 'Start="' . $date . '"', $thisXml);
             $thisXml = str_replace('End="2020-03-01"', 'End="' . $date . '"', $thisXml);
             $thisXml = str_replace('InvCode="SGL"', 'InvCode="' . $room . '"', $thisXml);
-            $thisXml = str_replace('InvCode="SGL"', 'InvCode="' . $room . '"', $thisXml);
             $thisXml = str_replace('ID="1"', 'ID="' . $this->uniqidReal() . '"', $thisXml);
             $printDate = date('Y-m-d');
             $printTime = date('H:i:s');
