@@ -14,6 +14,7 @@ class InventoryUpdate extends Model
         'date_updated',
         'quantity',
         'xml',
-        'hotel'
+        'hotel',
+        'xml_request'
     ];
 }
