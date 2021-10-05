@@ -147,7 +147,7 @@ XML;
 
         $this->inventoryModifyRequest = <<<XML
 <OTA_HotelAvailNotifRQ xmlns="http://www.opentravel.org/OTA/2003/05" TimeStamp="{$currentDate}T{$currentTime}" Target="Production" Version="1.002" EchoToken="{$this->uniqidReal()}">
-	<AvailStatusMessages HotelCode="{$hotelId}">
+	<AvailStatusMessages HotelCode="xxxxx">
 		<AvailStatusMessage BookingLimit="1" BookingLimitMessageType="SetLimit">
 			<StatusApplicationControl Start="2020-03-01" End="2020-03-01" InvCode="SGL"></StatusApplicationControl>
 			<UniqueID Type="16" ID="1"></UniqueID>
@@ -206,7 +206,8 @@ XML;
         $return = [];
 
         foreach ($dates as $date) {
-            $thisXml = str_replace('BookingLimit="1"', 'BookingLimit="' . $quantity . '"', $xml);
+            $thisXml = str_replace('HotelCode="xxxxx"', 'HotelCode="' . $hotelId . '"', $xml);
+            $thisXml = str_replace('BookingLimit="1"', 'BookingLimit="' . $quantity . '"', $thisXml);
             $thisXml = str_replace('Start="2020-03-01"', 'Start="' . $date . '"', $thisXml);
             $thisXml = str_replace('End="2020-03-01"', 'End="' . $date . '"', $thisXml);
             $thisXml = str_replace('InvCode="SGL"', 'InvCode="' . $room . '"', $thisXml);
