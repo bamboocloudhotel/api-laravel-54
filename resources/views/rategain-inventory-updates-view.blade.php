@@ -16,9 +16,22 @@
                 <pre>{{$sxe}}</pre>
             </div>
         </div>
+
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h3>Respuesta</h3>
+            </div>
+        </div>
+
         <div class="row">
             <div class="col-md-8 col-md-offset-2">
                 {{$rateGainInventoryUpdate->xml}}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h3>Petición</h3>
             </div>
         </div>
 
