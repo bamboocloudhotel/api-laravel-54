@@ -52,7 +52,8 @@ class TestSoapController extends SoapController
                         'date_updated' => $res['date'],
                         'quantity' => $res['quantity'],
                         'xml' => $res['xml'],
-                        'hotel' => $instance['name']
+                        'hotel' => $instance['name'],
+                        'xml_request' => $res['request']
                     ]);
                 }
             }

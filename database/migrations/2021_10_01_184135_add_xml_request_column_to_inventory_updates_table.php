@@ -16,7 +16,7 @@ class AddXmlRequestColumnToInventoryUpdatesTable extends Migration
         //
         Schema::table('inventory_updates', function (Blueprint $table) {
             //
-            $table->string('xml_request')->nullable()->comment('XML request');
+            $table->text('xml_request')->nullable()->comment('XML request');
         });
     }
 
