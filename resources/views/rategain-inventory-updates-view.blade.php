@@ -21,6 +21,12 @@
                 {{$rateGainInventoryUpdate->xml}}
             </div>
         </div>
+
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                {{$rateGainInventoryUpdate->xml_request}}
+            </div>
+        </div>
     </div>
 
 @endsection
