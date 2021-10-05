@@ -253,7 +253,7 @@ XML;
      * @return array
      * @throws \Exception
      */
-    public function sendAvailability($feclle, $fecsal, $codcla, $codrg)
+    public function sendAvailability($feclle, $fecsal, $codcla, $codrg, $instance)
     {
 
         $fecsal = date('Y-m-d H:i:s', strtotime($fecsal . ' +1 day'));
@@ -316,7 +316,8 @@ XML;
 
             $xml = $this->inventoryModifyRequest;
 
-            $thisXml = str_replace('BookingLimit="1"', 'BookingLimit="' . $roomsAvailable->count() . '"', $xml);
+            $thisXml = str_replace('HotelCode="xxxxx"', 'HotelCode="' . $instance . '"', $xml);
+            $thisXml = str_replace('BookingLimit="1"', 'BookingLimit="' . $roomsAvailable->count() . '"', $thisXml);
             $thisXml = str_replace('Start="2020-03-01"', 'Start="' . $date . '"', $thisXml);
             $thisXml = str_replace('End="2020-03-01"', 'End="' . $date . '"', $thisXml);
             $thisXml = str_replace('InvCode="SGL"', 'InvCode="' . $codrg . '"', $thisXml);
