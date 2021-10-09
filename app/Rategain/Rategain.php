@@ -750,7 +750,7 @@ XML;
 
         if ($bambooBookingChannelCompany) {
             $bambooBookingChannelCompany = $bambooBookingChannelCompany->toArray();
-            $bambooCompanyNit = $bambooBookingChannelCompany['empresa']['nit'];
+            $bambooCompanyNit = $bambooBookingChannelCompany['NIT'];
             $bambooTipseg = $bambooBookingChannelCompany['tipseg'] ? $bambooBookingChannelCompany['tipseg'] : 'I';
             $bambooTipres = $bambooBookingChannelCompany['tipres'];
             $bambooCodcan = $bambooBookingChannelCompany['codcan'];
@@ -1037,11 +1037,11 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     'referencia' => 'RateGain ' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Type . ' ' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Value . ' - ' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Type . ' ' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value,
                     'tipdoc' => $guestExits ? $guestExits->tipdoc : 1,
                     'cedula' => $guestExits ? $guestExits->cedula : $cedula,
-                    'nit' => $bambooCompanyNit ? $bambooCompanyNit : 0, // $nit,
-                    'nitage' => $bambooCompanyNit ? $bambooCompanyNit : 0,
+                    'nit' => $bambooCompanyNit ?: 0, // $nit,
+                    'nitage' => $bambooCompanyNit ?: 0,
                     'numhab' => $numhab,
-                    'tipres' => $bambooTipres ? $bambooTipres : $tipres,
-                    'tipseg' => $bambooTipseg ? $bambooTipseg : 'I',
+                    'tipres' => $bambooTipres ?: $tipres,
+                    'tipseg' => $bambooTipseg ?: 'I',
                     'fecres' => date('Y-m-d'),
                     'feclle' => $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->Start,
                     'fecsal' => $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->End,
