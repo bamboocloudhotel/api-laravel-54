@@ -751,7 +751,7 @@ XML;
         if ($bambooBookingChannelCompany) {
             $bambooBookingChannelCompany = $bambooBookingChannelCompany->toArray();
             $bambooCompanyNit = $bambooBookingChannelCompany['NIT'];
-            $bambooTipseg = $bambooBookingChannelCompany['tipseg'] ? $bambooBookingChannelCompany['tipseg'] : 'I';
+            $bambooTipseg = $bambooBookingChannelCompany['tipseg'] ?: 'I';
             $bambooTipres = $bambooBookingChannelCompany['tipres'];
             $bambooCodcan = $bambooBookingChannelCompany['codcan'];
         }
