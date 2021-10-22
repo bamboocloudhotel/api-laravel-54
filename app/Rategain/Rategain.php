@@ -1077,10 +1077,6 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                                 json_encode($roomStay->SpecialRequests->SpecialRequest) :
                                 json_encode($roomStay->SpecialRequests->SpecialRequest)) :
                             "\n"
-                        ) . (
-                            isset($rateList) ?
-                                '' . $rateList :
-                                ''
                         ),
                     'cancellationid' => null,
                     // 'rateplanname' => null,
