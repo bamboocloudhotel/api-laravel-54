@@ -92,6 +92,7 @@ class XMLController extends Controller
                     '<HotelReservationID ResID_Type="3" ResID_Value="' . $confirmationid . '" />',
                     $returnSuccess
                 );
+
                 $returnSuccess = str_replace(
                     '<HotelReservationID ResID_Type="14" ResID_Value="chd23242342"/>',
                     '<HotelReservationID ResID_Type="14" ResID_Value="' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value . '"/>',
@@ -109,7 +110,7 @@ class XMLController extends Controller
                     ]);
                 }
 
-                $response = $this->rategain->saveReservation($reservationObject, $confirmationid);
+                $response = $this->rategain->saveReservation($reservationObject, $reserva->confirmationid);
 
                 return response()->xml($response);
                 break;

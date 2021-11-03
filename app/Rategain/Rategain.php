@@ -344,7 +344,7 @@ XML;
                 'updated' => isset($matches[1][0]) ? $matches[1][0] : 'Undefined',
                 'booking_engine' => 'rategain',
                 'xml' => $data,
-                'request' =>  $thisXml
+                'request' => $thisXml
             ];
 
         }
