@@ -110,7 +110,7 @@ class XMLController extends Controller
                     ]);
                 }
 
-                $response = $this->rategain->saveReservation($reservationObject, $reserva->confirmationid);
+                $response = $this->rategain->saveReservation($reservationObject, $reserva[0]->confirmationid);
 
                 return response()->xml($response);
                 break;
