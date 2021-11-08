@@ -289,6 +289,9 @@ XML;
         foreach ($dates as $date) {
             $start = $date;
             $end = date('Y-m-d H:i:s', strtotime($date . ' +1 day'));
+
+            $thisXmlItem = $this->inventoryModifyRequestItem;
+
             $sqlAvailable = "
               SELECT * 
               FROM habitacion 
@@ -328,7 +331,7 @@ XML;
 
             $roomsAvailable = collect(\DB::connection('on_the_fly')->select($sqlAvailable));
 
-            $thisXmlItem = str_replace('BookingLimit="1"', 'BookingLimit="' . $roomsAvailable->count() . '"', $xmlIems);
+            $thisXmlItem = str_replace('BookingLimit="1"', 'BookingLimit="' . $roomsAvailable->count() . '"', $thisXmlItem);
             $thisXmlItem = str_replace('Start="2020-03-01"', 'Start="' . $date . '"', $thisXmlItem);
             $thisXmlItem = str_replace('End="2020-03-01"', 'End="' . $date . '"', $thisXmlItem);
             $thisXmlItem = str_replace('InvCode="SGL"', 'InvCode="' . $codrg . '"', $thisXmlItem);
