@@ -280,7 +280,7 @@ XML;
         $return = [];
 
         $xml = $this->inventoryModifyRequest;
-        $xmlIems = '';
+        $xmlItems = '';
 
 
         $thisXml = str_replace('HotelCode="xxxxx"', 'HotelCode="' . $instance . '"', $xml);
@@ -336,6 +336,9 @@ XML;
             $xmlItems .= "\n" . $thisXmlItem;
 
         }
+
+
+        dd($xmlItems);
 
         $thisXml = str_replace('<AvailStatusMessage></AvailStatusMessage>', $xmlIems . "\n", $thisXml);
 
