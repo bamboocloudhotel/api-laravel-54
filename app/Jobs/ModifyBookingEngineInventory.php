@@ -35,6 +35,13 @@
       $this->endDate = $endDate;
       $this->roomClass = $roomClass;
       $this->bookingEngineCode = $bookingEngineCode;
+
+        $class = 'App\\RateGain\\RateGain';
+        if (!class_exists($class)) {
+            die("La clase {$class} no existe!");
+        }
+
+        $this->bookingEngine = new $class();
     }
 
     /**
