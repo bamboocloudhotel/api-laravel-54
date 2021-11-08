@@ -340,10 +340,7 @@ XML;
 
         }
 
-
-        dd($xmlItems);
-
-        $thisXml = str_replace('<AvailStatusMessage></AvailStatusMessage>', $xmlIems . "\n", $thisXml);
+        $thisXml = str_replace('<AvailStatusMessage></AvailStatusMessage>', $xmlItems . "\n", $thisXml);
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_USERPWD, config('rategain.username') . ":" . config('rategain.password'));
