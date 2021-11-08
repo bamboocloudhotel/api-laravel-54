@@ -22,6 +22,7 @@
           ->orWhere('hotel', 'like', '%' . $request->get('search') . '%')
           ->orWhere('date_updated', 'like', '%' . $request->get('search') . '%')
           ->orWhere('xml_request', 'like', '%' . $request->get('search') . '%')
+          ->orWhere('xml', 'like', '%' . $request->get('search') . '%')
           ->orWhere('quantity', 'like', '%' . $request->get('search') . '%');
       }
 
