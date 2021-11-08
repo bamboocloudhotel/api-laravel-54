@@ -243,6 +243,7 @@ class TestSoapController extends SoapController
                             'date_updated' => $mod['date'],
                             'quantity' => $mod['quantity'],
                             'xml' => $mod['xml'],
+                            'xml_request' => $mod['xml'],
                             'hotel' => $request->get('hotelId'),
                         ]);
                     }

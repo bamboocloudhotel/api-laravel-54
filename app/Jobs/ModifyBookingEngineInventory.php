@@ -2,6 +2,7 @@
 
   namespace App\Jobs;
 
+  use App\BambooInstance;
   use App\Http\Controllers\Api\TestSoapController;
   use App\InventoryUpdate;
   use Illuminate\Bus\Queueable;
@@ -44,28 +45,31 @@
      */
     public function handle()
     {
-      $class = 'App\\' . studly_case($this->bookingEngineCode) . '\\' . studly_case($this->bookingEngineCode);
-      $this->bookingEngine = new $class();
-      //
+        $instance = BambooInstance::where('rg_hotel_code', $this->hotelId)->with('bambooInstanceRooms')->first()->toArray();
 
-      $typeRoom = config(snake_case(studly_case($this->bookingEngineCode)) . '.rooms_lc.' . $this->roomClass);
+        $return = [];
 
-      if ($typeRoom) {
-        $testRequest = new \Illuminate\Http\Request();
+        if ($instance) {
+            foreach ($instance['bamboo_instance_rooms'] as $room) {
 
-        $testRequest->setMethod('POST');
-        $testRequest->request->add(['bookingEngine' => $this->bookingEngineCode]);
-        $testRequest->request->add(['hotelId' => $this->hotelId]);
+                $resp = $this->bookingEngine->sendAvailability($this->startDate, $this->startDate, $room['bb_room'], $room['rg_room'], $instance['rg_hotel_code']);
 
-        $soapCtrl = new TestSoapController($testRequest);
+                $return[] = $resp;
 
-        $soapCtrl->modifyInventoryByDatesAndRoom(
-          $testRequest,
-          $this->startDate,
-          $this->endDate,
-          $this->roomClass
-        );
-      }
+                foreach ($resp as $res) {
+                    InventoryUpdate::create([
+                        'booking_engine' => 'rategain',
+                        'room_class_cloud' => $room['rg_room'],
+                        'room_class_local' => $room['bb_room'],
+                        'date_updated' => $res['date'],
+                        'quantity' => $res['quantity'],
+                        'xml' => $res['xml'],
+                        'hotel' => $instance['name'],
+                        'xml_request' => $res['request']
+                    ]);
+                }
+            }
+        }
     }
   }
 

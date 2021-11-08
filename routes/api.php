@@ -1,40 +1,40 @@
 <?php
 
-  use Illuminate\Http\Request;
+use Illuminate\Http\Request;
 
-  /*
-  |--------------------------------------------------------------------------
-  | API Routes
-  |--------------------------------------------------------------------------
-  |
-  | Here is where you can register API routes for your application. These
-  | routes are loaded by the RouteServiceProvider within a group which
-  | is assigned the "api" middleware group. Enjoy building your API!
-  |
-  */
+/*
+|--------------------------------------------------------------------------
+| API Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register API routes for your application. These
+| routes are loaded by the RouteServiceProvider within a group which
+| is assigned the "api" middleware group. Enjoy building your API!
+|
+*/
 
-  use App\Models\Dathot;
-  use App\Models\CrGuarantee;
+use App\Models\Dathot;
+use App\Models\CrGuarantee;
 
-  Route::middleware('auth:api')->get('/user', function (Request $request) {
+Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
-  });
+});
 
-  Route::any('test', function (Request $request) {
+Route::any('test', function (Request $request) {
     return response()->json([
-      'message' => 'OK',
-      'data' => $request->all()
+        'message' => 'OK',
+        'data' => $request->all()
     ], 200);
-  });
+});
 
-  Route::post('view-guarantee', function (Request $request) {
+Route::post('view-guarantee', function (Request $request) {
 
     $xmlController = new \App\Http\Controllers\XMLController();
 
     if (!$request->get('hotelCode')) {
-      return response()->json([
-        'message' => 'Debe enviar el código del hotel!'
-      ], 404);
+        return response()->json([
+            'message' => 'Debe enviar el código del hotel!'
+        ], 404);
     }
 
     $xmlController->getInstance($request->get('hotelCode'));
@@ -42,9 +42,9 @@
     $xmlController = new \App\Http\Controllers\XMLController();
 
     if (!$request->get('hotelCode')) {
-      return response()->json([
-        'message' => 'Debe enviar el código del hotel!'
-      ], 404);
+        return response()->json([
+            'message' => 'Debe enviar el código del hotel!'
+        ], 404);
     }
 
     $xmlController->getInstance($request->get('hotelCode'));
@@ -53,51 +53,51 @@
 
     if ($dathot->guarantee_password == $request->get('guarantee_password')) {
 
-      $guarantee = CrGuarantee::where('numres', $request->get('numres'))->first();
+        $guarantee = CrGuarantee::where('numres', $request->get('numres'))->first();
 
-      if (!$guarantee) {
+        if (!$guarantee) {
+            return response()->json([
+                'message' => 'Reserva no valida'
+            ], 422);
+        }
+
         return response()->json([
-          'message' => 'Reserva no valida'
-        ], 422);
-      }
-
-      return response()->json([
-        'message' => 'Garantia obtenida con éxito!',
-        'data' => $guarantee->toArray()
-      ], 200);
+            'message' => 'Garantia obtenida con éxito!',
+            'data' => $guarantee->toArray()
+        ], 200);
     }
 
     return response()->json([
-      'message' => 'Clave no valida'
+        'message' => 'Clave no valida'
     ], 422);
-  });
+});
 
-  Route::any('rgbridgeapi/push/receive', 'XMLController@index');
+Route::any('rgbridgeapi/push/receive', 'XMLController@index');
 
-  Route::get('radius/users', 'Api\FreeRadiusController@getUsers');
-  Route::get('radius/users/{username}', 'Api\FreeRadiusController@getUser');
-  Route::post('radius/users', 'Api\FreeRadiusController@addUser');
-  Route::post('radius/users/{username}/delete', 'Api\FreeRadiusController@removeUser');
+Route::get('radius/users', 'Api\FreeRadiusController@getUsers');
+Route::get('radius/users/{username}', 'Api\FreeRadiusController@getUser');
+Route::post('radius/users', 'Api\FreeRadiusController@addUser');
+Route::post('radius/users/{username}/delete', 'Api\FreeRadiusController@removeUser');
 
-  Route::get('databases', 'Api\DatabasesController@index');
-  Route::post('databases', 'Api\DatabasesController@store');
-  Route::put('databases/{id}', 'Api\DatabasesController@update');
+Route::get('databases', 'Api\DatabasesController@index');
+Route::post('databases', 'Api\DatabasesController@store');
+Route::put('databases/{id}', 'Api\DatabasesController@update');
 
-  Route::get('soap/test', 'SoapTestController@show');
-  Route::get('soap/tests', 'SoapTestController@testing');
+Route::get('soap/test', 'SoapTestController@show');
+Route::get('soap/tests', 'SoapTestController@testing');
 
-  Route::get('soap/cr-reservas/hotels', 'Api\TestSoapController@getHotels');
-  Route::get('soap/cr-reservas/rates/{hotelId?}', 'Api\TestSoapController@getRates');
-  Route::get('soap/cr-reservas/rooms/{hotelId?}', 'Api\TestSoapController@getRooms');
-  Route::get('soap/cr-reservas/portals/{hotelId?}', 'Api\TestSoapController@getPortals');
-  Route::get('soap/cr-reservas/reservations/{startDate?}/{endDate?}/{hotelId?}/{dlm?}', 'Api\TestSoapController@getReservations');
-  Route::get('soap/cr-reservas/availability/{startDate?}/{endDate?}/{hotelId?}/{clahab?}', 'Api\TestSoapController@getAvailability');
-  Route::get('soap/cr-reservas/modify-inventory/{startDate}/{endDate}/{roomTypeId}/{oldStartDate?}/{oldEndDate?}', 'Api\TestSoapController@modifyInventoryByDatesAndRoom');
-  Route::get('soap/cr-reservas/modify-inventory', 'Api\TestSoapController@modifyInventory');
+Route::get('soap/cr-reservas/hotels', 'Api\TestSoapController@getHotels');
+Route::get('soap/cr-reservas/rates/{hotelId?}', 'Api\TestSoapController@getRates');
+Route::get('soap/cr-reservas/rooms/{hotelId?}', 'Api\TestSoapController@getRooms');
+Route::get('soap/cr-reservas/portals/{hotelId?}', 'Api\TestSoapController@getPortals');
+Route::get('soap/cr-reservas/reservations/{startDate?}/{endDate?}/{hotelId?}/{dlm?}', 'Api\TestSoapController@getReservations');
+Route::get('soap/cr-reservas/availability/{startDate?}/{endDate?}/{hotelId?}/{clahab?}', 'Api\TestSoapController@getAvailability');
+Route::get('soap/cr-reservas/modify-inventory/{startDate}/{endDate}/{roomTypeId}/{oldStartDate?}/{oldEndDate?}', 'Api\TestSoapController@modifyInventoryByDatesAndRoom');
+Route::get('soap/cr-reservas/modify-inventory', 'Api\TestSoapController@modifyInventory');
 
-  Route::get('soap/bamboo/availability/{startDate?}/{endDate?}/{hotelId?}', 'Api\TestSoapController@getBambooQuantityAvailability');
+Route::get('soap/bamboo/availability/{startDate?}/{endDate?}/{hotelId?}', 'Api\TestSoapController@getBambooQuantityAvailability');
 
-  Route::get('test/availabilities', function (Request $request) {
+Route::get('test/availabilities', function (Request $request) {
 
     $testSoapController = new \App\Http\Controllers\Api\TestSoapController($request);
 
@@ -116,7 +116,7 @@
     $roomsBlocked = collect(\DB::connection('on_the_fly')->select($sql));
 
     foreach ($roomsBlocked as $roomBlocked) {
-      $roomsOccupied[] = $roomBlocked->numhab;
+        $roomsOccupied[] = $roomBlocked->numhab;
     }
 
     $sql = "
@@ -133,7 +133,7 @@
     $roomsReserved = collect(\DB::connection('on_the_fly')->select($sql));
 
     foreach ($roomsReserved as $roomReserved) {
-      $roomsOccupied[] = $roomReserved->numhab;
+        $roomsOccupied[] = $roomReserved->numhab;
     }
 
     $sql = "
@@ -152,7 +152,7 @@
     $roomsHosted = collect(\DB::connection('on_the_fly')->select($sql));
 
     foreach ($roomsHosted as $roomHosted) {
-      $roomsOccupied[] = $roomHosted->numhab;
+        $roomsOccupied[] = $roomHosted->numhab;
     }
 
     $roomsOccupied = collect($roomsOccupied);
@@ -174,14 +174,14 @@
     // dd($roomsBlocked, $roomsReserved, $roomsHosted, $roomsOccupied, $roomsAvailable);
 
     return response()->json([
-      'message' => "OK",
-      'available' => $roomsAvailable == "''" ? null : $roomsAvailable,
-      'notAvailable' => $roomsOccupied == "''" ? null : $roomsOccupied
+        'message' => "OK",
+        'available' => $roomsAvailable == "''" ? null : $roomsAvailable,
+        'notAvailable' => $roomsOccupied == "''" ? null : $roomsOccupied
     ]);
 
-  });
+});
 
-  Route::get('test/set-availability', function (Request $request) {
+Route::get('test/set-availability', function (Request $request) {
     $testSoapController = new \App\Http\Controllers\Api\TestSoapController($request);
     $testSoapController->setRateGainConfig($request->get('hotelId'));
     $feclle = $request->get('feclle');
@@ -190,12 +190,12 @@
     $return = $testSoapController->sendInventory($request->get('hotelId'), $feclle, $fecsal);
 
     return response()->json([
-      'message' => 'OK',
-      'data' => $return
+        'message' => 'OK',
+        'data' => $return
     ], 200);
-  });
+});
 
-  Route::get('test/availability', function (Request $request) {
+Route::get('test/availability', function (Request $request) {
 
     $testSoapController = new \App\Http\Controllers\Api\TestSoapController($request);
 
@@ -206,7 +206,7 @@
     $codcla = $request->get('codcla');
 
     if (!$fecsal) {
-      $fecsal = date('Y-m-d', strtotime($request->get('feclle'). '+ 1 days'));
+        $fecsal = date('Y-m-d', strtotime($request->get('feclle') . '+ 1 days'));
     }
 
     $sqlAvailable = "
@@ -287,13 +287,13 @@
     $roomsAvailable = collect(\DB::connection('on_the_fly')->select($sqlAvailable));
 
     return response()->json([
-      'message' => "OK",
-      'available' => $roomsAvailable->pluck('numhab'),
-      'availableCount' => $roomsAvailable->pluck('numhab')->count(),
-      'notAvailable' => $roomsOccupied->pluck('numhab'),
-      'notAvailableCount' => $roomsOccupied->pluck('numhab')->count()
+        'message' => "OK",
+        'available' => $roomsAvailable->pluck('numhab'),
+        'availableCount' => $roomsAvailable->pluck('numhab')->count(),
+        'notAvailable' => $roomsOccupied->pluck('numhab'),
+        'notAvailableCount' => $roomsOccupied->pluck('numhab')->count()
     ]);
 
-  });
+});
 
 

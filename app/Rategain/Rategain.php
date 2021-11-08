@@ -148,12 +148,19 @@ XML;
         $this->inventoryModifyRequest = <<<XML
 <OTA_HotelAvailNotifRQ xmlns="http://www.opentravel.org/OTA/2003/05" TimeStamp="{$currentDate}T{$currentTime}" Target="Production" Version="1.002" EchoToken="{$this->uniqidReal()}">
 	<AvailStatusMessages HotelCode="xxxxx">
-		<AvailStatusMessage BookingLimit="1" BookingLimitMessageType="SetLimit">
-			<StatusApplicationControl Start="2020-03-01" End="2020-03-01" InvCode="SGL"></StatusApplicationControl>
-			<UniqueID Type="16" ID="1"></UniqueID>
-		</AvailStatusMessage>
+		<AvailStatusMessage></AvailStatusMessage>
 	</AvailStatusMessages>
 </OTA_HotelAvailNotifRQ>
+XML;
+
+
+
+
+        $this->inventoryModifyRequestItem = <<<XML
+<AvailStatusMessage BookingLimit="1" BookingLimitMessageType="SetLimit">
+    <StatusApplicationControl Start="2020-03-01" End="2020-03-01" InvCode="SGL"></StatusApplicationControl>
+    <UniqueID Type="16" ID="1"></UniqueID>
+</AvailStatusMessage>
 XML;
 
     }
@@ -272,6 +279,13 @@ XML;
 
         $return = [];
 
+        $xml = $this->inventoryModifyRequest;
+        $xmlIems = '';
+
+
+        $thisXml = str_replace('HotelCode="xxxxx"', 'HotelCode="' . $instance . '"', $xml);
+        $thisXml = str_replace('ID="1"', 'ID="' . $this->uniqidReal() . '"', $thisXml);
+
         foreach ($dates as $date) {
             $start = $date;
             $end = date('Y-m-d H:i:s', strtotime($date . ' +1 day'));
@@ -314,40 +328,40 @@ XML;
 
             $roomsAvailable = collect(\DB::connection('on_the_fly')->select($sqlAvailable));
 
-            $xml = $this->inventoryModifyRequest;
+            $thisXmlItem = str_replace('BookingLimit="1"', 'BookingLimit="' . $roomsAvailable->count() . '"', $xmlIems);
+            $thisXmlItem = str_replace('Start="2020-03-01"', 'Start="' . $date . '"', $thisXmlItem);
+            $thisXmlItem = str_replace('End="2020-03-01"', 'End="' . $date . '"', $thisXmlItem);
+            $thisXmlItem = str_replace('InvCode="SGL"', 'InvCode="' . $codrg . '"', $thisXmlItem);
 
-            $thisXml = str_replace('HotelCode="xxxxx"', 'HotelCode="' . $instance . '"', $xml);
-            $thisXml = str_replace('BookingLimit="1"', 'BookingLimit="' . $roomsAvailable->count() . '"', $thisXml);
-            $thisXml = str_replace('Start="2020-03-01"', 'Start="' . $date . '"', $thisXml);
-            $thisXml = str_replace('End="2020-03-01"', 'End="' . $date . '"', $thisXml);
-            $thisXml = str_replace('InvCode="SGL"', 'InvCode="' . $codrg . '"', $thisXml);
-            $thisXml = str_replace('ID="1"', 'ID="' . $this->uniqidReal() . '"', $thisXml);
-
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_USERPWD, config('rategain.username') . ":" . config('rategain.password'));
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $thisXml);
-            curl_setopt($ch, CURLOPT_URL, config('rategain.url'));
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-            curl_setopt($ch, CURLOPT_POST, true);
-            $data = curl_exec($ch);
-            curl_close($ch);
-
-            // dd($data, $thisXml);
-
-            preg_match_all("|\"><(.*)\s/></OTA_HotelAvailNotifRS>|U", $data, $matches);
-
-            $return[] = [
-                'room' => $codcla,
-                'date' => $date,
-                'quantity' => $roomsAvailable->count(),
-                'updated' => isset($matches[1][0]) ? $matches[1][0] : 'Undefined',
-                'booking_engine' => 'rategain',
-                'xml' => $data,
-                'request' => $thisXml
-            ];
+            $xmlItems .= "\n" . $thisXmlItem;
 
         }
+
+        $thisXml = str_replace('<AvailStatusMessage></AvailStatusMessage>', $xmlIems . "\n", $thisXml);
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_USERPWD, config('rategain.username') . ":" . config('rategain.password'));
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $thisXml);
+        curl_setopt($ch, CURLOPT_URL, config('rategain.url'));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        $data = curl_exec($ch);
+        curl_close($ch);
+
+        // dd($data, $thisXml);
+
+        preg_match_all("|\"><(.*)\s/></OTA_HotelAvailNotifRS>|U", $data, $matches);
+
+        $return[] = [
+            'room' => $codcla,
+            'date' => $date,
+            'quantity' => $roomsAvailable->count(),
+            'updated' => isset($matches[1][0]) ? $matches[1][0] : 'Undefined',
+            'booking_engine' => 'rategain',
+            'xml' => $data,
+            'request' => $thisXml
+        ];
 
         return $return;
 
@@ -1434,13 +1448,13 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
         );
 
         $job = (
-        new ModifyBookingEngineInventory(
-            $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->Start,
-            $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->End,
-            $roomClass,
-            'rategain',
-            $data->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode
-        )
+            new ModifyBookingEngineInventory(
+                $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->Start,
+                $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->End,
+                $roomClass,
+                'rategain',
+                $data->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode
+            )
         );
 
         dispatch($job);
