@@ -25,7 +25,7 @@
           ->orWhere('quantity', 'like', '%' . $request->get('search') . '%');
       }
 
-      $rateGainInventoryUpdates = $rateGainInventoryUpdates->orderBy('id', 'desc')->paginate(20);
+      $rateGainInventoryUpdates = $rateGainInventoryUpdates->orderBy('id', 'desc')->paginate(20)->appends(request()->query());
 
       return view('rategain-inventory-updates-list', ['rateGainInventoryUpdates' => $rateGainInventoryUpdates, 'request' => $request->all()]);
     }
