@@ -1049,7 +1049,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
 
                 // dd($rateList);
 
-                Reserva::create([
+                $createdReservation = Reserva::create([
                     'numres' => $numres,
                     'referencia' => 'RateGain ' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Type . ' ' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Value . ' - ' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Type . ' ' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value,
                     'tipdoc' => $guestExits ? $guestExits->tipdoc : 1,
@@ -1450,7 +1450,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
             $returnSuccess
         );
 
-        $job = (
+        /*$job = (
             new ModifyBookingEngineInventory(
                 $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->Start,
                 $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->End,
@@ -1460,7 +1460,17 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
             )
         );
 
-        dispatch($job);
+        dispatch($job);*/
+
+        if (isset($createdReservation) && $createdReservation) {
+            $this->sendAvailability(
+                '' . $createdReservation->feclle,
+                '' . $createdReservation->fecsal,
+                '' . $roomClass,
+                '' . $roomStay->RoomRates->RoomRate->RoomTypeCode,
+                '' . $data->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode
+            );
+        }
 
         return $returnSuccess;
 
