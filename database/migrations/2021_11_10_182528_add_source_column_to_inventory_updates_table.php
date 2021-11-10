@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddXmlRequestColumnToInventoryUpdatesTable extends Migration
+class AddSourceColumnToInventoryUpdatesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,9 @@ class AddXmlRequestColumnToInventoryUpdatesTable extends Migration
      */
     public function up()
     {
-        //
         Schema::table('inventory_updates', function (Blueprint $table) {
             //
-            $table->text('xml_request')->nullable()->comment('XML request');
+            $table->string('source')->nullable();
         });
     }
 
@@ -27,10 +26,9 @@ class AddXmlRequestColumnToInventoryUpdatesTable extends Migration
      */
     public function down()
     {
-        //
         Schema::table('inventory_updates', function (Blueprint $table) {
             //
-            $table->dropColumn('xml_request');
+            $table->dropColumn('source');
         });
     }
 }

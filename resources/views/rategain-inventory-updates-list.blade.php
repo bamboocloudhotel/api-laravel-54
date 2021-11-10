@@ -32,6 +32,7 @@
                 <th>Room</th>
                 <th>Date</th>
                 <th>Quantity</th>
+                <th>Source</th>
 
                 <th width="300px;">Action</th>
 
@@ -51,6 +52,7 @@
                         <td>{{ $value->room_class_cloud}}</td>
                         <td>{{ $value->date_updated }}</td>
                         <td>{{ $value->quantity }}</td>
+                        <td>{{ $value->source }}</td>
 
                         <td>
 
@@ -68,7 +70,7 @@
 
                 <tr>
 
-                    <td colspan="10">There are no data.</td>
+                    <td colspan="6">There are no data.</td>
 
                 </tr>
 

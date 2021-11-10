@@ -72,7 +72,8 @@
                         'quantity' => $res['quantity'],
                         'xml' => $res['xml'],
                         'hotel' => $instance['name'],
-                        'xml_request' => $res['request']
+                        'xml_request' => $res['request'],
+                        'resource' => 'integration'
                     ]);
                 }
             }

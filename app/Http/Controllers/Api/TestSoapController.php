@@ -53,7 +53,8 @@ class TestSoapController extends SoapController
                         'quantity' => $res['quantity'],
                         'xml' => $res['xml'],
                         'hotel' => $instance['name'],
-                        'xml_request' => $res['request']
+                        'xml_request' => $res['request'],
+                        'source' => 'bamboo'
                     ]);
                 }
             }
@@ -245,6 +246,7 @@ class TestSoapController extends SoapController
                             'xml' => $mod['xml'],
                             'xml_request' => $mod['xml'],
                             'hotel' => $request->get('hotelId'),
+                            'source' => 'bamboo'
                         ]);
                     }
                 }

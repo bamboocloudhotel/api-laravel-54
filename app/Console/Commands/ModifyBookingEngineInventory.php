@@ -71,7 +71,8 @@ class ModifyBookingEngineInventory extends Command
                         'quantity' => $res['quantity'],
                         'xml' => $res['xml'],
                         'hotel' => $instance['name'],
-                        'xml_request' => $res['request']
+                        'xml_request' => $res['request'],
+                        'source' => 'integration'
                     ]);
                 }
             }
