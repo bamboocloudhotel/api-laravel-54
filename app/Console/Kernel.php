@@ -16,6 +16,7 @@ class Kernel extends ConsoleKernel
         //
         Commands\GetBookingEngineReservations::class,
         Commands\ModifyBookingEngineInventory::class,
+        Commands\UpdateInventoryCommand::class,
         Commands\KillQueue::class,
     ];
 
@@ -44,7 +45,7 @@ class Kernel extends ConsoleKernel
     {
         require base_path('routes/console.php');
     }
-	
+
 	/**
      * checks, if a process with $needle in the name is running
      *

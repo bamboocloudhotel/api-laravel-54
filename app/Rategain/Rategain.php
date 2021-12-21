@@ -1075,7 +1075,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     'tippro' => null,
                     'tipgar' => null,
                     'codven' => null,
-                    'codcan' => $bambooCodcan ? $bambooCodcan : 0,
+                    'codcan' => $bambooCodcan ?: 0,
                     'metadata' => $metadata,
                     'guarantee' => ' ' . $guaranteeText,
                     'confirmationid' => $confirmationid,
