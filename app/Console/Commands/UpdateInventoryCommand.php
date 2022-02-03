@@ -14,7 +14,7 @@ class UpdateInventoryCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'rategain:update-inventory';
+    protected $signature = 'rategain:update_inventory';
 
     /**
      * The console command description.
@@ -44,27 +44,37 @@ class UpdateInventoryCommand extends Command
 
         $instances = BambooInstance::with('bambooInstanceRooms')->get();
 
-        $rows = [];
-
-        $cnt = 0;
-
-        $rows[$cnt] = [
-            'fecha',
-            'hotel',
-            'hab bamboo',
-            'hab rategain',
-            'disponibilidad'
-        ];
-
-        $cnt++;
-
         foreach ($instances as $instance) {
+
+            $currentDate = date('Y-m-d');
+            $currentTime = date('H:i:s');
+
+            $inventoryModifyRequest = <<<XML
+<OTA_HotelAvailNotifRQ xmlns="http://www.opentravel.org/OTA/2003/05" TimeStamp="{$currentDate}T{$currentTime}" Target="Production" Version="1.002" EchoToken="{$this->uniqidReal()}">
+	<AvailStatusMessages HotelCode="xxxxx">
+		<AvailStatusMessage></AvailStatusMessage>
+	</AvailStatusMessages>
+</OTA_HotelAvailNotifRQ>
+XML;
+
+            $inventoryModifyRequestItem = <<<XML
+<AvailStatusMessage BookingLimit="1" BookingLimitMessageType="SetLimit">
+    <StatusApplicationControl Start="2020-03-01" End="2020-03-01" InvCode="SGL"></StatusApplicationControl>
+    <UniqueID Type="16" ID="1"></UniqueID>
+</AvailStatusMessage>
+XML;
+
+            $xml = $inventoryModifyRequest;
 
             $config = $this->setRateGainConfig($instance->rg_hotel_code);
 
             if ($config) {
 
-                $period = CarbonPeriod::create(date('Y-m-d'), date('Y-m-d', strtotime("+30 days")));
+                $period = CarbonPeriod::create(date('Y-m-d'), date('Y-m-d', strtotime("+90 days")));
+
+                $thisXml = str_replace('HotelCode="xxxxx"', 'HotelCode="' . $instance->rg_hotel_code . '"', $xml);
+
+                $thisItems = '';
 
                 foreach ($period as $date) {
                     $thisDate = $date->format('Y-m-d');
@@ -72,29 +82,54 @@ class UpdateInventoryCommand extends Command
                     foreach ($instance->bambooInstanceRooms as $room) {
                         $availability = $this->getAvailability($thisDate, date('Y-m-d', strtotime("+1 days")), $room->bb_room);
 
-                        $rows[$cnt] = [
-                            $thisDate,
-                            $instance->rg_hotel_code,
-                            $room->bb_room,
-                            $room->rg_room,
-                            $availability
-                        ];
+                        $thisItemXml = str_replace('BookingLimit="1"', 'BookingLimit="' . $availability . '"', $inventoryModifyRequestItem);
+                        $thisItemXml = str_replace('Start="2020-03-01"', 'Start="' . $date . '"', $thisItemXml);
+                        $thisItemXml = str_replace('End="2020-03-01"', 'End="' . $date . '"', $thisItemXml);
+                        $thisItemXml = str_replace('InvCode="SGL"', 'InvCode="' . $room['rg_room'] . '"', $thisItemXml);
+                        $thisItemXml = str_replace('ID="1"', 'ID="' . $this->uniqidReal() . '"', $thisItemXml);
 
-                        $cnt++;
+                        $thisItems = $thisItems . "\n" . $thisItemXml;
 
                     }
                 }
             }
 
+            $xml = str_replace('<AvailStatusMessage></AvailStatusMessage>', $thisItems, $thisXml);
+
+            // echo $xml . "\n";
+
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_USERPWD, config('rategain.username') . ":" . config('rategain.password'));
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $xml);
+            curl_setopt($ch, CURLOPT_URL, config('rategain.url'));
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            $data = curl_exec($ch);
+            curl_close($ch);
+
+            // dd($data, $thisXml);
+
+            preg_match_all("|\"><(.*)\s/></OTA_HotelAvailNotifRS>|U", $data, $matches);
+
+            // dd($data);
+
+            /*$return = [
+                'room' => $room,
+                'date' => $date,
+                'quantity' => $availability,
+                'updated' => isset($matches[1][0]) ? $matches[1][0] : 'Undefined',
+                'booking_engine' => 'rategain',
+                'xml' => $data,
+            ];
+
+            dd($return);*/
+
+            echo $data . "\n";
+
         }
 
-        $fp = fopen(public_path('inventory.csv'), 'w');
 
-        foreach ($rows as $row) {
-            fputcsv($fp, $row);
-        }
-
-        fclose($fp);
 
     }
 
@@ -200,5 +235,27 @@ class UpdateInventoryCommand extends Command
 
         return $roomsAvailable->pluck('numhab')->count();
 
+    }
+
+    /**
+     * @param int $lenght
+     * @return false|string
+     * @throws \Exception
+     */
+    function uniqidReal($lenght = 13)
+    {
+        // uniqid gives 13 chars, but you could adjust it to your needs.
+        if (function_exists("random_bytes")) {
+            try {
+                $bytes = random_bytes(ceil($lenght / 2));
+            } catch (\Exception $e) {
+                throw new \Exception("random_bytes function available");
+            }
+        } elseif (function_exists("openssl_random_pseudo_bytes")) {
+            $bytes = openssl_random_pseudo_bytes(ceil($lenght / 2));
+        } else {
+            throw new \Exception("no cryptographically secure random function available");
+        }
+        return substr(bin2hex($bytes), 0, $lenght);
     }
 }
