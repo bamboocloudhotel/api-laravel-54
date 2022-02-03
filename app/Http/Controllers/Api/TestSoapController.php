@@ -202,6 +202,8 @@ class TestSoapController extends SoapController
         $class = 'App\\' . studly_case($request->bookingEngine) . '\\' . studly_case($request->bookingEngine);
         $bookingEngine = new $class();
 
+        $availabilities = [];
+
         if ($typeRoom) {
             $period = new \DatePeriod(
                 new \DateTime($startDate),
