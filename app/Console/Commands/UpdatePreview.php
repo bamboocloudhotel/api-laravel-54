@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\BambooInstance;
 use Carbon\CarbonPeriod;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 class UpdatePreview extends Command
 {
@@ -59,11 +60,17 @@ class UpdatePreview extends Command
 
         foreach ($instances as $instance) {
 
+            $d1 = new \DateTime();
+
+            echo "START " . $instance->rg_hotel_code . "\n";
+
+            Log::info("START " . $instance->rg_hotel_code . " at " . $d1->format('Y-m-d H:i:s'));
+
             /*$config = $this->setRateGainConfig($instance->rg_hotel_code);
 
             if ($config) {*/
 
-                $period = CarbonPeriod::create(date('Y-m-d', strtotime("+1 days")), date('Y-m-d', strtotime("+5 days")));
+                $period = CarbonPeriod::create(date('Y-m-d', strtotime("+1 days")), date('Y-m-d', strtotime("+10 days")));
 
                 foreach ($period as $date) {
                     $thisDate = $date->format('Y-m-d');
@@ -85,6 +92,13 @@ class UpdatePreview extends Command
 
                     }
                 }
+            $d2 = new \DateTime();
+
+            $interval = $d1->diff($d2);
+
+            echo "END " . $instance->rg_hotel_code . " in " . $interval->s . " seconds\n\n";
+
+            Log::info("END " . $instance->rg_hotel_code . " at " . $d2->format('Y-m-d H:i:s') . " in " . $interval->s . " seconds");
             }
 
         // }

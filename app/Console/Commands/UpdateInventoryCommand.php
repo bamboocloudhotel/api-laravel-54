@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\BambooInstance;
+use App\InventoryUpdate;
 use App\Models\Log;
 use Carbon\CarbonPeriod;
 use Illuminate\Console\Command;
@@ -45,6 +46,11 @@ class UpdateInventoryCommand extends Command
         $instances = BambooInstance::with('bambooInstanceRooms')->get();
 
         foreach ($instances as $instance) {
+            $d1 = new \DateTime();
+
+            echo "START " . $instance->rg_hotel_code . "\n";
+
+            \Illuminate\Support\Facades\Log::info("START " . $instance->rg_hotel_code . " at " . $d1->format('Y-m-d H:i:s'));
 
             $currentDate = date('Y-m-d');
             $currentTime = date('H:i:s');
@@ -125,7 +131,27 @@ XML;
 
             dd($return);*/
 
-            echo $data . "\n";
+            // echo $data . "\n";
+
+            $d2 = new \DateTime();
+
+            InventoryUpdate::insert([
+                'booking_engine' => 'rategain',
+                'room_class_cloud' => null,
+                'room_class_local' => null,
+                'date_updated' => $d2->format('Y-m-d H:i:s'),
+                'quantity' => null,
+                'xml' => $data,
+                'hotel' => $instance->rg_hotel_code,
+                'xml_request' => $xml,
+                'source' => null
+            ]);
+
+            $interval = $d1->diff($d2);
+
+            echo "END " . $instance->rg_hotel_code . " in " . $interval->s . " seconds\n\n";
+
+            \Illuminate\Support\Facades\Log::info("END " . $instance->rg_hotel_code . " at " . $d2->format('Y-m-d H:i:s') . " in " . $interval->s . " seconds");
 
         }
 
