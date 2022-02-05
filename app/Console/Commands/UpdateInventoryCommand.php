@@ -80,7 +80,7 @@ XML;
                     $thisDate = $date->format('Y-m-d');
 
                     foreach ($instance->bambooInstanceRooms as $room) {
-                        $availability = $this->getAvailability($thisDate, date('Y-m-d', strtotime("+1 days")), $room->bb_room);
+                        $availability = $this->getAvailability($instance->rg_hotel_code, $thisDate, date('Y-m-d', strtotime("+1 days")), $room->bb_room);
 
                         $thisItemXml = str_replace('BookingLimit="1"', 'BookingLimit="' . $availability . '"', $inventoryModifyRequestItem);
                         $thisItemXml = str_replace('Start="2020-03-01"', 'Start="' . $date . '"', $thisItemXml);
