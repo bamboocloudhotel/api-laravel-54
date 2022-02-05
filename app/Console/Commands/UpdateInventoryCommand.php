@@ -66,9 +66,9 @@ XML;
 
             $xml = $inventoryModifyRequest;
 
-            $config = $this->setRateGainConfig($instance->rg_hotel_code);
+            // $config = $this->setRateGainConfig($instance->rg_hotel_code);
 
-            if ($config) {
+            // if ($config) {
 
                 $period = CarbonPeriod::create(date('Y-m-d'), date('Y-m-d', strtotime("+90 days")));
 
@@ -92,7 +92,7 @@ XML;
 
                     }
                 }
-            }
+            // }
 
             $xml = str_replace('<AvailStatusMessage></AvailStatusMessage>', $thisItems, $thisXml);
 
@@ -192,48 +192,81 @@ XML;
         return true;
     }
 
-    private function getAvailability($start, $end, $codcla)
+    private function getAvailability($rg_hotel_code, $start, $end, $codcla)
     {
-        $sqlAvailable = "
-        SELECT * 
-        FROM habitacion 
-        WHERE numhab NOT IN(
-          SELECT reserva.numhab 
-          FROM reserva 
-          INNER JOIN habitacion ON reserva.numhab = habitacion.numhab
-          WHERE '{$start}' < reserva.fecsal 
-          AND '{$end}' > reserva.feclle 
-          AND reserva.estado IN ('P','G')
-          AND habitacion.codcla = {$codcla}
-          AND habitacion.tipo = 'V'
-        )
-        AND numhab NOT IN(
-          SELECT folio.numhab 
-          FROM folio
-          INNER JOIN habitacion ON folio.numhab = habitacion.numhab
-          WHERE '{$start}' < folio.fecsal 
-          AND '{$end}' > folio.feclle 
-          AND folio.estado IN ('I')
-          AND habitacion.codcla = {$codcla}
-          AND habitacion.tipo = 'V'
-        )
-        AND numhab NOT IN(
-          SELECT blohab.numhab
-          FROM blohab
-          LEFT JOIN habitacion ON blohab.numhab = habitacion.numhab
-          WHERE '{$start}' <= blohab.fecfin 
-          AND '{$end}' >= blohab.fecini
-          AND blohab.fecdes IS NULL
-          AND habitacion.codcla = {$codcla}
-          AND habitacion.tipo = 'V'
-        )
-        AND codcla = {$codcla}
-        AND tipo = 'V'
-        ";
+        $this->setRateGainConfig($rg_hotel_code);
 
-        $roomsAvailable = collect(\DB::connection('on_the_fly')->select($sqlAvailable));
+        $sql = "
+    SELECT blohab.numhab
+    FROM blohab
+    LEFT JOIN habitacion ON blohab.numhab = habitacion.numhab
+    WHERE blohab.fecini <= '{$end}' AND blohab.fecfin >= '{$start}'
+    AND blohab.fecdes IS NULL
+    AND habitacion.codcla = {$codcla}
+    AND habitacion.tipo = 'V'
+    ";
 
-        return $roomsAvailable->pluck('numhab')->count();
+        $roomsBlocked = collect(\DB::connection('on_the_fly')->select($sql));
+
+        foreach ($roomsBlocked as $roomBlocked) {
+            $roomsOccupied[] = $roomBlocked->numhab;
+        }
+
+        $sql = "
+    SELECT reserva.numres, reserva.numhab, reserva.estado, habitacion.codcla
+    FROM `reserva`
+    LEFT JOIN habitacion ON reserva.numhab = habitacion.numhab
+    WHERE reserva.feclle <= '{$start}' AND reserva.fecsal >= '{$end}'
+    AND reserva.estado IN ('P','G')
+    AND habitacion.codcla = {$codcla}
+    AND habitacion.tipo = 'V'
+    ORDER BY reserva.numhab ASC
+    ";
+
+        $roomsReserved = collect(\DB::connection('on_the_fly')->select($sql));
+
+        foreach ($roomsReserved as $roomReserved) {
+            $roomsOccupied[] = $roomReserved->numhab;
+        }
+
+        $sql = "
+    SELECT folio.numhab, folio.numres, folio.numfol, folio.estado
+    FROM folio
+    INNER JOIN habitacion ON folio.numhab = habitacion.numhab
+    INNER JOIN reserva ON folio.numres = reserva.numres
+    WHERE folio.feclle <= '{start}' AND folio.fecsal >= '{$end}'
+    AND reserva.estado IN ('H')
+    AND folio.estado IN ('I')
+    AND habitacion.codcla = {$codcla}
+    AND habitacion.tipo = 'V'
+    ORDER BY folio.numhab 
+    ";
+
+        $roomsHosted = collect(\DB::connection('on_the_fly')->select($sql));
+
+        foreach ($roomsHosted as $roomHosted) {
+            $roomsOccupied[] = $roomHosted->numhab;
+        }
+
+        $roomsOccupied = collect($roomsOccupied);
+
+        $roomsOccupied = implode('\',\'', $roomsOccupied->sort()->unique()->values()->all());
+
+        $sql = "
+    select habitacion.numhab 
+    from habitacion 
+    where habitacion.numhab not in ('{$roomsOccupied}')
+    AND habitacion.codcla = {$codcla}
+    AND habitacion.tipo = 'V'
+    ";
+
+        $numhab = collect(\DB::connection('on_the_fly')->select($sql));
+
+        $roomsAvailable = implode('\',\'', $numhab->pluck('numhab')->unique()->sort()->values()->all());
+
+        \DB::disconnect('on_the_fly');
+
+        return count($numhab->pluck('numhab'));
 
     }
 

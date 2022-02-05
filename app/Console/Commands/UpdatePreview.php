@@ -63,7 +63,7 @@ class UpdatePreview extends Command
 
             if ($config) {*/
 
-                $period = CarbonPeriod::create(date('Y-m-d'), date('Y-m-d', strtotime("+5 days")));
+                $period = CarbonPeriod::create(date('Y-m-d', strtotime("+1 days")), date('Y-m-d', strtotime("+5 days")));
 
                 foreach ($period as $date) {
                     $thisDate = $date->format('Y-m-d');
