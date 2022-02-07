@@ -3,26 +3,25 @@
 namespace App\Console\Commands;
 
 use App\BambooInstance;
-use App\InventoryUpdate;
-use App\Models\Log;
 use Carbon\CarbonPeriod;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
-class UpdateInventoryCommand extends Command
+class UpdatePreview extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'rategain:update_inventory';
+    protected $signature = 'rategain:update_preview';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Update all instances inventory';
+    protected $description = 'Command description';
 
     /**
      * Create a new command instance.
@@ -45,117 +44,74 @@ class UpdateInventoryCommand extends Command
 
         $instances = BambooInstance::with('bambooInstanceRooms')->get();
 
+        $rows = [];
+
+        $cnt = 0;
+
+        $rows[$cnt] = [
+            'fecha',
+            'hotel',
+            'hab bamboo',
+            'hab rategain',
+            'disponibilidad'
+        ];
+
+        $cnt++;
+
         foreach ($instances as $instance) {
+
             $d1 = new \DateTime();
 
             echo "START " . $instance->rg_hotel_code . "\n";
 
-            \Illuminate\Support\Facades\Log::info("START " . $instance->rg_hotel_code . " at " . $d1->format('Y-m-d H:i:s'));
+            Log::info("START " . $instance->rg_hotel_code . " at " . $d1->format('Y-m-d H:i:s'));
 
-            $currentDate = date('Y-m-d');
-            $currentTime = date('H:i:s');
+            /*$config = $this->setRateGainConfig($instance->rg_hotel_code);
 
-            $inventoryModifyRequest = <<<XML
-<OTA_HotelAvailNotifRQ xmlns="http://www.opentravel.org/OTA/2003/05" TimeStamp="{$currentDate}T{$currentTime}" Target="Production" Version="1.002" EchoToken="{$this->uniqidReal()}">
-	<AvailStatusMessages HotelCode="xxxxx">
-		<AvailStatusMessage></AvailStatusMessage>
-	</AvailStatusMessages>
-</OTA_HotelAvailNotifRQ>
-XML;
+            if ($config) {*/
 
-            $inventoryModifyRequestItem = <<<XML
-<AvailStatusMessage BookingLimit="1" BookingLimitMessageType="SetLimit">
-    <StatusApplicationControl Start="2020-03-01" End="2020-03-01" InvCode="SGL"></StatusApplicationControl>
-    <UniqueID Type="16" ID="1"></UniqueID>
-</AvailStatusMessage>
-XML;
-
-            $xml = $inventoryModifyRequest;
-
-            // $config = $this->setRateGainConfig($instance->rg_hotel_code);
-
-            // if ($config) {
-
-                $period = CarbonPeriod::create(date('Y-m-d'), date('Y-m-d', strtotime("+90 days")));
-
-                $thisXml = str_replace('HotelCode="xxxxx"', 'HotelCode="' . $instance->rg_hotel_code . '"', $xml);
-
-                $thisItems = '';
+                $period = CarbonPeriod::create(date('Y-m-d', strtotime("+1 days")), date('Y-m-d', strtotime("+10 days")));
 
                 foreach ($period as $date) {
                     $thisDate = $date->format('Y-m-d');
 
                     foreach ($instance->bambooInstanceRooms as $room) {
-                        $availability = $this->getAvailability($instance->rg_hotel_code, $thisDate, date('Y-m-d', strtotime("+1 days")), $room->bb_room);
+                        $availability = $this->getAvailability($instance->rg_hotel_code, $thisDate, date('Y-m-d', strtotime($thisDate . " +1 days")), $room->bb_room);
 
-                        $thisItemXml = str_replace('BookingLimit="1"', 'BookingLimit="' . $availability . '"', $inventoryModifyRequestItem);
-                        $thisItemXml = str_replace('Start="2020-03-01"', 'Start="' . $date . '"', $thisItemXml);
-                        $thisItemXml = str_replace('End="2020-03-01"', 'End="' . $date . '"', $thisItemXml);
-                        $thisItemXml = str_replace('InvCode="SGL"', 'InvCode="' . $room['rg_room'] . '"', $thisItemXml);
-                        $thisItemXml = str_replace('ID="1"', 'ID="' . $this->uniqidReal() . '"', $thisItemXml);
+                        echo \Config::get("database.connections.on_the_fly.host") . ' -> ' . \Config::get("database.connections.on_the_fly.database") . ' -> ' . $thisDate . ' ' . date('Y-m-d', strtotime($thisDate . " +1 days")) . ": " . $room->bb_room . " -> " . $availability . "\n";
 
-                        $thisItems = $thisItems . "\n" . $thisItemXml;
+                        $rows[$cnt] = [
+                            $thisDate,
+                            $instance->rg_hotel_code,
+                            $room->bb_room,
+                            $room->rg_room,
+                            $availability
+                        ];
+
+                        $cnt++;
 
                     }
                 }
-            // }
-
-            $xml = str_replace('<AvailStatusMessage></AvailStatusMessage>', $thisItems, $thisXml);
-
-            // echo $xml . "\n";
-
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_USERPWD, config('rategain.username') . ":" . config('rategain.password'));
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $xml);
-            curl_setopt($ch, CURLOPT_URL, config('rategain.url'));
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-            curl_setopt($ch, CURLOPT_POST, true);
-            $data = curl_exec($ch);
-            curl_close($ch);
-
-            // dd($data, $thisXml);
-
-            preg_match_all("|\"><(.*)\s/></OTA_HotelAvailNotifRS>|U", $data, $matches);
-
-            // dd($data);
-
-            /*$return = [
-                'room' => $room,
-                'date' => $date,
-                'quantity' => $availability,
-                'updated' => isset($matches[1][0]) ? $matches[1][0] : 'Undefined',
-                'booking_engine' => 'rategain',
-                'xml' => $data,
-            ];
-
-            dd($return);*/
-
-            // echo $data . "\n";
-
             $d2 = new \DateTime();
-
-            InventoryUpdate::insert([
-                'booking_engine' => 'rategain',
-                'room_class_cloud' => null,
-                'room_class_local' => null,
-                'date_updated' => $d2->format('Y-m-d H:i:s'),
-                'quantity' => null,
-                'xml' => $data,
-                'hotel' => $instance->rg_hotel_code,
-                'xml_request' => $xml,
-                'source' => null
-            ]);
 
             $interval = $d1->diff($d2);
 
             echo "END " . $instance->rg_hotel_code . " in " . $interval->s . " seconds\n\n";
 
-            \Illuminate\Support\Facades\Log::info("END " . $instance->rg_hotel_code . " at " . $d2->format('Y-m-d H:i:s') . " in " . $interval->s . " seconds");
+            Log::info("END " . $instance->rg_hotel_code . " at " . $d2->format('Y-m-d H:i:s') . " in " . $interval->s . " seconds");
+            }
 
+        // }
+
+        $time = time();
+
+        $fp = fopen(public_path('inventory_'.$time.'.csv'), 'w');
+
+        foreach ($rows as $row) {
+            fputcsv($fp, $row);
         }
 
-
+        fclose($fp);
 
     }
 
@@ -179,7 +135,7 @@ XML;
         \Config::set("database.connections.on_the_fly", [
             "driver" => "mysql",
             "host" => $instance['db_host'],
-            "port" => $instance['db_password'],
+            "port" => 3306,
             "database" => $instance['db_database'],
             "username" => $instance['db_username'],
             "password" => $instance['db_password'],

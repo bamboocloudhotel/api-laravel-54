@@ -17,6 +17,7 @@ class Kernel extends ConsoleKernel
         Commands\GetBookingEngineReservations::class,
         Commands\ModifyBookingEngineInventory::class,
         Commands\UpdateInventoryCommand::class,
+        Commands\UpdatePreview::class,
         Commands\KillQueue::class,
     ];
 
@@ -30,7 +31,7 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('cr:get_reservations cm_reservas')->everyMinute();
         $schedule->command('kill:queue')->everyFiveMinutes();
-        $schedule->command('rategain:update_inventory')->cron('0 */4 * * *');
+        $schedule->command('rategain:update_inventory')->twiceDaily(1, 13);
         // start the queue daemon, if its not running
         if (!$this->osProcessIsRunning('queue:work')) {
             $schedule->command('queue:work --tries=3')->everyMinute();
