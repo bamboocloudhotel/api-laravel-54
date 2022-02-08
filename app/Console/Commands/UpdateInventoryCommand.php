@@ -155,8 +155,6 @@ XML;
 
         }
 
-
-
     }
 
     private function setRateGainConfig($rgHotelCode)
@@ -223,14 +221,14 @@ XML;
         $this->setRateGainConfig($rg_hotel_code);
 
         $sql = "
-    SELECT blohab.numhab
-    FROM blohab
-    LEFT JOIN habitacion ON blohab.numhab = habitacion.numhab
-    WHERE blohab.fecini <= '{$end}' AND blohab.fecfin >= '{$start}'
-    AND blohab.fecdes IS NULL
-    AND habitacion.codcla = {$codcla}
-    AND habitacion.tipo = 'V'
-    ";
+        SELECT blohab.numhab
+        FROM blohab
+        LEFT JOIN habitacion ON blohab.numhab = habitacion.numhab
+        WHERE blohab.fecini <= '{$end}' AND blohab.fecfin >= '{$start}'
+        AND blohab.fecdes IS NULL
+        AND habitacion.codcla = {$codcla}
+        AND habitacion.tipo = 'V'
+        ";
 
         $roomsBlocked = collect(\DB::connection('on_the_fly')->select($sql));
 
@@ -239,15 +237,15 @@ XML;
         }
 
         $sql = "
-    SELECT reserva.numres, reserva.numhab, reserva.estado, habitacion.codcla
-    FROM `reserva`
-    LEFT JOIN habitacion ON reserva.numhab = habitacion.numhab
-    WHERE reserva.feclle <= '{$start}' AND reserva.fecsal >= '{$end}'
-    AND reserva.estado IN ('P','G')
-    AND habitacion.codcla = {$codcla}
-    AND habitacion.tipo = 'V'
-    ORDER BY reserva.numhab ASC
-    ";
+        SELECT reserva.numres, reserva.numhab, reserva.estado, habitacion.codcla
+        FROM `reserva`
+        LEFT JOIN habitacion ON reserva.numhab = habitacion.numhab
+        WHERE reserva.feclle <= '{$start}' AND reserva.fecsal >= '{$end}'
+        AND reserva.estado IN ('P','G')
+        AND habitacion.codcla = {$codcla}
+        AND habitacion.tipo = 'V'
+        ORDER BY reserva.numhab ASC
+        ";
 
         $roomsReserved = collect(\DB::connection('on_the_fly')->select($sql));
 
@@ -256,17 +254,17 @@ XML;
         }
 
         $sql = "
-    SELECT folio.numhab, folio.numres, folio.numfol, folio.estado
-    FROM folio
-    INNER JOIN habitacion ON folio.numhab = habitacion.numhab
-    INNER JOIN reserva ON folio.numres = reserva.numres
-    WHERE folio.feclle <= '{start}' AND folio.fecsal >= '{$end}'
-    AND reserva.estado IN ('H')
-    AND folio.estado IN ('I')
-    AND habitacion.codcla = {$codcla}
-    AND habitacion.tipo = 'V'
-    ORDER BY folio.numhab 
-    ";
+        SELECT folio.numhab, folio.numres, folio.numfol, folio.estado
+        FROM folio
+        INNER JOIN habitacion ON folio.numhab = habitacion.numhab
+        INNER JOIN reserva ON folio.numres = reserva.numres
+        WHERE folio.feclle <= '{start}' AND folio.fecsal >= '{$end}'
+        AND reserva.estado IN ('H')
+        AND folio.estado IN ('I')
+        AND habitacion.codcla = {$codcla}
+        AND habitacion.tipo = 'V'
+        ORDER BY folio.numhab 
+        ";
 
         $roomsHosted = collect(\DB::connection('on_the_fly')->select($sql));
 
@@ -279,12 +277,12 @@ XML;
         $roomsOccupied = implode('\',\'', $roomsOccupied->sort()->unique()->values()->all());
 
         $sql = "
-    select habitacion.numhab 
-    from habitacion 
-    where habitacion.numhab not in ('{$roomsOccupied}')
-    AND habitacion.codcla = {$codcla}
-    AND habitacion.tipo = 'V'
-    ";
+        select habitacion.numhab 
+        from habitacion 
+        where habitacion.numhab not in ('{$roomsOccupied}')
+        AND habitacion.codcla = {$codcla}
+        AND habitacion.tipo = 'V'
+        ";
 
         $numhab = collect(\DB::connection('on_the_fly')->select($sql));
 
