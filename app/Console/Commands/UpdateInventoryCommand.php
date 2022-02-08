@@ -46,6 +46,9 @@ class UpdateInventoryCommand extends Command
         $instances = BambooInstance::with('bambooInstanceRooms')->get();
 
         foreach ($instances as $instance) {
+            if ($instance->rg_hotel_code  !== 'bhparque93') {
+                continue;
+            }
             $d1 = new \DateTime();
 
             echo "START " . $instance->rg_hotel_code . "\n";
@@ -82,7 +85,7 @@ XML;
 
                 $thisItems = '';
 
-                foreach ($period as $date) {
+                    foreach ($period as $date) {
                     $thisDate = $date->format('Y-m-d');
                     $tomorrow = date('Y-m-d', strtotime($thisDate . " +1 days"));
 
