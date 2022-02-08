@@ -76,7 +76,7 @@ XML;
 
             // if ($config) {
 
-                $period = CarbonPeriod::create(date('Y-m-d'), date('Y-m-d', strtotime("+90 days")));
+                $period = CarbonPeriod::create(date('Y-m-d', strtotime("+1 days")), date('Y-m-d', strtotime("+90 days")));
 
                 $thisXml = str_replace('HotelCode="xxxxx"', 'HotelCode="' . $instance->rg_hotel_code . '"', $xml);
 
@@ -84,13 +84,14 @@ XML;
 
                 foreach ($period as $date) {
                     $thisDate = $date->format('Y-m-d');
+                    $tomorrow = date('Y-m-d', strtotime($thisDate . " +1 days"));
 
                     foreach ($instance->bambooInstanceRooms as $room) {
-                        $availability = $this->getAvailability($instance->rg_hotel_code, $thisDate, date('Y-m-d', strtotime("+1 days")), $room->bb_room);
+                        $availability = $this->getAvailability($instance->rg_hotel_code, $thisDate, $tomorrow, $room->bb_room);
 
                         $thisItemXml = str_replace('BookingLimit="1"', 'BookingLimit="' . $availability . '"', $inventoryModifyRequestItem);
-                        $thisItemXml = str_replace('Start="2020-03-01"', 'Start="' . $date . '"', $thisItemXml);
-                        $thisItemXml = str_replace('End="2020-03-01"', 'End="' . $date . '"', $thisItemXml);
+                        $thisItemXml = str_replace('Start="2020-03-01"', 'Start="' . $thisDate . '"', $thisItemXml);
+                        $thisItemXml = str_replace('End="2020-03-01"', 'End="' . $thisDate . '"', $thisItemXml);
                         $thisItemXml = str_replace('InvCode="SGL"', 'InvCode="' . $room['rg_room'] . '"', $thisItemXml);
                         $thisItemXml = str_replace('ID="1"', 'ID="' . $this->uniqidReal() . '"', $thisItemXml);
 
