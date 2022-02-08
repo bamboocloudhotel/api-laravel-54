@@ -82,7 +82,7 @@ XML;
 
                 $thisItems = '';
 
-                foreach ($period as $date) {
+                    foreach ($period as $date) {
                     $thisDate = $date->format('Y-m-d');
                     $tomorrow = date('Y-m-d', strtotime($thisDate . " +1 days"));
 
