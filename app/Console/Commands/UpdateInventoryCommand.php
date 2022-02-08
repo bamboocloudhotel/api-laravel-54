@@ -76,7 +76,7 @@ XML;
 
             // if ($config) {
 
-                $period = CarbonPeriod::create(date('Y-m-d'), date('Y-m-d', strtotime("+90 days")));
+                $period = CarbonPeriod::create(date('Y-m-d', strtotime("+1 days")), date('Y-m-d', strtotime("+90 days")));
 
                 $thisXml = str_replace('HotelCode="xxxxx"', 'HotelCode="' . $instance->rg_hotel_code . '"', $xml);
 
@@ -84,13 +84,14 @@ XML;
 
                 foreach ($period as $date) {
                     $thisDate = $date->format('Y-m-d');
+                    $tomorrow = date('Y-m-d', strtotime($thisDate . " +1 days"));
 
                     foreach ($instance->bambooInstanceRooms as $room) {
-                        $availability = $this->getAvailability($instance->rg_hotel_code, $thisDate, date('Y-m-d', strtotime("+1 days")), $room->bb_room);
+                        $availability = $this->getAvailability($instance->rg_hotel_code, $thisDate, $tomorrow, $room->bb_room);
 
                         $thisItemXml = str_replace('BookingLimit="1"', 'BookingLimit="' . $availability . '"', $inventoryModifyRequestItem);
-                        $thisItemXml = str_replace('Start="2020-03-01"', 'Start="' . $date . '"', $thisItemXml);
-                        $thisItemXml = str_replace('End="2020-03-01"', 'End="' . $date . '"', $thisItemXml);
+                        $thisItemXml = str_replace('Start="2020-03-01"', 'Start="' . $thisDate . '"', $thisItemXml);
+                        $thisItemXml = str_replace('End="2020-03-01"', 'End="' . $thisDate . '"', $thisItemXml);
                         $thisItemXml = str_replace('InvCode="SGL"', 'InvCode="' . $room['rg_room'] . '"', $thisItemXml);
                         $thisItemXml = str_replace('ID="1"', 'ID="' . $this->uniqidReal() . '"', $thisItemXml);
 
@@ -154,8 +155,6 @@ XML;
             \Illuminate\Support\Facades\Log::info("END " . $instance->rg_hotel_code . " at " . $d2->format('Y-m-d H:i:s') . " in " . $interval->s . " seconds");
 
         }
-
-
 
     }
 
@@ -223,14 +222,14 @@ XML;
         $this->setRateGainConfig($rg_hotel_code);
 
         $sql = "
-    SELECT blohab.numhab
-    FROM blohab
-    LEFT JOIN habitacion ON blohab.numhab = habitacion.numhab
-    WHERE blohab.fecini <= '{$end}' AND blohab.fecfin >= '{$start}'
-    AND blohab.fecdes IS NULL
-    AND habitacion.codcla = {$codcla}
-    AND habitacion.tipo = 'V'
-    ";
+        SELECT blohab.numhab
+        FROM blohab
+        LEFT JOIN habitacion ON blohab.numhab = habitacion.numhab
+        WHERE blohab.fecini <= '{$end}' AND blohab.fecfin >= '{$start}'
+        AND blohab.fecdes IS NULL
+        AND habitacion.codcla = {$codcla}
+        AND habitacion.tipo = 'V'
+        ";
 
         $roomsBlocked = collect(\DB::connection('on_the_fly')->select($sql));
 
@@ -239,15 +238,15 @@ XML;
         }
 
         $sql = "
-    SELECT reserva.numres, reserva.numhab, reserva.estado, habitacion.codcla
-    FROM `reserva`
-    LEFT JOIN habitacion ON reserva.numhab = habitacion.numhab
-    WHERE reserva.feclle <= '{$start}' AND reserva.fecsal >= '{$end}'
-    AND reserva.estado IN ('P','G')
-    AND habitacion.codcla = {$codcla}
-    AND habitacion.tipo = 'V'
-    ORDER BY reserva.numhab ASC
-    ";
+        SELECT reserva.numres, reserva.numhab, reserva.estado, habitacion.codcla
+        FROM `reserva`
+        LEFT JOIN habitacion ON reserva.numhab = habitacion.numhab
+        WHERE reserva.feclle <= '{$start}' AND reserva.fecsal >= '{$end}'
+        AND reserva.estado IN ('P','G')
+        AND habitacion.codcla = {$codcla}
+        AND habitacion.tipo = 'V'
+        ORDER BY reserva.numhab ASC
+        ";
 
         $roomsReserved = collect(\DB::connection('on_the_fly')->select($sql));
 
@@ -256,17 +255,17 @@ XML;
         }
 
         $sql = "
-    SELECT folio.numhab, folio.numres, folio.numfol, folio.estado
-    FROM folio
-    INNER JOIN habitacion ON folio.numhab = habitacion.numhab
-    INNER JOIN reserva ON folio.numres = reserva.numres
-    WHERE folio.feclle <= '{start}' AND folio.fecsal >= '{$end}'
-    AND reserva.estado IN ('H')
-    AND folio.estado IN ('I')
-    AND habitacion.codcla = {$codcla}
-    AND habitacion.tipo = 'V'
-    ORDER BY folio.numhab 
-    ";
+        SELECT folio.numhab, folio.numres, folio.numfol, folio.estado
+        FROM folio
+        INNER JOIN habitacion ON folio.numhab = habitacion.numhab
+        INNER JOIN reserva ON folio.numres = reserva.numres
+        WHERE folio.feclle <= '{start}' AND folio.fecsal >= '{$end}'
+        AND reserva.estado IN ('H')
+        AND folio.estado IN ('I')
+        AND habitacion.codcla = {$codcla}
+        AND habitacion.tipo = 'V'
+        ORDER BY folio.numhab 
+        ";
 
         $roomsHosted = collect(\DB::connection('on_the_fly')->select($sql));
 
@@ -279,12 +278,12 @@ XML;
         $roomsOccupied = implode('\',\'', $roomsOccupied->sort()->unique()->values()->all());
 
         $sql = "
-    select habitacion.numhab 
-    from habitacion 
-    where habitacion.numhab not in ('{$roomsOccupied}')
-    AND habitacion.codcla = {$codcla}
-    AND habitacion.tipo = 'V'
-    ";
+        select habitacion.numhab 
+        from habitacion 
+        where habitacion.numhab not in ('{$roomsOccupied}')
+        AND habitacion.codcla = {$codcla}
+        AND habitacion.tipo = 'V'
+        ";
 
         $numhab = collect(\DB::connection('on_the_fly')->select($sql));
 
