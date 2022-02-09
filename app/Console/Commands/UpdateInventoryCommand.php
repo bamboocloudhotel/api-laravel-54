@@ -46,9 +46,9 @@ class UpdateInventoryCommand extends Command
         $instances = BambooInstance::with('bambooInstanceRooms')->get();
 
         foreach ($instances as $instance) {
-            if ($instance->rg_hotel_code  !== 'bhbicentenario') {
+            /*if ($instance->rg_hotel_code  !== 'bhbicentenario') {
                 continue;
-            }
+            }*/
             $d1 = new \DateTime();
 
             echo "START " . $instance->rg_hotel_code . "\n";
