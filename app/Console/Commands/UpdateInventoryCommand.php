@@ -79,7 +79,7 @@ XML;
 
             // if ($config) {
 
-                $period = CarbonPeriod::create(date('Y-m-d', strtotime("+1 days")), date('Y-m-d', strtotime("+90 days")));
+                $period = CarbonPeriod::create(date('Y-m-d'), date('Y-m-d', strtotime("+90 days")));
 
                 $thisXml = str_replace('HotelCode="xxxxx"', 'HotelCode="' . $instance->rg_hotel_code . '"', $xml);
 
