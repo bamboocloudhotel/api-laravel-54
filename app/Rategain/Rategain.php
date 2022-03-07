@@ -1011,10 +1011,10 @@ XML;
 RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Type} {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Value}
 RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Type} {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value}
             " : '';
-            $paymentType = config('rategain.paymentType');
-            $warrantyType = config('rategain.warrantyType');
-            $programType = config('rategain.programType');
-            $tipres = config('rategain.tipres');
+            $paymentType = $bambooBookingChannelCompany['forpag'];
+            $warrantyType = $bambooBookingChannelCompany['tipgar'];
+            $programType = $bambooBookingChannelCompany['tippro'];
+            $tipres = $bambooBookingChannelCompany['tipres'];
             $metadata = json_encode($data);
 
             try {
@@ -1069,14 +1069,16 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     'numadu' => $numadu, // count($data->HotelReservations->HotelReservation->ResGuests->ResGuest),
                     'numnin' => $numnin,
                     'observacion' => $guestExits ? '' : $observacion,
-                    'habfij' => 'N',
+                    'habfij' => $bambooBookingChannelCompany['habfij'] ? $bambooBookingChannelCompany['habfij'] : 'N',
                     'solicitada' => "{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->GivenName} {$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->Surname}",
-                    'forpag' => $paymentType,
+                    'forpag' => $bambooBookingChannelCompany['forpag'] ? $bambooBookingChannelCompany['forpag'] : '45',
+                    'desayuno' => $bambooBookingChannelCompany['desayuno'] ? $bambooBookingChannelCompany['desayuno'] : 'NO',
+                    'reembl' => $bambooBookingChannelCompany['reembl'] ? $bambooBookingChannelCompany['reembl'] : 'S',
                     'fecest' => date('Y-m-d'),
                     'estado' => 'G',
-                    'tippro' => null,
-                    'tipgar' => null,
-                    'codven' => null,
+                    'tippro' => $bambooBookingChannelCompany['tippro'] ? $bambooBookingChannelCompany['tippro'] : 1,
+                    'tipgar' => $bambooBookingChannelCompany['reembl'] ? $bambooBookingChannelCompany['reembl'] : 2,
+                    'codven' => $bambooBookingChannelCompany['codven'] ? $bambooBookingChannelCompany['cedven'] : 1,
                     'codcan' => $bambooCodcan ?: 0,
                     'metadata' => $metadata,
                     'guarantee' => ' ' . $guaranteeText,
