@@ -765,13 +765,15 @@ XML;
         $bambooTipres = null;
         $bambooCodcan = null;
 
-        if ($bambooBookingChannelCompany) {
-            $bambooBookingChannelCompany = $bambooBookingChannelCompany->toArray();
-            $bambooCompanyNit = $bambooBookingChannelCompany['NIT'];
-            $bambooTipseg = $bambooBookingChannelCompany['tipseg'] ?: 'I';
-            $bambooTipres = $bambooBookingChannelCompany['tipres'];
-            $bambooCodcan = $bambooBookingChannelCompany['codcan'];
+        if (!$bambooBookingChannelCompany) {
+            $bambooBookingChannelCompany = CrChannel::with('empresa')->where('channel_code', 'defecto')->first();
         }
+
+        $bambooBookingChannelCompany = $bambooBookingChannelCompany->toArray();
+        $bambooCompanyNit = $bambooBookingChannelCompany['NIT'];
+        $bambooTipseg = $bambooBookingChannelCompany['tipseg'] ?: 'I';
+        $bambooTipres = $bambooBookingChannelCompany['tipres'];
+        $bambooCodcan = $bambooBookingChannelCompany['codcan'];
 
         // dd($bambooCodcan, $bambooTipres, $bambooTipseg, $bambooCompanyNit, $bambooBookingChannelCompany);
 
