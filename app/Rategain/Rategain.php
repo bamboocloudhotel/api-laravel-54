@@ -769,7 +769,7 @@ XML;
             $bambooBookingChannelCompany = CrChannel::with('empresa')->where('channel_code', 'defecto')->first();
         }
 
-        $bambooBookingChannelCompany = $bambooBookingChannelCompany->toArray();
+        $bambooBookingChannelCompany = $bambooBookingChannelCompany ? $bambooBookingChannelCompany->toArray() : [];
         $bambooCompanyNit = $bambooBookingChannelCompany['NIT'];
         $bambooTipseg = $bambooBookingChannelCompany['tipseg'] ?: 'I';
         $bambooTipres = $bambooBookingChannelCompany['tipres'];
