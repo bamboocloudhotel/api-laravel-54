@@ -17,6 +17,7 @@ class Kernel extends ConsoleKernel
         Commands\GetBookingEngineReservations::class,
         Commands\ModifyBookingEngineInventory::class,
         Commands\UpdateInventoryCommand::class,
+        Commands\UpdateTodayInventoryCommand::class,
         Commands\UpdatePreview::class,
         Commands\KillQueue::class,
     ];
