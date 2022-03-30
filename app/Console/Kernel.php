@@ -33,6 +33,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('cr:get_reservations cm_reservas')->everyMinute();
         $schedule->command('kill:queue')->everyFiveMinutes();
         $schedule->command('rategain:update_inventory')->twiceDaily(1, 13);
+        $schedule->command('rategain:update_today_inventory')->twiceDaily(8, 11);
+        $schedule->command('rategain:update_today_inventory')->twiceDaily(15, 20);
         // start the queue daemon, if its not running
         if (!$this->osProcessIsRunning('queue:work')) {
             $schedule->command('queue:work --tries=3')->everyMinute();
