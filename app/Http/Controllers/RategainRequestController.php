@@ -7,6 +7,11 @@ use Illuminate\Http\Request;
 
 class RategainRequestController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -15,6 +20,7 @@ class RategainRequestController extends Controller
     public function index(Request $request)
     {
         //
+        auth()->user()->authorizeRoles(['admin', 'reservations']);
 
     	$rateGainRequests = RategainRequest::whereNotNull('reference');
 
@@ -59,6 +65,7 @@ class RategainRequestController extends Controller
      */
     public function show($id)
     {
+        auth()->user()->authorizeRoles(['admin', 'reservations']);
         
         $rategainRequest = RategainRequest::find($id);
 

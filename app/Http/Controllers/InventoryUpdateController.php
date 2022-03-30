@@ -7,6 +7,12 @@
 
   class InventoryUpdateController extends Controller
   {
+
+      public function __construct()
+      {
+          $this->middleware('auth');
+      }
+
     /**
      * Display a listing of the resource.
      *
@@ -15,6 +21,7 @@
     public function index(Request $request)
     {
       //
+        auth()->user()->authorizeRoles(['admin', 'reception']);
       $rateGainInventoryUpdates = InventoryUpdate::whereBookingEngine('rategain');
 
       if ($request->get('search')) {
@@ -60,6 +67,7 @@
      */
     public function show($id)
     {
+        auth()->user()->authorizeRoles(['admin', 'reception']);
       //
       $rateGainInventoryUpdate = InventoryUpdate::findOrFail($id);
 
