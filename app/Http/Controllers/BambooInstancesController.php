@@ -10,8 +10,15 @@ class BambooInstancesController extends Controller
 {
     //
 
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     public function index(Request $request)
     {
+
+        auth()->user()->authorizeRoles(['admin']);
         $bambooInstances = BambooInstance::with('bambooInstanceRooms');
 
         if ($request->get('search')) {
@@ -27,7 +34,7 @@ class BambooInstancesController extends Controller
 
     public function show(Request $request, $id)
     {
-
+        auth()->user()->authorizeRoles(['admin']);
         $instance = [];
 
         if ($id == 0) {
@@ -54,7 +61,7 @@ class BambooInstancesController extends Controller
 
     public function update(Request $request, $id)
     {
-
+        auth()->user()->authorizeRoles(['admin']);
         // dd('update', $request->all());
 
         \DB::beginTransaction();
@@ -107,7 +114,7 @@ class BambooInstancesController extends Controller
 
     public function store(Request $request)
     {
-
+        auth()->user()->authorizeRoles(['admin']);
         // dd('create', $request->all());
 
         \DB::beginTransaction();

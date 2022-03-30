@@ -46,21 +46,26 @@
                         <!-- Left Side Of Navbar -->
                         @if(Auth::user())
                         <ul class="nav navbar-nav">
+                            @if(Auth::user()->hasRole('admin'))
                             <li>
                                 <a href="{{url('/rategain-bamboo-instances')}}">Instances</a>
                             </li>
-
+                            @endif
+                            @if(Auth::user()->hasAnyRole(['reservations', 'admin']))
                             <li>
                                 <a href="{{url('/rategain-requests')}}">Requests</a>
                             </li>
-
+                            @endif
+                            @if(Auth::user()->hasAnyRole(['reception', 'admin']))
                             <li>
                                 <a href="{{url('/rategain-availability')}}">Inventory</a>
                             </li>
-
+                            @endif
+                            @if(Auth::user()->hasAnyRole(['reception', 'admin']))
                             <li>
                                 <a href="{{url('/rategain-inventory-updates')}}">Inventory updates</a>
                             </li>
+                            @endif
                             &nbsp;
                         </ul>
                         @endif

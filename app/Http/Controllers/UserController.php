@@ -2,30 +2,31 @@
 
 namespace App\Http\Controllers;
 
-use App\BambooInstance;
+use App\User;
+use http\Env\Response;
 use Illuminate\Http\Request;
 
-class AvailabilityController extends Controller
+class UserController extends Controller
 {
+
     public function __construct()
     {
         $this->middleware('auth');
     }
+
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Foundation\Application|\Illuminate\Http\Response|\Illuminate\View\View
+     * @return \Illuminate\Http\Response
      */
     public function index()
     {
         //
-        auth()->user()->authorizeRoles(['admin', 'reception']);
-      $instances = BambooInstance::with('bambooInstanceRooms')->get();
 
-      return view('rategain-check-availability', [
-        'instances' => $instances,
-        'instances_json' => $instances->toJson()
-      ]);
+        auth()->user()->authorizeRoles(['admin']);
+        $users = User::with('roles')->paginate(10);
+
+        return \response()->json($users);
     }
 
     /**
