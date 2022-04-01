@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Motcan extends Model
 {
+    protected $connection = 'on_the_fly';
 	protected $table = 'motcan';
 	protected $primaryKey = 'motcan';
 	public $incrementing = false;
@@ -28,6 +29,7 @@ class Motcan extends Model
 	];
 
 	protected $fillable = [
-		'detalle'
+		'detalle',
+		'motcan',
 	];
 }
