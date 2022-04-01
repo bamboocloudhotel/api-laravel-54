@@ -25,6 +25,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Canre extends Model
 {
+    protected $connection = 'on_the_fly';
 	protected $table = 'canres';
 	protected $primaryKey = 'codcan';
 	public $incrementing = false;
@@ -42,6 +43,7 @@ class Canre extends Model
 	];
 
 	protected $fillable = [
+		'codcan',
 		'numres',
 		'feccan',
 		'hora',

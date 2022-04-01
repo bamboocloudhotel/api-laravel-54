@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\BambooInstance;
+use App\Models\Canre;
+use App\Models\Motcan;
 use App\Rategain\Rategain;
 use Illuminate\Http\Request;
 use App\Models\Reserva;
@@ -65,7 +67,7 @@ class XMLController extends Controller
 
                 $this->getInstance($reservationObject->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode);
 
-				// dd($reservationObject->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode);
+                // dd($reservationObject->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode);
 
                 $response = $this->rategain->saveReservation($reservationObject);
                 return response()->xml($response);
@@ -104,6 +106,36 @@ class XMLController extends Controller
                 $reserva = Reserva::where('referencia', 'LIKE', '%' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value)->get();
 
                 foreach ($reserva as $res) {
+
+                    $lastCancellation = Canre::orderBy('codcan', 'desc')->first()->toArray();
+                    $lastCancellationId = $lastCancellation['codcan'] + 1;
+
+                    $motcan = Motcan::where('detalle', 'INTEGRACIÓN MODIFICACIÓN')->first();
+
+                    if (!$motcan) {
+                        $motcanNext = Motcan::orderBy('motcan', 'desc')->first();
+                        $motcanId = ($motcanNext->motcan + 1);
+                        $motcan = Motcan::create([
+                            'motcan' => $motcanId,
+                            'detalle' => 'INTEGRACIÓN MODIFICACIÓN'
+                        ]);
+                    }
+
+                    try {
+                        Canre::create([
+                            'codcan' => $lastCancellationId,
+                            'numres' => $reserva['numres'],
+                            'feccan' => date('Y-m-d'),
+                            'hora' => date('H:i'),
+                            'descripcion' => 'Reserva cancelada por modificación en la integración Rategain',
+                            'solicitada' => 'Integración Rategain',
+                            'codusu' => 1,
+                            'motcan' => $motcan->motcan,
+                        ]);
+                    } catch (\Exception $exception) {
+                        // nothing
+                    }
+
                     $res->update([
                         'estado' => 'C',
                         'modifyid' => $confirmationid
@@ -148,11 +180,44 @@ class XMLController extends Controller
 
                 $reserva = Reserva::where('referencia', 'LIKE', '%' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value)->get();
 
+                // dd($reserva->toArray());
+
                 if (!$reserva || !count($reserva)) {
                     return response()->xml($returnSuccess);
                 }
 
                 foreach ($reserva as $res) {
+
+                    $lastCancellation = Canre::orderBy('codcan', 'desc')->first()->toArray();
+                    // dd($lastCancellation);
+                    $lastCancellationId = $lastCancellation['codcan'] + 1;
+
+                    $motcan = Motcan::where('detalle', 'INTEGRACIÓN CANCELACIÓN')->first();
+
+                    if (!$motcan) {
+                        $motcanNext = Motcan::orderBy('motcan', 'desc')->first();
+                        $motcanId = ($motcanNext->motcan + 1);
+                        $motcan = Motcan::create([
+                            'motcan' => $motcanId,
+                            'detalle' => 'INTEGRACIÓN CANCELACIÓN'
+                        ]);
+                    }
+
+                    try {
+                        Canre::create([
+                            'codcan' => $lastCancellationId,
+                            'numres' => $res->numres,
+                            'feccan' => date('Y-m-d'),
+                            'hora' => date('H:i'),
+                            'descripcion' => 'Reserva cancelada por la integración Rategain',
+                            'solicitada' => 'Integración Rategain',
+                            'codusu' => 1,
+                            'motcan' => $motcan->motcan,
+                        ]);
+                    } catch (\Exception $exception) {
+                        // nothing
+                    }
+
                     $res->update([
                         'cancellationid' => $confirmationid,
                         'estado' => 'C'
@@ -207,7 +272,7 @@ class XMLController extends Controller
     {
         $this->setRateGainConfig($reservationObject->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode);
 
-		if (!is_array($reservationObject->HotelReservations->HotelReservation->RoomStays->RoomStay)) {
+        if (!is_array($reservationObject->HotelReservations->HotelReservation->RoomStays->RoomStay)) {
             $validation = \Validator::make($data, [
                 'method' => 'required|in:OTA_HotelResNotifRQ',
                 'data.ResStatus' => 'in:Commit,Modify,Cancel',
@@ -303,12 +368,12 @@ class XMLController extends Controller
                 'rg_hotel_code', $rgHotelCode
             )->first();
 
-			if (!$instance) {
+        if (!$instance) {
 
-				dd('No hotel instance found!');
-			}
+            dd('No hotel instance found!');
+        }
 
-			$instance = $instance->toArray();
+        $instance = $instance->toArray();
 
         \Config::set("database.connections.on_the_fly", [
             "driver" => "mysql",
@@ -357,11 +422,11 @@ class XMLController extends Controller
                 'rg_hotel_code', $rgHotelCode
             )->first();
 
-		if (!$instance) {
-			dd('No hotel instance found!');
-		}
+        if (!$instance) {
+            dd('No hotel instance found!');
+        }
 
-		$instance = $instance->toArray();
+        $instance = $instance->toArray();
 
         $rooms_cl = [];
 
