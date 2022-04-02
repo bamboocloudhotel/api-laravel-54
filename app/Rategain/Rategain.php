@@ -758,6 +758,7 @@ XML;
         // \DB::setConnection('on_the_fly');
 
         $bambooBookingChannelCompany = CrChannel::with('empresa')->where('channel_code', $bookingChannel)->first();
+        dd($bambooBookingChannelCompany);
         // $bambooBookingChannelCompany = CrChannel::where('channel_code', $bookingChannel)->first();
         // dd($bambooBookingChannelCompany->toArray());
 
