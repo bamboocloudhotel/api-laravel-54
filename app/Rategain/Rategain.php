@@ -10,12 +10,14 @@ use App\Models\Detrec;
 use App\Models\Folio;
 use App\Models\Garres;
 use App\Models\Plares;
+use App\Models\PlaresNuevo;
 use App\Models\Reccaj;
 use App\Models\Reserva;
 use App\Models\Cliente;
 use App\Models\CrBooker;
 use App\Models\CrBookerReserva;
 use App\Models\CrGuarantee;
+use App\Models\ReservaNuevo;
 use App\Models\Tipdoc;
 use App\Models\Valcar;
 use App\Models\Empresa;
@@ -1050,8 +1052,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
 
                 // dd($rateList);
                 // dd($bambooBookingChannelCompany);
-
-                $createdReservation = Reserva::create([
+                $reservaData = [
                     'numres' => $numres,
                     'referencia' => 'RateGain ' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Type . ' ' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Value . ' - ' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Type . ' ' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value,
                     'tipdoc' => $guestExits ? $guestExits->tipdoc : 1,
@@ -1104,7 +1105,9 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     // 'rateplancode' => isset($roomStay->RatePlans->RatePlan->RatePlanCode) ? $roomStay->RatePlans->RatePlan->RatePlanCode : '',
                     // 'ratelist' => $rateList,
                     'idclifre' => $booker ? ($booker->givenname . ' ' . $booker->surname . ' - ' . $booker->email) : "{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->GivenName} {$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->Surname}",
-                ]);
+                ];
+                $createdReservation = Reserva::create($reservaData);
+                // $createdReservationNueva = ReservaNuevo::create($reservaData);
             } catch (\Exception $exception) {
                 dd($exception->getMessage());
             }
@@ -1174,7 +1177,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     }
 
                     try {
-                        Plares::create([
+                        $plaresData = [
                             'numres' => $numres,
                             'numpla' => $dayPriceCnt,
                             'codpla' => $codpla,
@@ -1186,7 +1189,9 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                             // 'valor' => 0,
                             'valornoche' => $value,
                             'codigocr' => $roomStay->RoomRates->RoomRate->RatePlanCode
-                        ]);
+                        ];
+                        Plares::create($plaresData);
+                        // PlaresNuevo::create($plaresData);
                         $dayPriceCnt++;
 
                     } catch (Exception $exception) {
@@ -1212,7 +1217,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     $value = $value * $usd->valor;
                 }
                 try {
-                    Plares::create([
+                    $plaresData = [
                         'numres' => $numres,
                         'numpla' => $dayPriceCnt,
                         'codpla' => $codpla,
@@ -1224,7 +1229,9 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                         // 'valor' => 0,
                         'valornoche' => $value,
                         'codigocr' => $roomStay->RoomRates->RoomRate->RatePlanCode
-                    ]);
+                    ];
+                    Plares::create($plaresData);
+                    // PlaresNuevo::create($plaresData);
                     $dayPriceCnt++;
 
                 } catch (Exception $exception) {
