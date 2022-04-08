@@ -1012,9 +1012,7 @@ XML;
 RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Type} {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Value}
 RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Type} {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value}
             " : '';
-            $paymentType = $bambooBookingChannelCompany['forpag'];
-            $warrantyType = $bambooBookingChannelCompany['tipgar'];
-            $programType = $bambooBookingChannelCompany['tippro'];
+
             $tipres = $bambooBookingChannelCompany['tipres'];
             $metadata = json_encode($data);
 
@@ -1051,6 +1049,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                 }
 
                 // dd($rateList);
+                // dd($bambooBookingChannelCompany);
 
                 $createdReservation = Reserva::create([
                     'numres' => $numres,
@@ -1070,16 +1069,16 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     'numadu' => $numadu, // count($data->HotelReservations->HotelReservation->ResGuests->ResGuest),
                     'numnin' => $numnin,
                     'observacion' => $guestExits ? '' : $observacion,
-                    'habfij' => $bambooBookingChannelCompany['habfij'] ? $bambooBookingChannelCompany['habfij'] : 'N',
+                    'habfij' => $bambooBookingChannelCompany['habfij'] ?: 'N',
                     'solicitada' => "{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->GivenName} {$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->Surname}",
-                    'forpag' => $bambooBookingChannelCompany['forpag'] ? $bambooBookingChannelCompany['forpag'] : '45',
-                    'desayuno' => $bambooBookingChannelCompany['desayuno'] ? $bambooBookingChannelCompany['desayuno'] : 'NO',
-                    'reembl' => $bambooBookingChannelCompany['reembl'] ? $bambooBookingChannelCompany['reembl'] : 'S',
+                    'forpag' => $bambooBookingChannelCompany['forpag'] ?: '45',
+                    'desayuno' => $bambooBookingChannelCompany['desayuno'] ?: 'NO',
+                    'reembl' => $bambooBookingChannelCompany['reembl'] ?: 'S',
                     'fecest' => date('Y-m-d'),
                     'estado' => 'G',
-                    'tippro' => $bambooBookingChannelCompany['tippro'] ? $bambooBookingChannelCompany['tippro'] : 1,
-                    'tipgar' => $bambooBookingChannelCompany['reembl'] ? $bambooBookingChannelCompany['reembl'] : 2,
-                    'codven' => $bambooBookingChannelCompany['codven'] ? $bambooBookingChannelCompany['cedven'] : 1,
+                    'tippro' => $bambooBookingChannelCompany['tippro'] ?: 1,
+                    'tipgar' => $bambooBookingChannelCompany['tipgar'] ?: 2,
+                    'codven' => $bambooBookingChannelCompany['codven'] ?: 1,
                     'codcan' => $bambooCodcan ?: 0,
                     'metadata' => $metadata,
                     'guarantee' => ' ' . $guaranteeText,
@@ -1371,11 +1370,11 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     'trahot' => 'N',
                     'estpai' => null,
                     'corregir' => 'N',
-                    'forpag' => null,
+                    'forpag' => $bambooBookingChannelCompany['forpag'] ?: 1,
                     'estado' => 'O',
                     'walkin' => 'A',
-                    'tippro' => '',
-                    'tipgar' => '',
+                    'tippro' => $bambooBookingChannelCompany['tippro'] ?: 1,
+                    'tipgar' => $bambooBookingChannelCompany['tipgar'] ?: 1,
                     'codven' => 0,
                     'idresweb' => null,
                     'idcanal' => null,
