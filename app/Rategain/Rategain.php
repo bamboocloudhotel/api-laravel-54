@@ -1107,7 +1107,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     'idclifre' => $booker ? ($booker->givenname . ' ' . $booker->surname . ' - ' . $booker->email) : "{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->GivenName} {$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->Surname}",
                 ];
                 $createdReservation = Reserva::create($reservaData);
-                // $createdReservationNueva = ReservaNuevo::create($reservaData);
+                ReservaNuevo::create($reservaData);
             } catch (\Exception $exception) {
                 dd($exception->getMessage());
             }
@@ -1191,7 +1191,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                             'codigocr' => $roomStay->RoomRates->RoomRate->RatePlanCode
                         ];
                         Plares::create($plaresData);
-                        // PlaresNuevo::create($plaresData);
+                        PlaresNuevo::create($plaresData);
                         $dayPriceCnt++;
 
                     } catch (Exception $exception) {
@@ -1231,7 +1231,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                         'codigocr' => $roomStay->RoomRates->RoomRate->RatePlanCode
                     ];
                     Plares::create($plaresData);
-                    // PlaresNuevo::create($plaresData);
+                    PlaresNuevo::create($plaresData);
                     $dayPriceCnt++;
 
                 } catch (Exception $exception) {
