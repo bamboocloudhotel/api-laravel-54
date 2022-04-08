@@ -1051,7 +1051,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                 }
 
                 // dd($rateList);
-                dd($bambooBookingChannelCompany);
+                // dd($bambooBookingChannelCompany);
                 $reservaData = [
                     'numres' => $numres,
                     'referencia' => 'RateGain ' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Type . ' ' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Value . ' - ' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Type . ' ' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value,
