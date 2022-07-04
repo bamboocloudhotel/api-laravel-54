@@ -148,7 +148,7 @@
                 </div>
 
                 <div class="form-group row">
-                    <label class="col-sm-3 col-form-label">RateGain username</label>
+                    <label class="col-sm-3 col-form-label">RateGain password</label>
                     <div class="col-sm-9">
                         <input type="text"
                                required
