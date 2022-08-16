@@ -22,6 +22,8 @@ class RategainRequestController extends Controller
         //
         auth()->user()->authorizeRoles(['admin', 'reservations']);
 
+        $instances = auth()->user()->instances->pluck('rg_hotel_code')->toArray();
+
     	$rateGainRequests = RategainRequest::whereNotNull('reference');
 
     	if ($request->get('search')) {
@@ -29,6 +31,8 @@ class RategainRequestController extends Controller
                 ->orWhere('hotel', 'like', '%' . $request->get('search') . '%')
                 ->orWhere('reference', 'like', '%' . $request->get('search') . '%');
         }
+
+        $rateGainRequests->whereIn('hotel', $instances);
 
         $rateGainRequests = $rateGainRequests->orderBy('id', 'desc')->paginate(100);
 

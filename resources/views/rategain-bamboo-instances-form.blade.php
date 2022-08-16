@@ -4,7 +4,8 @@
 
     <div class="container">
         <div class="row">
-            <form data-action="{{$action}}" action="{{$action == 'create' ? '/api-laravel-54/public/index.php/rategain-bamboo-instances' : '/api-laravel-54/public/index.php/rategain-bamboo-instances/' . $instance['id']}}"
+            <form data-action="{{$action}}"
+                  action="{{$action == 'create' ? '/api-laravel-54/public/index.php/rategain-bamboo-instances' : '/api-laravel-54/public/index.php/rategain-bamboo-instances/' . $instance['id']}}"
                   method="post">
 
                 <div class="form-group row">

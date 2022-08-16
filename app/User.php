@@ -62,4 +62,8 @@ class User extends Authenticatable
         }
         return false;
     }
+
+    public function instances() {
+        return $this->belongsToMany(BambooInstance::class, 'instance_user');
+    }
 }

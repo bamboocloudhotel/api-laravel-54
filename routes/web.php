@@ -20,6 +20,11 @@ Auth::routes([
   'reset' => false,
   'verify' => false,
 ]);
+Route::get('/users/{id}', 'UsersController@show')->name('users-show');
+Route::post('/users', 'UsersController@store')->name('users-store');
+Route::post('/users/{id}', 'UsersController@update')->name('users-update');
+Route::delete('/users/{id}', 'UsersController@delete')->name('users-delete');
+Route::get('/users', 'UsersController@index')->name('users-index');
 
 Route::get('/rategain-requests', 'RategainRequestController@index')->middleware('auth');
 Route::get('/rategain-requests/{id}', 'RategainRequestController@show')->middleware('auth');
@@ -40,5 +45,3 @@ Route::get('/home', 'HomeController@index')->name('home');
 Route::get('/passport', 'PassportController@index')->name('passport');
 
 Auth::routes();
-
-Route::get('/home', 'HomeController@index')->name('home');

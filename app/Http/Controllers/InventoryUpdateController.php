@@ -1,17 +1,17 @@
 <?php
 
-  namespace App\Http\Controllers;
+namespace App\Http\Controllers;
 
-  use App\InventoryUpdate;
-  use Illuminate\Http\Request;
+use App\InventoryUpdate;
+use Illuminate\Http\Request;
 
-  class InventoryUpdateController extends Controller
-  {
+class InventoryUpdateController extends Controller
+{
 
-      public function __construct()
-      {
-          $this->middleware('auth');
-      }
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
 
     /**
      * Display a listing of the resource.
@@ -20,22 +20,26 @@
      */
     public function index(Request $request)
     {
-      //
+        //
         auth()->user()->authorizeRoles(['admin', 'reception']);
-      $rateGainInventoryUpdates = InventoryUpdate::whereBookingEngine('rategain');
+        $rateGainInventoryUpdates = InventoryUpdate::whereBookingEngine('rategain');
 
-      if ($request->get('search')) {
-        $rateGainInventoryUpdates->where('room_class_cloud', 'like', '%' . $request->get('search') . '%')
-          ->orWhere('hotel', 'like', '%' . $request->get('search') . '%')
-          ->orWhere('date_updated', 'like', '%' . $request->get('search') . '%')
-          ->orWhere('xml_request', 'like', '%' . $request->get('search') . '%')
-          ->orWhere('xml', 'like', '%' . $request->get('search') . '%')
-          ->orWhere('quantity', 'like', '%' . $request->get('search') . '%');
-      }
+        $instances = auth()->user()->instances->pluck('rg_hotel_code')->toArray();
 
-      $rateGainInventoryUpdates = $rateGainInventoryUpdates->orderBy('id', 'desc')->paginate(20)->appends(request()->query());
+        if ($request->get('search')) {
+            $rateGainInventoryUpdates->where('room_class_cloud', 'like', '%' . $request->get('search') . '%')
+                ->orWhere('hotel', 'like', '%' . $request->get('search') . '%')
+                ->orWhere('date_updated', 'like', '%' . $request->get('search') . '%')
+                ->orWhere('xml_request', 'like', '%' . $request->get('search') . '%')
+                ->orWhere('xml', 'like', '%' . $request->get('search') . '%')
+                ->orWhere('quantity', 'like', '%' . $request->get('search') . '%');
+        }
 
-      return view('rategain-inventory-updates-list', ['rateGainInventoryUpdates' => $rateGainInventoryUpdates, 'request' => $request->all()]);
+        $rateGainInventoryUpdates->whereIn('hotel', $instances);
+
+        $rateGainInventoryUpdates = $rateGainInventoryUpdates->orderBy('id', 'desc')->paginate(20)->appends(request()->query());
+
+        return view('rategain-inventory-updates-list', ['rateGainInventoryUpdates' => $rateGainInventoryUpdates, 'request' => $request->all()]);
     }
 
     /**
@@ -45,7 +49,7 @@
      */
     public function create()
     {
-      //
+        //
     }
 
     /**
@@ -56,7 +60,7 @@
      */
     public function store(Request $request)
     {
-      //
+        //
     }
 
     /**
@@ -68,19 +72,19 @@
     public function show($id)
     {
         auth()->user()->authorizeRoles(['admin', 'reception']);
-      //
-      $rateGainInventoryUpdate = InventoryUpdate::findOrFail($id);
+        //
+        $rateGainInventoryUpdate = InventoryUpdate::findOrFail($id);
 
-      // dd($rategainRequest->toArray());
+        // dd($rategainRequest->toArray());
 
-      try {
-        $sxe = new \SimpleXMLElement($rateGainInventoryUpdate->xml);
-        $sxe = json_encode($sxe);
-      } catch (\Exception $e) {
-        $sxe = "{}";
-      }
+        try {
+            $sxe = new \SimpleXMLElement($rateGainInventoryUpdate->xml);
+            $sxe = json_encode($sxe);
+        } catch (\Exception $e) {
+            $sxe = "{}";
+        }
 
-      return view('rategain-inventory-updates-view', ['rateGainInventoryUpdate' => $rateGainInventoryUpdate, 'sxe' => $sxe]);
+        return view('rategain-inventory-updates-view', ['rateGainInventoryUpdate' => $rateGainInventoryUpdate, 'sxe' => $sxe]);
     }
 
     /**
@@ -91,7 +95,7 @@
      */
     public function edit(InventoryUpdate $inventoryUpdate)
     {
-      //
+        //
     }
 
     /**
@@ -103,7 +107,7 @@
      */
     public function update(Request $request, InventoryUpdate $inventoryUpdate)
     {
-      //
+        //
     }
 
     /**
@@ -114,6 +118,6 @@
      */
     public function destroy(InventoryUpdate $inventoryUpdate)
     {
-      //
+        //
     }
-  }
+}

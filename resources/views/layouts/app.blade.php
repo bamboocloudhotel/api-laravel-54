@@ -66,7 +66,11 @@
                                 <a href="{{url('/rategain-inventory-updates')}}">Inventory updates</a>
                             </li>
                             @endif
-                            &nbsp;
+                            @if(Auth::user()->hasAnyRole(['admin']))
+                                <li>
+                                    <a href="{{url('/users')}}">Users</a>
+                                </li>
+                            @endif
                         </ul>
                         @endif
 
