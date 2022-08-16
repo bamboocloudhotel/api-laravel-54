@@ -687,6 +687,10 @@ XML;
                 'Code' => 402,
                 'ShortText' => 'Invalid data HotelReservations HotelReservation RoomStays RoomRates RoomRate RoomTypeCode'
             ],
+			'The selected data. hotel reservations. hotel reservation. room stays. room stay. room rates. room rate. room type code is invalid.' => [
+				'Code' => 402,
+                'ShortText' => 'Invalid data HotelReservations HotelReservation RoomStays RoomStay RoomRates RoomRate RoomTypeCode'
+			],			
             'data.HotelReservations.HotelReservation.RoomStays.RoomRates.RoomRate.NumberOfUnits' => [
                 'Code' => 321,
                 'ShortText' => 'Invalid data HotelReservations HotelReservation RoomStays RoomRates RoomRate NumberOfUnits'
@@ -717,12 +721,13 @@ XML;
 
         foreach ($errorsArray as $error) {
             if (is_array($error)) {
-                foreach ($error as $err) {
+                foreach ($error as $err => $er) {
+					// dd($err);
                     $errors .= "\n\t\t<Error Code=\"" . $responseErrors[$err]['Code'] . "\" Status=\"NotProcessed\" ShortText=\"" . $responseErrors[$err]['ShortText'] . "\" />";
                 }
             } else {
-                $errors .= "\n\t\t<Error Code=\"" . $responseErrors[$error]['Code'] . "\" Status=\"NotProcessed\" ShortText=\"" . $responseErrors[$error]['ShortText'] . "\" />";
-            }
+				$errors .= "\n\t\t<Error Code=\"{$responseErrors[$error]['Code']}\" Status=\"NotProcessed\" ShortText=\"{$error}\" />";
+			}
 
         }
 
