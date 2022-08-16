@@ -61,7 +61,7 @@ class XMLController extends Controller
                 if ($validation->fails()) {
                     $errors = $validation->errors();
                     // dd($errors);
-                    return response()->xml($this->rategain->getReservationError($errors->all()), 422);
+                    return response()->xml($this->rategain->getReservationError($errors->all()), 200);
                 }
 
 
