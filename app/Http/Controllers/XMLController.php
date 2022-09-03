@@ -140,7 +140,7 @@ class XMLController extends Controller
 
                 $rategainRequest->update([
                     'response' => $response,
-                    'confirmation_id' => $confirmationid
+                    'confirmation_id' => $reserva[0]->confirmationid
                 ]);
 
                 return response()->xml($response);
