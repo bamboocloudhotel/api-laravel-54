@@ -13,6 +13,8 @@ class RategainRequest extends Model
     	'type',
     	'request',
 		'xml',
-		'hotel'
+		'hotel',
+        'response',
+        'confirmation_id',
     ];
 }
