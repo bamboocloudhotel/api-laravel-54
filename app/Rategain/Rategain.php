@@ -810,7 +810,7 @@ XML;
 
                     if (!$guestExits) {
 
-                        $cedula = str_random(14);
+                        $cedula = str_random(10);
 
                         try {
 
@@ -1059,7 +1059,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                 // dd($bambooBookingChannelCompany);
                 $reservaData = [
                     'numres' => $numres,
-                    'referencia' => 'RateGain ' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Type . ' ' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Value . ' - ' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Type . ' ' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value,
+                    'referencia' => $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value,
                     'tipdoc' => $guestExits ? $guestExits->tipdoc : 1,
                     'cedula' => $guestExits ? $guestExits->cedula : $cedula,
                     'nit' => $bambooCompanyNit ?: 0, // $nit,
