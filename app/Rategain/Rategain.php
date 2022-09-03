@@ -745,7 +745,7 @@ XML;
      * @return array|string|string[]|void
      * @throws \Exception
      */
-    public function saveReservation($data, $confirmationId = null)
+    public function saveReservation($data, $confirmationid = null)
     {
 
         $resGuest = null;
@@ -944,7 +944,7 @@ XML;
         }
         $tipDoc = Tipdoc::where('detalle', 'CEDULA CIUDADANIA')->first();
 
-        if (!$confirmationId) {
+        if (!$confirmationid) {
             $confirmationid = $this->uniqidReal(16);
         }
 
