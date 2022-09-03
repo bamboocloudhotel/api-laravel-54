@@ -70,9 +70,12 @@ class XMLController extends Controller
 
                 // dd($reservationObject->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode);
 
-                $response = $this->rategain->saveReservation($reservationObject);
+                $response = $this->rategain->saveReservation($reservationObject, $confirmationid);
 
-                $rategainRequest->update(['response' => $response]);
+                $rategainRequest->update([
+                    'response' => $response,
+                    'confirmation_id' => $confirmationid
+                ]);
 
                 return response()->xml($response);
                 break;
@@ -93,7 +96,8 @@ class XMLController extends Controller
 
                 $this->getInstance($reservationObject->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode);
 
-                $reserva = Reserva::where('referencia', 'LIKE', '%' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value)->get();
+                $reserva = Reserva::where('referencia', 'LIKE', '%' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value . '%')
+                    ->get();
 
                 foreach ($reserva as $res) {
 
