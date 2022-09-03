@@ -147,20 +147,6 @@ class XMLController extends Controller
                 break;
             case 'Cancel':
 
-                try {
-
-                    $rategainRequest = RategainRequest::create([
-                        'reference' => 'Rategain ' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Type . ' ' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Value . ' - ' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Type . ' ' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value,
-                        'type' => 'cancellation',
-                        'request' => json_encode($reservationObject),
-                        'xml' => $xml,
-                        'hotel' => $reservationObject->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode
-                    ]);
-
-                } catch (\Exception $exception) {
-                    dd($exception->getMessage());
-                }
-
                 // dd('cancellation', $reservationObject->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode);
 
                 $this->getInstance($reservationObject->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode);
@@ -177,7 +163,7 @@ class XMLController extends Controller
                     $returnSuccess
                 );
 
-                $reserva = Reserva::where('referencia', 'LIKE', '%' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value)->get();
+                $reserva = Reserva::where('referencia', 'LIKE', '%' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value . '%')->get();
 
                 // dd($reserva->toArray());
 
