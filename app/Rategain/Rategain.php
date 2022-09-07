@@ -810,7 +810,7 @@ XML;
 
                     if (!$guestExits) {
 
-                        $cedula = str_random(10);
+                        $cedula = rand(99999999, 999999999);
 
                         try {
 

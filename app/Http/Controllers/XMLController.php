@@ -40,7 +40,7 @@ class XMLController extends Controller
         $confirmationid = $this->uniqidReal(16);
         $returnSuccess = $this->rategain->reservationResponseSuccess;
 
-        $this->setRateGainConfig($reservationObject->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode);
+        // $this->setRateGainConfig($reservationObject->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode);
 
         try {
 
