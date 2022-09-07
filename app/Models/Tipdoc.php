@@ -20,7 +20,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Tipdoc extends Model
 {
-    protected $connection = 'hhotel5';
+    protected $connection = 'on_the_fly';
 	protected $table = 'tipdoc';
 	protected $primaryKey = 'tipdoc';
 	public $incrementing = false;

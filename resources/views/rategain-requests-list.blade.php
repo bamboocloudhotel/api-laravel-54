@@ -34,6 +34,8 @@
                 <th>Name</th>
 
                 <th>Type</th>
+				
+                <th>Response ID</th>
 
                 <th>Date</th>
 
@@ -56,6 +58,8 @@
                         <td>{{ $value->reference }}</td>
 
                         <td>{{ $value->type }}</td>
+						
+                        <td>{{ $value->confirmation_id }}</td>
 
                         <td>{{ $value->created_at }}</td>
 
