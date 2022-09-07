@@ -64,12 +64,17 @@ class XMLController extends Controller
                 if ($validation->fails()) {
                     $errors = $validation->errors();
                     // dd($errors->toArray());
+					$rategainRequest->update([
+						'response' => $this->rategain->getReservationError($errors->all()),
+						'confirmation_id' => 'FAIL'
+					]);
                     return response()->xml($this->rategain->getReservationError($errors->all()));
                 }
 
 
                 $this->getInstance($reservationObject->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode);
 
+				// return response()->json(\Config::get("database.connections.on_the_fly"));
                 // dd($reservationObject->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode);
 
                 $response = $this->rategain->saveReservation($reservationObject, $confirmationid);
@@ -95,6 +100,18 @@ class XMLController extends Controller
                     '<HotelReservationID ResID_Type="14" ResID_Value="' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value . '"/>',
                     $returnSuccess
                 );
+				
+				$validation = $this->doValidation($reservationObject, $data);
+
+                if ($validation->fails()) {
+                    $errors = $validation->errors();
+                    // dd($errors->toArray());
+					$rategainRequest->update([
+						'response' => $this->rategain->getReservationError($errors->all()),
+						'confirmation_id' => 'FAIL'
+					]);
+                    return response()->xml($this->rategain->getReservationError($errors->all()));
+                }
 
                 $this->getInstance($reservationObject->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode);
 
@@ -148,6 +165,18 @@ class XMLController extends Controller
                 return response()->xml($response);
                 break;
             case 'Cancel':
+			
+				$validation = $this->doValidation($reservationObject, $data);
+
+                if ($validation->fails()) {
+                    $errors = $validation->errors();
+                    // dd($errors->toArray());
+					$rategainRequest->update([
+						'response' => $this->rategain->getReservationError($errors->all()),
+						'confirmation_id' => 'FAIL'
+					]);
+                    return response()->xml($this->rategain->getReservationError($errors->all()));
+                }
 
                 // dd('cancellation', $reservationObject->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode);
 
@@ -409,6 +438,8 @@ class XMLController extends Controller
             'codpla' => $instance['codpla'],
             'tipres' => $instance['tipres'],
         ]);
+		
+		// dd(\Config::set("database.connections.on_the_fly"));
     }
 
     public function setRateGainConfig($rgHotelCode)

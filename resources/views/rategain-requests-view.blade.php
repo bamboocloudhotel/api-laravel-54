@@ -20,7 +20,18 @@
 	</div>
 	<div class="row">
 		<div class="col-md-8 col-md-offset-2">
+			<b>Request</b>
+		</div>
+		<div class="col-md-8 col-md-offset-2">
 			{{$rategainRequest->xml}}
+		</div>		
+	</div>
+	<div class="row">
+		<div class="col-md-8 col-md-offset-2">
+			<b>Response</b>
+		</div>
+		<div class="col-md-8 col-md-offset-2">
+			{{$rategainRequest->response}}
 		</div>		
 	</div>
 </div>
