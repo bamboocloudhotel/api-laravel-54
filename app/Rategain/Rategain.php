@@ -816,14 +816,18 @@ XML;
 
                             $client = [
                                 'cedula' => $cedula,
-                                'tipdoc' => 1,
+                                'tipdoc' => 3,
                                 'nombre' => $resGuest->PersonName->GivenName . ' ' . $resGuest->PersonName->Surname,
-                                'telefono1' => $resGuest->Telephone->PhoneNumber ? substr($resGuest->Telephone->PhoneNumber, 0, 20) : '123456',
+                                'telefono1' => $resGuest->Telephone->PhoneNumber ? substr(preg_replace('/[^0-9.]+/', '', $resGuest->Telephone->PhoneNumber), 0, 11) : '123456',
+                                'telefono2' => $resGuest->Telephone->PhoneNumber ? substr($resGuest->Telephone->PhoneNumber, 0, 11) : '123456',
                                 'email' => $resGuest->Email,
                                 'primer_nombre' => $resGuest->PersonName->GivenName,
                                 'primer_apellido' => $resGuest->PersonName->Surname,
                                 'emailfe' => $resGuest->Email,
-                                'ciudades_dian' => 149
+                                'locnac' => 15,
+                                'ciudades_dian' => 1181,
+                                'credito' => 'N',
+                                'tipcre' => 'T'
                             ];
 
                             $guestExits = Cliente::create($client);
