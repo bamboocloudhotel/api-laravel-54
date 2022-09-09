@@ -156,8 +156,6 @@ XML;
 XML;
 
 
-
-
         $this->inventoryModifyRequestItem = <<<XML
 <AvailStatusMessage BookingLimit="1" BookingLimitMessageType="SetLimit">
     <StatusApplicationControl Start="2020-03-01" End="2020-03-01" InvCode="SGL"></StatusApplicationControl>
@@ -687,10 +685,10 @@ XML;
                 'Code' => 402,
                 'ShortText' => 'Invalid data HotelReservations HotelReservation RoomStays RoomRates RoomRate RoomTypeCode'
             ],
-			'The selected data. hotel reservations. hotel reservation. room stays. room stay. room rates. room rate. room type code is invalid.' => [
-				'Code' => 402,
+            'The selected data. hotel reservations. hotel reservation. room stays. room stay. room rates. room rate. room type code is invalid.' => [
+                'Code' => 402,
                 'ShortText' => 'Invalid data HotelReservations HotelReservation RoomStays RoomStay RoomRates RoomRate RoomTypeCode'
-			],			
+            ],
             'data.HotelReservations.HotelReservation.RoomStays.RoomRates.RoomRate.NumberOfUnits' => [
                 'Code' => 321,
                 'ShortText' => 'Invalid data HotelReservations HotelReservation RoomStays RoomRates RoomRate NumberOfUnits'
@@ -722,12 +720,12 @@ XML;
         foreach ($errorsArray as $error) {
             if (is_array($error)) {
                 foreach ($error as $err => $er) {
-					// dd($err);
+                    // dd($err);
                     $errors .= "\n\t\t<Error Code=\"" . $responseErrors[$err]['Code'] . "\" Status=\"NotProcessed\" ShortText=\"" . $responseErrors[$err]['ShortText'] . "\" />";
                 }
             } else {
-				$errors .= "\n\t\t<Error Code=\"{$responseErrors[$error]['Code']}\" Status=\"NotProcessed\" ShortText=\"{$error}\" />";
-			}
+                $errors .= "\n\t\t<Error Code=\"{$responseErrors[$error]['Code']}\" Status=\"NotProcessed\" ShortText=\"{$error}\" />";
+            }
 
         }
 
@@ -787,108 +785,110 @@ XML;
 
         foreach ($data->HotelReservations->HotelReservation->ResGuests->ResGuest as $guest) {
 
-            foreach ($guest->Profiles as $profile) {
+            if ($guest->PrimaryIndicator == 'true') {
+                foreach ($guest->Profiles as $profile) {
 
-                if ($profile->Profile->ProfileType == 1) {
+                    if ($profile->Profile->ProfileType == 1) {
 
-                    if (
-                        !isset($profile->Profile->Customer->Email) ||
-                        $profile->Profile->Customer->Email == '' ||
-                        !filter_var($profile->Profile->Customer->Email, FILTER_VALIDATE_EMAIL)
-                    ) {
+                        if (
+                            !isset($profile->Profile->Customer->Email) ||
+                            $profile->Profile->Customer->Email == '' ||
+                            !filter_var($profile->Profile->Customer->Email, FILTER_VALIDATE_EMAIL)
+                        ) {
 
-                        $profile->Profile->Customer->Email = str_random(14) . '@email.com';
-                    }
-
-                    $resGuest = $profile->Profile->Customer;
-
-                    // dd($resGuest->Email);
-
-                    $guestExits = Cliente::where('email', $resGuest->Email)->first();
-
-                    // dd($resGuest->Email, $guestExits->toArray());
-
-                    if (!$guestExits) {
-
-                        $cedula = rand(99999999, 999999999);
-
-                        try {
-
-                            $client = [
-                                'cedula' => $cedula,
-                                'tipdoc' => 3,
-                                'nombre' => $resGuest->PersonName->GivenName . ' ' . $resGuest->PersonName->Surname,
-                                'telefono1' => $resGuest->Telephone->PhoneNumber ? substr(preg_replace('/[^0-9.]+/', '', $resGuest->Telephone->PhoneNumber), 0, 11) : '123456',
-                                'telefono2' => $resGuest->Telephone->PhoneNumber ? substr($resGuest->Telephone->PhoneNumber, 0, 11) : '123456',
-                                'email' => $resGuest->Email,
-                                'primer_nombre' => $resGuest->PersonName->GivenName,
-                                'primer_apellido' => $resGuest->PersonName->Surname,
-                                'emailfe' => $resGuest->Email,
-                                'locnac' => 15,
-                                'ciudades_dian' => 1181,
-                                'credito' => 'N',
-                                'tipcre' => 'T'
-                            ];
-
-                            $guestExits = Cliente::create($client);
-
-                        } catch (\Exception $exception) {
-                            echo $exception->getMessage();
-                            die;
+                            $profile->Profile->Customer->Email = str_random(14) . '@email.com';
                         }
 
+                        $resGuest = $profile->Profile->Customer;
+
+                        // dd($resGuest->Email);
+
+                        $guestExits = Cliente::where('email', $resGuest->Email)->first();
+
+                        // dd($resGuest->Email, $guestExits->toArray());
+
+                        if (!$guestExits) {
+
+                            $cedula = rand(99999999, 999999999);
+
+                            try {
+
+                                $client = [
+                                    'cedula' => $cedula,
+                                    'tipdoc' => 3,
+                                    'nombre' => $resGuest->PersonName->GivenName . ' ' . $resGuest->PersonName->Surname,
+                                    'telefono1' => $resGuest->Telephone->PhoneNumber ? substr(preg_replace('/[^0-9.]+/', '', $resGuest->Telephone->PhoneNumber), 0, 11) : '123456',
+                                    'telefono2' => $resGuest->Telephone->PhoneNumber ? substr($resGuest->Telephone->PhoneNumber, 0, 11) : '123456',
+                                    'email' => $resGuest->Email,
+                                    'primer_nombre' => $resGuest->PersonName->GivenName,
+                                    'primer_apellido' => $resGuest->PersonName->Surname,
+                                    'emailfe' => $resGuest->Email,
+                                    'locnac' => 15,
+                                    'ciudades_dian' => 1181,
+                                    'credito' => 'N',
+                                    'tipcre' => 'T'
+                                ];
+
+                                $guestExits = Cliente::create($client);
+
+                            } catch (\Exception $exception) {
+                                echo $exception->getMessage();
+                                die;
+                            }
+
+
+                        }
 
                     }
+                    if ($guest->Profiles->ProfileInfo->Profile->ProfileType == 18) {
 
-                }
-                if ($guest->Profiles->ProfileInfo->Profile->ProfileType == 18) {
+                        // dd($guest->Profiles->ProfileInfo->Profile->Customer->Email);
+                        if (
+                            !isset($guest->Profiles->ProfileInfo->Profile->Customer->Email) ||
+                            $guest->Profiles->ProfileInfo->Profile->Customer->Email == '' ||
+                            !filter_var($guest->Profiles->ProfileInfo->Profile->Customer->Email, FILTER_VALIDATE_EMAIL)
+                        ) {
 
-                    // dd($guest->Profiles->ProfileInfo->Profile->Customer->Email);
-                    if (
-                        !isset($guest->Profiles->ProfileInfo->Profile->Customer->Email) ||
-                        $guest->Profiles->ProfileInfo->Profile->Customer->Email == '' ||
-                        !filter_var($guest->Profiles->ProfileInfo->Profile->Customer->Email, FILTER_VALIDATE_EMAIL)
-                    ) {
+                            $guest->Profiles->ProfileInfo->Profile->Customer->Email = str_random(14) . '@email.com';
+                        }
+                        $booker = $guest->Profiles->ProfileInfo->Profile->Customer;
 
-                        $guest->Profiles->ProfileInfo->Profile->Customer->Email = str_random(14) . '@email.com';
-                    }
-                    $booker = $guest->Profiles->ProfileInfo->Profile->Customer;
+                        $bookerOr = $guest->Profiles->ProfileInfo->Profile->Customer;
 
-                    $bookerOr = $guest->Profiles->ProfileInfo->Profile->Customer;
+                        // dd($guest->Profiles->ProfileInfo);
+                        $bookerExists = CrBooker::where('email', $booker->Email)->first();
 
-                    // dd($guest->Profiles->ProfileInfo);
-                    $bookerExists = CrBooker::where('email', $booker->Email)->first();
+                        if (!$bookerExists) {
+                            try {
+                                $booker = [
+                                    'givenname' => $booker->PersonName->GivenName,
+                                    'surname' => $booker->PersonName->Surname,
+                                    'phone' => $booker->Telephone->PhoneNumber,
+                                    'email' => $booker->Email,
+                                    'address' => isset($booker->Address->AddressLine) ? json_encode($booker->Address->AddressLine) : '',
+                                    'city' => isset($booker->Address->CityName) ? json_encode($booker->Address->CityName) : '',
+                                    'postal_code' => isset($booker->Address->PostalCode) ? json_encode($booker->Address->PostalCode) : '',
+                                    'country' => isset($booker->Address->CountryName->Code) ? $booker->Address->CountryName->Code : '',
+                                ];
 
-                    if (!$bookerExists) {
-                        try {
-                            $booker = [
-                                'givenname' => $booker->PersonName->GivenName,
-                                'surname' => $booker->PersonName->Surname,
-                                'phone' => $booker->Telephone->PhoneNumber,
-                                'email' => $booker->Email,
-                                'address' => isset($booker->Address->AddressLine) ? json_encode($booker->Address->AddressLine) : '',
-                                'city' => isset($booker->Address->CityName) ? json_encode($booker->Address->CityName) : '',
-                                'postal_code' => isset($booker->Address->PostalCode) ? json_encode($booker->Address->PostalCode) : '',
-                                'country' => isset($booker->Address->CountryName->Code) ? $booker->Address->CountryName->Code : '',
-                            ];
+                                $booker = CrBooker::create($booker);
 
-                            $booker = CrBooker::create($booker);
+                            } catch (\Exception $exception) {
+                                echo $exception->getMessage();
+                                die;
+                            }
+                        }
 
-                        } catch (\Exception $exception) {
-                            echo $exception->getMessage();
-                            die;
+                        if ($bookerExists) {
+                            $booker = $bookerExists;
                         }
                     }
-
-                    if ($bookerExists) {
-                        $booker = $bookerExists;
+                    if ($guest->Profiles->ProfileInfo->Profile->ProfileType == 3) {
+                        $company = [
+                            'id' => $guest->Profiles->ProfileInfo->UniqueID->ID,
+                            'name' => $guest->Profiles->ProfileInfo->Profile->CompanyInfo->CompanyName
+                        ];
                     }
-                }
-                if ($guest->Profiles->ProfileInfo->Profile->ProfileType == 3) {
-                    $company = [
-                        'id' => $guest->Profiles->ProfileInfo->UniqueID->ID,
-                        'name' => $guest->Profiles->ProfileInfo->Profile->CompanyInfo->CompanyName
-                    ];
                 }
             }
 
