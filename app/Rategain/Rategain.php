@@ -1007,6 +1007,7 @@ XML;
             $roomClass = config('rategain.rooms_cl.' . $roomStay->RoomRates->RoomRate->RoomTypeCode);
             $numres = collect(\DB::connection('on_the_fly')->select('select MAX(numres)+1 as res from reserva limit 1'))->first();
             $dathot = collect(\DB::connection('on_the_fly')->select("select nit, numrec from dathot;"))->first();
+            // $dathot = collect(\DB::connection('on_the_fly')->select("select nit, numrec, hora_llegada from dathot;"))->first();
             $numres = $numres->res;
             $nit = explode('.', $dathot->nit);
             $nit = implode('', $nit);
@@ -1075,7 +1076,8 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     'feclle' => $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->Start,
                     'fecsal' => $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->End,
                     'feclim' => $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->Start,
-                    'hora' => '12:00',
+                    'hora' => '15:00',
+                    // 'hora' => $dathot->hora_llegada,
                     'numadu' => $numadu, // count($data->HotelReservations->HotelReservation->ResGuests->ResGuest),
                     'numnin' => $numnin,
                     'observacion' => $guestExits ? '' : $observacion,
@@ -1375,7 +1377,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     'fecres' => $resDate,
                     'feclle' => $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->Start,
                     'fecsal' => $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->End,
-                    'hora' => null,
+                    'hora' => '15:00',
                     'horsal' => null,
                     'numadu' => $numadu,
                     'numnin' => $numnin,
