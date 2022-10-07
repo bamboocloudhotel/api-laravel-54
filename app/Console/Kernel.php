@@ -35,6 +35,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('rategain:update_inventory')->cron('0 */6 * * *');
         $schedule->command('rategain:update_inventory')->twiceDaily(6, 9);
         $schedule->command('rategain:update_inventory')->twiceDaily(12, 17);
+        $schedule->command('rategain:update_inventory')->twiceDaily(1, 20);
         $schedule->command('rategain:update_today_inventory')->twiceDaily(8, 11);
         $schedule->command('rategain:update_today_inventory')->twiceDaily(15, 20);
         // start the queue daemon, if its not running
