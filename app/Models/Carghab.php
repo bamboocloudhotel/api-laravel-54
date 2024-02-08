@@ -24,6 +24,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Carghab extends Model
 {
+    protected $connection = 'on_the_fly';
 	protected $table = 'carghab';
 	public $incrementing = false;
 	public $timestamps = false;
@@ -35,6 +36,8 @@ class Carghab extends Model
 	];
 
 	protected $fillable = [
+        'numfol',
+        'numcue',
 		'prefac',
 		'numfac',
 		'tipfac',

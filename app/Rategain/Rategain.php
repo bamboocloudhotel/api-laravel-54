@@ -5,6 +5,7 @@ namespace App\Rategain;
 use App\Http\Controllers\Api\TestSoapController;
 use App\InventoryUpdate;
 use App\Jobs\ModifyBookingEngineInventory;
+use App\Models\Carghab;
 use App\Models\Dathot;
 use App\Models\Detrec;
 use App\Models\Folio;
@@ -1530,6 +1531,18 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
             } catch (Exception $exception) {
                 dd($exception->getMessage());
             }
+
+            try {
+                Carghab::create([
+                    'numfol' => '' . $numfolio->fol,
+                    'numcue' => '1',
+                    'estado' => 'S'
+                   ]);
+            } catch (Exception $exception) {
+                dd($exception->getMessage());
+            }
+
+
 
             $amountBT = isset($data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax) ? $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax : 0;
             $amountAT = isset($data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountAfterTax) ? $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountAfterTax : 0;
