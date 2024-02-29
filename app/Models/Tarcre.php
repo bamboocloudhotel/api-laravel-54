@@ -26,8 +26,11 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Tarcre extends Model
 {
-	protected $table = 'tarcre';
-	public $timestamps = false;
+    public $connection = 'on_the_fly';
+    protected $table = 'tarcre';
+    protected $primaryKey = 'id';
+    public $incrementing = true;
+    public $timestamps = false;
 
 	protected $casts = [
 		'numres' => 'int',
@@ -46,6 +49,7 @@ class Tarcre extends Model
 		'numero',
 		'numero_mask',
 		'nombre',
-		'grupal'
+		'grupal',
+        'fecven'
 	];
 }

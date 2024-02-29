@@ -38,9 +38,10 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Valcar extends Model
 {
-    protected $connection = 'hhotel5';
+    protected $connection = 'on_the_fly';
 	protected $table = 'valcar';
-	public $incrementing = false;
+    protected $primaryKey = 'valcar_id';
+	public $incrementing = true;
 	public $timestamps = false;
 
 	protected $casts = [

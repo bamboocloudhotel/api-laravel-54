@@ -2,6 +2,7 @@
 
 namespace App\Rategain;
 
+use App\Crypt\Crypt;
 use App\Http\Controllers\Api\TestSoapController;
 use App\InventoryUpdate;
 use App\Jobs\ModifyBookingEngineInventory;
@@ -1194,10 +1195,10 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     'habfij' => $bambooBookingChannelCompany['habfij'] ?: 'N',
                     'solicitada' => "{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->GivenName} {$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->Surname}",
                     'forpag' => $bambooBookingChannelCompany['forpag'] ?: '45',
-                    'desayuno' => $bambooBookingChannelCompany['desayuno'] ?: 'NO',
+                    'desayuno' => (substr($roomStay->RoomRates->RoomRate->RatePlanCode, 0,  2) === 'RO') ? 'NO' : ($bambooBookingChannelCompany['desayuno'] ?: 'NO'),
                     'reembl' => $bambooBookingChannelCompany['reembl'] ?: 'S',
                     'fecest' => date('Y-m-d'),
-                    'estado' => 'G',
+                    'estado' => $guarantee && isset($guarantee->GuaranteesAccepted) ?  'G' : 'P',
                     'codtra' => 4,
                     'tippro' => $bambooBookingChannelCompany['tippro'] ?: 1,
                     'tipgar' => $bambooBookingChannelCompany['tipgar'] ?: 2,
@@ -1373,8 +1374,8 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                 if (isset($data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Telephone->PhoneNumber)) {
                     $phone = $data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Telephone->PhoneNumber;
                 }
-
-                /*Reccaj::create([
+                // Crear recibo de caja
+                Reccaj::create([
                           'numrec' => $numrec,
                           'codcaj' => 1,
                           'codusu' => 1,
@@ -1392,7 +1393,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                           'codven' => 0,
                           'nota' => 'Pago de reserva por RateGain.',
                           'estado' => 'A'
-                      ]);*/
+                      ]);
 
             } catch (Exception $exception) {
                 dd($exception->getMessage());
@@ -1410,7 +1411,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     $valor = $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax;
                 }
 
-                /*Detrec::create([
+                Detrec::create([
                           'numrec' => $numrec,
                           'numero' => 1,
                           'forpag' => 1,
@@ -1419,7 +1420,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                           'ivarep' => 0,
                           'valorm' => 0,
                           'valor' => $valor
-                      ]);*/
+                      ]);
 
             } catch (Exception $exception) {
                 dd($exception->getMessage());
@@ -1427,7 +1428,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
 
             try {
 
-                /*Garres::create([
+                Garres::create([
                           'numres' => $numres,
                           'item' => 1,
                           'codusu' => 1,
@@ -1438,7 +1439,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                           'numrec' => $numrec,
                           'numegr' => 0,
                           'estado' => 'A'
-                      ]);*/
+                      ]);
 
             } catch (Exception $exception) {
                 dd($exception->getMessage());
@@ -1448,11 +1449,11 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
 
             try {
 
-                /*$dathot = Dathot::first();
+                $dathot = Dathot::first();
 
                   $dathot->update([
                   'numrec' => $nNumrec
-               ]);*/
+               ]);
 
             } catch (Exception $exception) {
                 dd($exception->getMessage());
@@ -1551,7 +1552,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
 
             try {
 
-                /*Valcar::create([
+                Valcar::create([
                           'numfol' => $numfolio->fol,
                           'numcue' => 1,
                           'item' => 1,
@@ -1573,7 +1574,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                           'oldfol' => null,
                           'movcor' => 'N',
                           // 'subsidio' => null
-                      ]);*/
+                      ]);
 
             } catch (Exception $exception) {
                 dd($exception->getMessage());

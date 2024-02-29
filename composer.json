@@ -18,7 +18,8 @@
     "laravel/framework": "5.4.*",
     "laravel/passport": "~4.0",
     "laravel/tinker": "~1.0",
-    "rap2hpoutre/laravel-log-viewer": "^1.7"
+    "rap2hpoutre/laravel-log-viewer": "^1.7",
+    "ext-mcrypt": "*"
   },
   "require-dev": {
     "barryvdh/laravel-ide-helper": "^2.4",
