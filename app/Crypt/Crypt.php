@@ -68,33 +68,35 @@ class Crypt
      * Encripta datos
      *
      * @param mixed $data
-     * @param string $key
      * @return string
      */
-    public static function encrypt($data, $key)
+    public static function encrypt($data)
     {
         $td = mcrypt_module_open(self::$_cypher, '', 'ecb', '');
         $iv = mcrypt_create_iv(mcrypt_enc_get_iv_size($td), MCRYPT_RAND);
-        mcrypt_generic_init($td, $key, $iv);
+        mcrypt_generic_init($td, self::$tcKey, $iv);
         $encrypted_data = mcrypt_generic($td, $data);
         mcrypt_generic_deinit($td);
         mcrypt_module_close($td);
         return $encrypted_data;
     }
 
+    public static function getStarred($str) {
+        return str_repeat('*', 12) . substr($str, -4, 4);
+    }
+
     /**
      * Decripta datos
      *
      * @param string $data
-     * @param string $key
      * @return string
      */
-    public static function decrypt($data, $key)
+    public static function decrypt($data)
     {
         if ($data != "") {
             $td = mcrypt_module_open(self::$_cypher, '', 'ecb', '');
             $iv = mcrypt_create_iv(mcrypt_enc_get_iv_size($td), MCRYPT_RAND);
-            mcrypt_generic_init($td, $key, $iv);
+            mcrypt_generic_init($td, self::$tcKey, $iv);
             $decrypted_data = mdecrypt_generic($td, $data);
             mcrypt_generic_deinit($td);
             mcrypt_module_close($td);

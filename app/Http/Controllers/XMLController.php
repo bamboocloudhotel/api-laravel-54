@@ -35,8 +35,6 @@ class XMLController extends Controller
         $data = $this->parseRequestXml($xml, true);
         $reservationObject = json_decode(json_encode($data['data']));
 
-        // dd($data);
-
         $confirmationid = $this->uniqidReal(16);
         $returnSuccess = $this->rategain->reservationResponseSuccess;
 
@@ -116,7 +114,11 @@ class XMLController extends Controller
                 $this->getInstance($reservationObject->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode);
 
                 $reserva = Reserva::where('referencia', 'LIKE', '%' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value . '%')
+                    // ->where('estado', '<>', 'C')
+                    ->orderBy('fecres', 'desd')
                     ->get();
+
+                $this->rategain->updateReservation($reserva[0], $data, $reserva[0]->confirmationid);
 
                 foreach ($reserva as $res) {
 

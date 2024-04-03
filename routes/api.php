@@ -29,6 +29,8 @@ Route::any('test', function (Request $request) {
     ], 200);
 });
 
+Route::any('request-remove-old', 'RategainRequestController@removeOld');
+
 Route::post('view-guarantee', function (Request $request) {
 
     $xmlController = new \App\Http\Controllers\XMLController();

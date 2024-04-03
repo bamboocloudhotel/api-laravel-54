@@ -20,6 +20,7 @@ class Kernel extends ConsoleKernel
         Commands\UpdateTodayInventoryCommand::class,
         Commands\UpdatePreview::class,
         Commands\KillQueue::class,
+        Commands\RemoveOld::class
     ];
 
     /**
@@ -38,6 +39,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('rategain:update_inventory')->twiceDaily(1, 20);
         $schedule->command('rategain:update_today_inventory')->twiceDaily(8, 11);
         $schedule->command('rategain:update_today_inventory')->twiceDaily(15, 20);
+        $schedule->command('rategain:remove_old')->hourly();
         // start the queue daemon, if its not running
         if (!$this->osProcessIsRunning('queue:work')) {
             $schedule->command('queue:work --tries=3')->everyMinute();

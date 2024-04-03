@@ -47,25 +47,25 @@
 
         <tbody>
 
-            @if(!empty($rateGainRequests) && $rateGainRequests->count())
+            @if(!empty($rateGainRequests))
 
-                @foreach($rateGainRequests as $key => $value)
+                @foreach($rateGainRequests as $value)
 
                     <tr>
 
-                        <td>{{ $value->hotel }}</td>
+                        <td>{{ $value['hotel'] }}</td>
 
-                        <td>{{ $value->reference }}</td>
+                        <td>{{ $value['reference'] }}</td>
 
-                        <td>{{ $value->type }}</td>
+                        <td>{{ $value['type'] }}</td>
 						
-                        <td>{{ $value->confirmation_id }}</td>
+                        <td>{{ $value['confirmation_id'] }}</td>
 
-                        <td>{{ $value->created_at }}</td>
+                        <td>{{ $value['created_at'] }}</td>
 
                         <td>
 
-                            <a href="/api-laravel-54/public/index.php/rategain-requests/{{$value->id}}"
+                            <a href="/api-laravel-54/public/index.php/rategain-requests/{{$value['id']}}"
                                class="btn btn-info">View
                             </a>
 
@@ -91,7 +91,25 @@
 
 
 
-    {!! $rateGainRequests->links() !!}
+    <nav aria-label="Page navigation example">
+        <ul class="pagination">
+            <li class="page-item">
+                <a class="page-link"
+                   disabled="{{ $links['prevPage'] ? '' : 'disabled' }}"
+                   href="?page={{ $links['prevPage'] }}"
+                   aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link"
+                   href="?page={{ $links['nextPage'] }}"
+                   aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
 
 
 

@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Tipre extends Model
 {
+    protected $connection = 'on_the_fly';
 	protected $table = 'tipres';
 	protected $primaryKey = 'tipres';
 	public $incrementing = false;

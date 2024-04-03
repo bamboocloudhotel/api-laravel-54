@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Tipcanre extends Model
 {
+    protected $connection = 'on_the_fly';
 	protected $table = 'tipcanres';
 	protected $primaryKey = 'codcan';
 	public $incrementing = false;

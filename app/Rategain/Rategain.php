@@ -20,11 +20,15 @@ use App\Models\CrBooker;
 use App\Models\CrBookerReserva;
 use App\Models\CrGuarantee;
 use App\Models\ReservaNuevo;
+use App\Models\Tarcre;
+use App\Models\Tipcanre;
 use App\Models\Tipdoc;
+use App\Models\Tipre;
 use App\Models\Valcar;
 use App\Models\Empresa;
 use App\Models\CrChannel;
 use App\Models\Valmon;
+use App\Reservation;
 
 class Rategain
 {
@@ -740,6 +744,14 @@ XML;
         return $xml;
     }
 
+    public function updateReservation($reservation, $data, $confirmationId = null) {
+        dd($reservation ? $reservation->toArray() : $reservation, $data, $confirmationId);
+
+
+
+        $reservation->update();
+    }
+
     /**
      * @param $data
      * @return array|string|string[]|void
@@ -761,6 +773,8 @@ XML;
         if (isset($data->POS->Source->BookingChannel->CompanyName)) {
             $bookingChannel = $data->POS->Source->BookingChannel->CompanyName;
         }
+
+        $hasNit = null;
         // dd(config('database.connections.on_the_fly'));
         // \DB::setConnection('on_the_fly');
 
@@ -1016,6 +1030,7 @@ XML;
         $selectedRooms = [];
 
         foreach ($data->HotelReservations->HotelReservation->RoomStays->RoomStay as $roomStay) {
+
             $roomClass = config('rategain.rooms_cl.' . $roomStay->RoomRates->RoomRate->RoomTypeCode);
 
             if ($this->getBambooAvailability($data, $roomClass)) {
@@ -1057,6 +1072,7 @@ XML;
         if (count($availables) < count($data->HotelReservations->HotelReservation->RoomStays->RoomStay)) {
             return $this->getReservationError(['noAvailabilities']);
         }
+
         $tipDoc = Tipdoc::where('detalle', 'CEDULA CIUDADANIA')->first();
 
         if (!$confirmationid) {
@@ -1068,6 +1084,17 @@ XML;
 
         $roomStayCnt = 0;
         foreach ($data->HotelReservations->HotelReservation->RoomStays->RoomStay as $roomStay) {
+
+            $CIALMatches = null;
+            $nitMatches = null;
+
+            $hasNit = preg_match('/\s-\s[0-9]{9}/', json_encode($roomStay->Comments), $nitMatches);
+            $hasCIAL = preg_match('/(OIS)\s(CIAL-COT)-([0-9]{4})-([0-9]{4})/', json_encode($roomStay->Comments), $CIALMatches);
+
+            $CIAL = $hasCIAL ? $CIALMatches[0] : null;
+
+            // dd(json_encode($roomStay->Comments), $hasCIAL, $CIALMatches[0]);
+            $nit = $hasNit ? trim(str_replace(' - ', '', $nitMatches[0])) : $bambooCompanyNit;
 
             $guarantee = null;
 
@@ -1124,6 +1151,14 @@ XML;
             $nit = implode('', $nit);
             $nit = explode('-', $nit);
             $nit = $nit[0];
+            $nitMatches = null;
+            $CIALMatches = null;
+            $hasNit = preg_match('/\s-\s[0-9]{9}/', json_encode($roomStay->Comments), $nitMatches);
+            // dd(json_encode($roomStay->Comments), $hasNit, $matches);
+            $hasCIAL = preg_match('/(OIS)\s(CIAL-COT)-([0-9]{4})-([0-9]{4})/', json_encode($roomStay->Comments), $CIALMatches);
+            $CIAL = $hasCIAL ? $CIALMatches[0] : null;
+            // dd(json_encode($roomStay->Comments), $hasCIAL, $CIALMatches[0]);
+            $nit = $hasNit ? trim(str_replace(' - ', '', $nitMatches[0])) : $bambooCompanyNit;
             $numrec = $dathot->numrec;
             $numhab = $selectedRooms[$roomStayCnt]->numhab;
 
@@ -1171,17 +1206,38 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
 
                 }
 
+                $codcanCodes = Tipcanre::all()->toArray();
+                $tipresCodes = Tipre::all()->toArray();
+                $codcan = null;
+
+                $ratePlanCodeParts = explode('-', $roomStay->RoomRates->RoomRate->RatePlanCode);
+                $ratePlanCode2 = $ratePlanCodeParts[1][0]; // tipres
+                $ratePlanCode3 = $ratePlanCodeParts[2][0]; // codcan
+                $ratePlanCode4 = $ratePlanCodeParts[3][0];
+
+                foreach ($tipresCodes as $tipresCode) {
+                    if ($ratePlanCode2 === $tipresCode['detalle'][0]) {
+                        $tipres = $tipresCode['tipres'];
+                    }
+                }
+
+                foreach ($codcanCodes as $codcanCode) {
+                    if ($ratePlanCode3 === $codcanCode['detalle'][0]) {
+                        $codcan = $codcanCode['codcan'];
+                    }
+                }
+
                 // dd($rateList);
                 // dd($bambooBookingChannelCompany);
                 $reservaData = [
                     'numres' => $numres,
-                    'referencia' => $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value,
+                    'referencia' => "{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->GivenName} {$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->Surname} - " . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value,
                     'tipdoc' => $guestExits ? $guestExits->tipdoc : 1,
-                    'cedula' => $guestExits ? $guestExits->cedula : $cedula,
-                    'nit' => $bambooCompanyNit ?: 0, // $nit,
+                    'cedula' => 0,//$cedula,
+                    'nit' => $nit,
                     'nitage' => $bambooCompanyNit ?: 0,
                     'numhab' => $numhab,
-                    'tipres' => $bambooTipres ?: $tipres,
+                    'tipres' => $tipres ?: $bambooTipres,
                     'tipseg' => $bambooTipseg ?: 'I',
                     'fecres' => date('Y-m-d'),
                     'feclle' => $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->Start,
@@ -1193,9 +1249,9 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     'numnin' => $numnin,
                     'observacion' => $guestExits ? '' : $observacion,
                     'habfij' => $bambooBookingChannelCompany['habfij'] ?: 'N',
-                    'solicitada' => "{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->GivenName} {$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->Surname}",
+                    'solicitada' => '',
                     'forpag' => $bambooBookingChannelCompany['forpag'] ?: '45',
-                    'desayuno' => (substr($roomStay->RoomRates->RoomRate->RatePlanCode, 0,  2) === 'RO') ? 'NO' : ($bambooBookingChannelCompany['desayuno'] ?: 'NO'),
+                    'desayuno' => (substr($roomStay->RoomRates->RoomRate->RatePlanCode, 0,  2) === 'BB') ? 'SI' : ($bambooBookingChannelCompany['desayuno'] ?: 'NO'),
                     'reembl' => $bambooBookingChannelCompany['reembl'] ?: 'S',
                     'fecest' => date('Y-m-d'),
                     'estado' => $guarantee && isset($guarantee->GuaranteesAccepted) ?  'G' : 'P',
@@ -1203,11 +1259,12 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     'tippro' => $bambooBookingChannelCompany['tippro'] ?: 1,
                     'tipgar' => $bambooBookingChannelCompany['tipgar'] ?: 2,
                     'codven' => $bambooBookingChannelCompany['codven'] ?: 1,
-                    'codcan' => $bambooCodcan ?: 0,
+                    'codcan' => $codcan ?: $bambooCodcan,
                     'metadata' => $metadata,
                     'guarantee' => ' ' . $guaranteeText,
                     'confirmationid' => $confirmationid,
                     'rateplancode' => $company ? $company['name'] : '',
+                    'idcanal' => $CIAL,
                     'onlinecomment' => (
                         isset($roomStay->Comments) ?
                             '' . (is_array($roomStay->Comments->Comment) ?
@@ -1365,7 +1422,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
 
             $address = '';
 
-            $address .= json_encode($data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Address, true);
+            $address .= isset($booker->Address->AddressLine) ? json_encode($booker->Address->AddressLine) : '';
 
             try {
 
@@ -1381,7 +1438,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                           'codusu' => 1,
                           'codcar',
                           'codven',
-                          'cedula' => $cedula,
+                          'cedula' => 0, //$cedula,
                           'nombre' => $data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->GivenName. ' ' . $data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->Surname,
                           'direccion' => $address,
                           'ciudad' => 'NA',
@@ -1471,7 +1528,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     'numres' => $numres,
                     'codeve' => 0,
                     'tipdoc' => $tipDoc->tipdoc,
-                    'cedula' => $cedula,
+                    'cedula' => 0, //$cedula,
                     'nit' => $bambooCompanyNit ?: 0,
                     'nitage' => $bambooCompanyNit ?: 0,
                     'locpro' => 127591,
@@ -1508,7 +1565,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     'tipgar' => $bambooBookingChannelCompany['tipgar'] ?: 1,
                     'codven' => 0,
                     'idresweb' => null,
-                    'idcanal' => null,
+                    'idcanal' => $CIAL,
                     'idclifre' => null,
                     'firma' => null,
                     'comentario_en_linea' => (
@@ -1543,6 +1600,27 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                 dd($exception->getMessage());
             }
 
+            if ($data->HotelReservations->HotelReservation->ResGlobalInfo->Guarantee->GuaranteesAccepted->GuaranteeAccepted->PaymentCard->CardNumber) {
+                $fecven = '20' . substr($data->HotelReservations->HotelReservation->ResGlobalInfo->Guarantee->GuaranteesAccepted->GuaranteeAccepted->PaymentCard->ExpireDate, -2, 2) . '-' . substr($data->HotelReservations->HotelReservation->ResGlobalInfo->Guarantee->GuaranteesAccepted->GuaranteeAccepted->PaymentCard->ExpireDate, 0, 2) . '-01';
+                try {
+                    Tarcre::create([
+                        'numres' => $numres,
+                        'codusu' => 1,
+                        'fecha' => date('Y-m-d'),
+                        'tipo' => Crypt::validatecard($data->HotelReservations->HotelReservation->ResGlobalInfo->Guarantee->GuaranteesAccepted->GuaranteeAccepted->PaymentCard->CardNumber),
+                        'numero' => $data->HotelReservations->HotelReservation->ResGlobalInfo->Guarantee->GuaranteesAccepted->GuaranteeAccepted->PaymentCard->CardNumber,
+                        'numero_mask' => Crypt::getStarred($data->HotelReservations->HotelReservation->ResGlobalInfo->Guarantee->GuaranteesAccepted->GuaranteeAccepted->PaymentCard->CardNumber),
+                        'nombre' => $data->HotelReservations->HotelReservation->ResGlobalInfo->Guarantee->GuaranteesAccepted->GuaranteeAccepted->PaymentCard->CardHolderName,
+                        'fecven' => $fecven,
+                        'direccion' => $address,
+                        'ciudad' => $data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Address->CityName ? $data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Address->CityName : '',
+                        'codigo_postal' => $data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Address->PostalCode ? $data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Address->PostalCode : '',
+                        'pais' => is_string($data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Address->CountryName) ? $data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Address->CountryName : 'Colombia'
+                    ]);
+                } catch (Exception $exception) {
+                    dd($exception->getMessage());
+                }
+            }
 
 
             $amountBT = isset($data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax) ? $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax : 0;

@@ -48,8 +48,14 @@ class Tarcre extends Model
 		'tipo',
 		'numero',
 		'numero_mask',
+        'codseg',
 		'nombre',
-		'grupal',
-        'fecven'
+        'fecven',
+        'direccion',
+        'ciudad',
+        'codigo_postal',
+        'pais',
+        'telefono',
+        'observaciones'
 	];
 }

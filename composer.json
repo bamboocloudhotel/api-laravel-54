@@ -19,7 +19,9 @@
     "laravel/passport": "~4.0",
     "laravel/tinker": "~1.0",
     "rap2hpoutre/laravel-log-viewer": "^1.7",
-    "ext-mcrypt": "*"
+    "ext-mcrypt": "*",
+    "ext-simplexml": "*",
+    "ext-pdo": "*"
   },
   "require-dev": {
     "barryvdh/laravel-ide-helper": "^2.4",
