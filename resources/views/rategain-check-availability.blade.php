@@ -140,7 +140,7 @@
             var end = $('#end').val();
 
             $('#sendHotelAvailability').attr('disabled', true);
-            axios.get('http://45.32.223.244/api-laravel-54/public/index.php/api/test/set-availability?bookingEngine=rategain&hotelId=' + instance + '&feclle=' + start + '&fecsal=' + end)
+            axios.get('https://rategain.bamboochamootor.com/api-laravel-54/public/index.php/api/test/set-availability?bookingEngine=rategain&hotelId=' + instance + '&feclle=' + start + '&fecsal=' + end)
                 .then(function (response) {
                     console.log(response);
                     loading = false;
@@ -156,7 +156,7 @@
         function getAvailability() {
             loading = true;
             $('#searchAvailability').attr('disabled', true);
-            axios.get('http://45.32.223.244/api-laravel-54/public/index.php/api/test/availability?bookingEngine=rategain&hotelId=' + $('#instance').val() + '&feclle=' + $('#start').val() + '&fecsal=' + $('#end').val() + '&codcla=' + $('#room').val())
+            axios.get('https://rategain.bamboochamootor.com/api-laravel-54/public/index.php/api/test/availability?bookingEngine=rategain&hotelId=' + $('#instance').val() + '&feclle=' + $('#start').val() + '&fecsal=' + $('#end').val() + '&codcla=' + $('#room').val())
                 .then(function (response) {
                     $('#available').html(response.data.available.join(', '));
                     $('#availableTotal').html(response.data.availableCount);
