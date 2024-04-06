@@ -1432,7 +1432,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     $phone = $data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Telephone->PhoneNumber;
                 }
                 // Crear recibo de caja
-                Reccaj::create([
+                /*Reccaj::create([
                           'numrec' => $numrec,
                           'codcaj' => 1,
                           'codusu' => 1,
@@ -1450,7 +1450,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                           'codven' => 0,
                           'nota' => 'Pago de reserva por RateGain.',
                           'estado' => 'A'
-                      ]);
+                      ]);*/
 
             } catch (Exception $exception) {
                 dd($exception->getMessage());
@@ -1468,7 +1468,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     $valor = $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax;
                 }
 
-                Detrec::create([
+                /*Detrec::create([
                           'numrec' => $numrec,
                           'numero' => 1,
                           'forpag' => 1,
@@ -1477,7 +1477,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                           'ivarep' => 0,
                           'valorm' => 0,
                           'valor' => $valor
-                      ]);
+                      ]);*/
 
             } catch (Exception $exception) {
                 dd($exception->getMessage());
@@ -1485,7 +1485,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
 
             try {
 
-                Garres::create([
+                /*Garres::create([
                           'numres' => $numres,
                           'item' => 1,
                           'codusu' => 1,
@@ -1496,7 +1496,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                           'numrec' => $numrec,
                           'numegr' => 0,
                           'estado' => 'A'
-                      ]);
+                      ]);*/
 
             } catch (Exception $exception) {
                 dd($exception->getMessage());

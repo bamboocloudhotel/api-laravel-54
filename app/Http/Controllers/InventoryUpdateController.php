@@ -37,7 +37,7 @@ class InventoryUpdateController extends Controller
 
         $rateGainInventoryUpdates->whereIn('hotel', $instances);
 
-        $rateGainInventoryUpdates = $rateGainInventoryUpdates->orderBy('id', 'desc')->paginate(20)->appends(request()->query());
+        $rateGainInventoryUpdates = $rateGainInventoryUpdates->orderByDesc('id')->simplePaginate(20)->appends(request()->query());
 
         return view('rategain-inventory-updates-list', ['rateGainInventoryUpdates' => $rateGainInventoryUpdates, 'request' => $request->all()]);
     }
