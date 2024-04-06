@@ -1506,11 +1506,11 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
 
             try {
 
-                $dathot = Dathot::first();
+                /*$dathot = Dathot::first();
 
                   $dathot->update([
                   'numrec' => $nNumrec
-               ]);
+               ]);*/
 
             } catch (Exception $exception) {
                 dd($exception->getMessage());
@@ -1630,7 +1630,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
 
             try {
 
-                Valcar::create([
+                /*Valcar::create([
                           'numfol' => $numfolio->fol,
                           'numcue' => 1,
                           'item' => 1,
@@ -1652,7 +1652,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                           'oldfol' => null,
                           'movcor' => 'N',
                           // 'subsidio' => null
-                      ]);
+                      ]);*/
 
             } catch (Exception $exception) {
                 dd($exception->getMessage());
