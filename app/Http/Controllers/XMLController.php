@@ -118,7 +118,7 @@ class XMLController extends Controller
                     ->orderBy('fecres', 'desd')
                     ->get();
 
-                $this->rategain->updateReservation($reserva[0], $data, $reserva[0]->confirmationid);
+                // $this->rategain->updateReservation($reserva[0], $data, $reserva[0]->confirmationid);
 
                 foreach ($reserva as $res) {
 

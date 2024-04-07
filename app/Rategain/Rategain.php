@@ -745,9 +745,7 @@ XML;
     }
 
     public function updateReservation($reservation, $data, $confirmationId = null) {
-        dd($reservation ? $reservation->toArray() : $reservation, $data, $confirmationId);
-
-
+        // dd($reservation ? $reservation->toArray() : $reservation, $data, $confirmationId);
 
         $reservation->update();
     }
@@ -1700,5 +1698,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
         return $returnSuccess;
 
     }
+
+    public function modifyReservation() {}
 
 }
