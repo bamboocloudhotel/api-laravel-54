@@ -150,4 +150,24 @@
       'ratelist',
       'desayuno',
     ];
+
+    public function habitacion()
+    {
+      return $this->belongsTo(Habitacion::class, 'numhab', 'numhab');
+    }
+
+    public function cliente()
+    {
+      return $this->belongsTo(Cliente::class, 'cedula', 'cedula');
+    }
+
+    public function plares()
+    {
+      return $this->hasMany(Plares::class, 'numres', 'numres');
+    }
+
+      public function folios()
+      {
+          return $this->hasMany(Folio::class, 'numres', 'numres');
+      }
   }

@@ -745,7 +745,11 @@ XML;
     }
 
     public function updateReservation($reservation, $data, $confirmationId = null) {
-        // dd($reservation ? $reservation->toArray() : $reservation, $data, $confirmationId);
+        dd($reservation ? $reservation->toArray() : $reservation, $data, $confirmationId);
+
+        $modifiedReservation = $reservation->toArray();
+
+        $modifiedReservation['modifyid'] = $confirmationId;
 
         $reservation->update();
     }
@@ -1209,18 +1213,18 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                 $codcan = null;
 
                 $ratePlanCodeParts = explode('-', $roomStay->RoomRates->RoomRate->RatePlanCode);
-                $ratePlanCode2 = $ratePlanCodeParts[1][0]; // tipres
-                $ratePlanCode3 = $ratePlanCodeParts[2][0]; // codcan
+                $ratePlanCode2 = substr($ratePlanCodeParts[1], 0, 2); // tipres
+                $ratePlanCode3 = substr($ratePlanCodeParts[2], 0, 2); // codcan
                 $ratePlanCode4 = $ratePlanCodeParts[3][0];
 
                 foreach ($tipresCodes as $tipresCode) {
-                    if ($ratePlanCode2 === $tipresCode['detalle'][0]) {
+                    if ($ratePlanCode2 === substr($tipresCode['detalle'], 0, 2)) {
                         $tipres = $tipresCode['tipres'];
                     }
                 }
 
                 foreach ($codcanCodes as $codcanCode) {
-                    if ($ratePlanCode3 === $codcanCode['detalle'][0]) {
+                    if ($ratePlanCode3 === substr($codcanCode['detalle'], 0, 2)) {
                         $codcan = $codcanCode['codcan'];
                     }
                 }
