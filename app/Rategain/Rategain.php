@@ -1091,7 +1091,7 @@ XML;
             $nitMatches = null;
 
             $hasNit = preg_match('/\s-\s[0-9]{9}/', json_encode($roomStay->Comments), $nitMatches);
-            $hasCIAL = preg_match('/(OIS)\s(CIAL-COT)-([0-9]{4})-([0-9]{4})/', json_encode($roomStay->Comments), $CIALMatches);
+            $hasCIAL = preg_match('/(CIAL-COT)-([0-9]{4})-([0-9]{4})/', json_encode($roomStay->Comments), $CIALMatches);
 
             $CIAL = $hasCIAL ? $CIALMatches[0] : null;
 
