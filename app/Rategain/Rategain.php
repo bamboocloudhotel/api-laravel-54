@@ -1157,7 +1157,7 @@ XML;
             $CIALMatches = null;
             $hasNit = preg_match('/\s-\s[0-9]{9}/', json_encode($roomStay->Comments), $nitMatches);
             // dd(json_encode($roomStay->Comments), $hasNit, $matches);
-            $hasCIAL = preg_match('/(OIS)\s(CIAL-COT)-([0-9]{4})-([0-9]{4})/', json_encode($roomStay->Comments), $CIALMatches);
+            $hasCIAL = preg_match('/(CIAL-COT)-([0-9]{4})-([0-9]{4})/', json_encode($roomStay->Comments), $CIALMatches);
             $CIAL = $hasCIAL ? $CIALMatches[0] : null;
             // dd(json_encode($roomStay->Comments), $hasCIAL, $CIALMatches[0]);
             $nit = $hasNit ? trim(str_replace(' - ', '', $nitMatches[0])) : $bambooCompanyNit;
