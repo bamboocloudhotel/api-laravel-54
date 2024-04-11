@@ -1213,12 +1213,12 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                 $codcan = null;
 
                 $ratePlanCodeParts = explode('-', $roomStay->RoomRates->RoomRate->RatePlanCode);
-                $ratePlanCode2 = substr($ratePlanCodeParts[1], 0, 2); // tipres
+                $ratePlanCode2 = substr($ratePlanCodeParts[1], 0, 3); // tipres
                 $ratePlanCode3 = substr($ratePlanCodeParts[2], 0, 2); // codcan
                 $ratePlanCode4 = $ratePlanCodeParts[3][0];
 
                 foreach ($tipresCodes as $tipresCode) {
-                    if ($ratePlanCode2 === substr($tipresCode['detalle'], 0, 2)) {
+                    if ($ratePlanCode2 === substr($tipresCode['detalle'], 0, 3)) {
                         $tipres = $tipresCode['tipres'];
                     }
                 }
@@ -1253,7 +1253,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     'habfij' => $bambooBookingChannelCompany['habfij'] ?: 'N',
                     'solicitada' => '',
                     'forpag' => $bambooBookingChannelCompany['forpag'] ?: '45',
-                    'desayuno' => (substr($roomStay->RoomRates->RoomRate->RatePlanCode, 0,  2) === 'BB') ? 'SI' : ($bambooBookingChannelCompany['desayuno'] ?: 'NO'),
+                    'desayuno' => (substr($roomStay->RoomRates->RoomRate->RatePlanCode, 0,  2) === 'BB') ? 'SI' : 'NO',
                     'reembl' => $bambooBookingChannelCompany['reembl'] ?: 'S',
                     'fecest' => date('Y-m-d'),
                     'estado' => $guarantee && isset($guarantee->GuaranteesAccepted) ?  'G' : 'P',
@@ -1287,7 +1287,8 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     // 'rateplanname' => null,
                     // 'rateplancode' => isset($roomStay->RatePlans->RatePlan->RatePlanCode) ? $roomStay->RatePlans->RatePlan->RatePlanCode : '',
                     // 'ratelist' => $rateList,
-                    'idclifre' => $booker ? ($booker->givenname . ' ' . $booker->surname . ' - ' . $booker->email) : "{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->GivenName} {$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->Surname}",
+                    'idclifre' => $guestExits ? ($guestExits->primer_nombre . ' ' . $guestExits->primer_apellido . ' ' . $guestExits->email) : null,
+                    // $booker ? ($booker->givenname . ' ' . $booker->surname . ' - ' . $booker->email) : "{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->GivenName} {$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->Surname}",
                 ];
                 $createdReservation = Reserva::create($reservaData);
                 ReservaNuevo::create($reservaData);
