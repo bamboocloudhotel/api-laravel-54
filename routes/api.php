@@ -300,4 +300,5 @@ Route::get('test/availability', function (Request $request) {
 
 });
 
+Route::get('reservation-changes/{numres}', 'ReservationChangeController@show');
 
