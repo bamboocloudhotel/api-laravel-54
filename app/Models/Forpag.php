@@ -36,6 +36,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Forpag extends Model
 {
+    protected $connection = 'on_the_fly';
 	protected $table = 'forpag';
 	protected $primaryKey = 'forpag';
 	public $incrementing = false;

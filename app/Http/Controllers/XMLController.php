@@ -117,52 +117,17 @@ class XMLController extends Controller
                     ->where('estado', '<>', 'C')
                     ->with('plares', 'folios')
                     ->orderBy('fecres', 'desd')
-                    ->get();
+                    ->first();
 
-                // $this->rategain->updateReservation($reserva[0], $data, $reserva[0]->confirmationid);
-
-                foreach ($reserva as $res) {
-
-                    $lastCancellation = Canre::orderBy('codcan', 'desc')->first()->toArray();
-                    $lastCancellationId = $lastCancellation['codcan'] + 1;
-
-                    $motcan = Motcan::where('detalle', 'INTEGRACIÓN MODIFICACIÓN')->first();
-
-                    if (!$motcan) {
-                        $motcanNext = Motcan::orderBy('motcan', 'desc')->first();
-                        $motcanId = ($motcanNext->motcan + 1);
-                        $motcan = Motcan::create([
-                            'motcan' => $motcanId,
-                            'detalle' => 'INTEGRACIÓN MODIFICACIÓN'
-                        ]);
-                    }
-
-                    try {
-                        Canre::create([
-                            'codcan' => $lastCancellationId,
-                            'numres' => $reserva['numres'],
-                            'feccan' => date('Y-m-d'),
-                            'hora' => date('H:i'),
-                            'descripcion' => 'Reserva cancelada por modificación en la integración Rategain',
-                            'solicitada' => 'Integración Rategain',
-                            'codusu' => 1,
-                            'motcan' => $motcan->motcan,
-                        ]);
-                    } catch (\Exception $exception) {
-                        // nothing
-                    }
-
-                    $res->update([
-                        'estado' => 'C',
-                        'modifyid' => $confirmationid
-                    ]);
+                if (!$reserva) {
+                    return response()->xml($this->rategain->getReservationError(['reservation.notFound']));
                 }
 
-                $response = $this->rategain->saveReservation($reservationObject, $reserva[0]->confirmationid);
+                $response = $this->rategain->saveReservation($reservationObject, $confirmationid, true);
 
                 $rategainRequest->update([
                     'response' => $response,
-                    'confirmation_id' => $reserva[0]->confirmationid
+                    'confirmation_id' => $confirmationid
                 ]);
 
                 return response()->xml($response);
@@ -235,6 +200,10 @@ class XMLController extends Controller
                         ]);
                     } catch (\Exception $exception) {
                         // nothing
+                    }
+
+                    if ($res->estado == 'G' ) {
+                        $this->rategain->createDirectInvoice($res);
                     }
 
                     $res->update([

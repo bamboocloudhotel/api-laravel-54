@@ -149,6 +149,7 @@
       'reteplanname',
       'ratelist',
       'desayuno',
+      'transporte',
     ];
 
     public function habitacion()
