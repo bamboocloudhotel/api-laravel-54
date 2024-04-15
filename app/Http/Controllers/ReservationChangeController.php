@@ -47,7 +47,7 @@ class ReservationChangeController extends Controller
     public function show($id)
     {
         //
-        $reservationChanges = ReservationChange::where('numres', $id)->get();
+        $reservationChanges = ReservationChange::where('numres', $id)->orderByDesc('id')->get();
 
         return response()->json($reservationChanges);
     }
