@@ -202,9 +202,9 @@ class XMLController extends Controller
                         // nothing
                     }
 
-                    if ($res->estado == 'G' ) {
+                    /*if ($res->estado == 'G' ) {
                         $this->rategain->createDirectInvoice($res, $reservationObject->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode);
-                    }
+                    }*/
 
                     $res->update([
                         'cancellationid' => $confirmationid,
