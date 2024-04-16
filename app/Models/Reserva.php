@@ -150,6 +150,7 @@
       'ratelist',
       'desayuno',
       'transporte',
+      'totest',
     ];
 
     public function habitacion()

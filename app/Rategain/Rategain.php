@@ -2,6 +2,7 @@
 
 namespace App\Rategain;
 
+use App\BambooInstance;
 use App\Crypt\Crypt;
 use App\Http\Controllers\Api\TestSoapController;
 use App\InventoryUpdate;
@@ -1421,6 +1422,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     // 'ratelist' => $rateList,
                     'idclifre' => $guestExits ? ($guestExits->primer_nombre . ' ' . $guestExits->primer_apellido . ' ' . $guestExits->email) : null,
                     // $booker ? ($booker->givenname . ' ' . $booker->surname . ' - ' . $booker->email) : "{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->GivenName} {$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->Surname}",
+                    'totest' => isset($data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax) ? $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax : $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountAfterTax,
                 ];
                 if (!$update) {
                     $createdReservation = Reserva::create($reservaData);
@@ -1888,7 +1890,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
 
     public function modifyReservation() {}
 
-    public function createDirectInvoice($reservation)
+    public function createDirectInvoice($reservation, $instance)
     {
         $folioOriginal = Folio::where('numres', $reservation->numres)->where('estado', '<>', 'F')->first();
 
@@ -1936,6 +1938,37 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
             'numcue' => '1',
             'estado' => 'N'
         ]);
+
+        $dataSaveCargo = [
+            'numfol' => ''. $numfolio->fol,
+            'codcar' => '77',
+            'numcue' => '1',
+            'valor' => '' . $reservation->totest ?: 1,
+            'cantidad' => '1',
+            'numdoc' => '0',
+        ];
+
+        $fields = http_build_query($dataSaveCargo);
+
+        $inst = BambooInstance::where(
+                'rg_hotel_code', $instance
+            )->first();
+
+        if (!$inst) {
+
+            dd('No hotel instance found!');
+        }
+
+        $urlPayload = "?numfol=" . $dataSaveCargo['numfol'] . "&codcar=" . $dataSaveCargo['codcar'] . "&numcue=" . $dataSaveCargo['numcue'] . "&valor=" . $dataSaveCargo['valor'] . "&cantidad=" . $dataSaveCargo['cantidad'] . "&numdoc=" . $dataSaveCargo['numdoc'];
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, "http://" . $inst->db_host . "/" . $inst->name . "/hotel5/webServices/saveCargo.php" . $urlPayload);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        // curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
+        $data = curl_exec($ch);
+        curl_close($ch);
 
     }
 
