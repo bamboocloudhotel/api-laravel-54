@@ -815,7 +815,7 @@ XML;
                         'codigocr' => $data->HotelReservations->HotelReservation->RoomStays->RoomStay->RoomRates->RoomRate->RatePlanCode
                     ];
                     Plares::create($plaresData);
-                    PlaresNuevo::create($plaresData);
+                    // PlaresNuevo::create($plaresData);
                     $dayPriceCnt++;
 
                 } catch (Exception $exception) {
@@ -855,7 +855,7 @@ XML;
                     'codigocr' => $data->HotelReservations->HotelReservation->RoomStays->RoomStay->RoomRates->RoomRate->RatePlanCode
                 ];
                 Plares::create($plaresData);
-                PlaresNuevo::create($plaresData);
+                // PlaresNuevo::create($plaresData);
                 $dayPriceCnt++;
 
             } catch (Exception $exception) {
@@ -1514,7 +1514,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     'type' => 'plans'
                 ]);
                 Plares::where('numres', $this->originalReservation->numres)->delete();
-                PlaresNuevo::where('numres', $this->originalReservation->numres)->delete();
+                // PlaresNuevo::where('numres', $this->originalReservation->numres)->delete();
             }
 
 
@@ -1550,7 +1550,9 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                             'codigocr' => $roomStay->RoomRates->RoomRate->RatePlanCode
                         ];
                         Plares::create($plaresData);
+                        /*if (!$update) {
                         PlaresNuevo::create($plaresData);
+                        }*/
                         $dayPriceCnt++;
 
                     } catch (Exception $exception) {
@@ -1590,7 +1592,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                         'codigocr' => $roomStay->RoomRates->RoomRate->RatePlanCode
                     ];
                     Plares::create($plaresData);
-                    PlaresNuevo::create($plaresData);
+                    /*PlaresNuevo::create($plaresData);*/
                     $dayPriceCnt++;
 
                 } catch (Exception $exception) {
