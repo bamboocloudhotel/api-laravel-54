@@ -1041,7 +1041,8 @@ XML;
                 if ($guest->Profiles->ProfileInfo->Profile->ProfileType == 3) {
                     $company = [
                         'id' => $guest->Profiles->ProfileInfo->UniqueID->ID,
-                        'name' => $guest->Profiles->ProfileInfo->Profile->CompanyInfo->CompanyName
+                        'name' => $guest->Profiles->ProfileInfo->Profile->CompanyInfo->CompanyName,
+                        'email' => isset($guest->Profiles->ProfileInfo->Profile->CompanyInfo->Email) ? ' - ' . $guest->Profiles->ProfileInfo->Profile->CompanyInfo->Email : null
                     ];
                 }
 
@@ -1147,7 +1148,8 @@ XML;
                     if ($guest->Profiles->ProfileInfo->Profile->ProfileType == "3") {
                         $company = [
                             'id' => $guest->Profiles->ProfileInfo->UniqueID->ID,
-                            'name' => $guest->Profiles->ProfileInfo->Profile->CompanyInfo->CompanyName
+                            'name' => $guest->Profiles->ProfileInfo->Profile->CompanyInfo->CompanyName,
+                            'email' => isset($guest->Profiles->ProfileInfo->Profile->CompanyInfo->CompanyName) ? ' - ' . $guest->Profiles->ProfileInfo->Profile->CompanyInfo->CompanyName : null
                         ];
                     }
                 }
@@ -1436,7 +1438,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     // 'rateplancode' => isset($roomStay->RatePlans->RatePlan->RatePlanCode) ? $roomStay->RatePlans->RatePlan->RatePlanCode : '',
                     // 'ratelist' => $rateList,
                     // 'idclifre' => $guestExits ? ($guestExits->primer_nombre . ' ' . $guestExits->primer_apellido . ' ' . $guestExits->email) : null,
-                    'idclifre' => $company ? $company['name'] : '',
+                    'idclifre' => $company ? $company['name'] . ($company['email'] ?: '') : '',
                     // $booker ? ($booker->givenname . ' ' . $booker->surname . ' - ' . $booker->email) : "{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->GivenName} {$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->Surname}",
                     'totest' => isset($data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax) ? $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax : $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountAfterTax,
                 ];
