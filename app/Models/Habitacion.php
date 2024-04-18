@@ -28,6 +28,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Habitacion extends Model
 {
+    protected $connection = 'on_the_fly';
 	protected $table = 'habitacion';
 	protected $primaryKey = 'numhab';
 	public $incrementing = false;

@@ -13,6 +13,7 @@ use App\Models\Detrec;
 use App\Models\Folio;
 use App\Models\Forpag;
 use App\Models\Garres;
+use App\Models\Habitacion;
 use App\Models\Plares;
 use App\Models\PlaresNuevo;
 use App\Models\Reccaj;
@@ -1164,6 +1165,16 @@ XML;
 
         $selectedRooms = [];
 
+        // cancel to availability
+        if ($update) {
+            $this->originalReservation = Reserva::where('referencia', 'LIKE', '%' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value . '%')
+                ->where('estado', '<>', 'C')
+                ->with('plares')
+                ->orderBy('fecres', 'desd')
+                ->first();
+            $this->originalReservation->update(['estado' => 'C']);
+        }
+
         foreach ($data->HotelReservations->HotelReservation->RoomStays->RoomStay as $roomStay) {
 
             $roomClass = config('rategain.rooms_cl.' . $roomStay->RoomRates->RoomRate->RoomTypeCode);
@@ -1193,6 +1204,10 @@ XML;
             }
         }
 
+        // return to granted to availability
+        if ($update) {
+            $this->originalReservation->update(['estado' => 'G']);
+        }
 
         foreach ($selectedRooms as $selectedRoom) {
             if (null == $selectedRoom->numhab) {
@@ -1351,7 +1366,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                 $ratePlanCode4 = $ratePlanCodeParts[3][0];
 
                 foreach ($tipresCodes as $tipresCode) {
-                    if ($ratePlanCode2 === substr($tipresCode['detalle'], 0, 3)) {
+                    if ($ratePlanCode2[1] === substr($tipresCode['detalle'], 0, 1)) {
                         $tipres = $tipresCode['tipres'];
                     }
                 }
@@ -1369,7 +1384,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     'referencia' => "{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->GivenName} {$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->Surname} - " . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value,
                     'tipdoc' => $guestExits ? $guestExits->tipdoc : 1,
                     'cedula' => 0,//$cedula,
-                    'nit' => $nit,
+                    'nit' => $company ? $company['id'] : '', // $nit,
                     'nitage' => $bambooCompanyNit ?: 0,
                     'numhab' => $numhab,
                     'tipres' => $tipres ?: $bambooTipres,
@@ -1420,7 +1435,8 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     // 'rateplanname' => null,
                     // 'rateplancode' => isset($roomStay->RatePlans->RatePlan->RatePlanCode) ? $roomStay->RatePlans->RatePlan->RatePlanCode : '',
                     // 'ratelist' => $rateList,
-                    'idclifre' => $guestExits ? ($guestExits->primer_nombre . ' ' . $guestExits->primer_apellido . ' ' . $guestExits->email) : null,
+                    // 'idclifre' => $guestExits ? ($guestExits->primer_nombre . ' ' . $guestExits->primer_apellido . ' ' . $guestExits->email) : null,
+                    'idclifre' => $company ? $company['name'] : '',
                     // $booker ? ($booker->givenname . ' ' . $booker->surname . ' - ' . $booker->email) : "{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->GivenName} {$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->Surname}",
                     'totest' => isset($data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax) ? $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax : $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountAfterTax,
                 ];
@@ -1428,20 +1444,24 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     $createdReservation = Reserva::create($reservaData);
                     ReservaNuevo::create($reservaData);
                 } else {
-                    $this->originalReservation = Reserva::where('referencia', 'LIKE', '%' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value . '%')
-                        ->where('estado', '<>', 'C')
-                        ->with('plares')
-                        ->orderBy('fecres', 'desd')
-                        ->first();
+
+                    if ($this->originalReservation) {
+                        $habitacionOr = Habitacion::where('numhab', $this->originalReservation['numhab'])->first();
+
+                        if ($habitacionOr->codcla === $roomClass) {
+                            $numhab = $this->originalReservation['numhab'];
+                        }
+                    }
 
                     $numres = $this->originalReservation->numres;
                     unset($reservaData['numres']);
                     $reservaData['modifyid'] = $confirmationid;
-                    $reservaData['numhab'] = $this->originalReservation->numhab;
+                    $reservaData['numhab'] = $numhab;
                     $reservaData['onlinecomment'] = $reservaData['onlinecomment'] . "\n" . $this->originalReservation['onlinecomment'];
                     $reservaData['forpag'] = $this->originalReservation['forpag'];
                     $reservaData['tipgar'] = $this->originalReservation['tipgar'];
                     $reservaData['observacion'] = "[" . date('Y-m-d') . " " . date('H:i') . "]\n" . $observacion . $this->originalReservation['observacion'];
+                    $reservaData['estado'] = $this->originalReservation['estado'];
 
                     $this->originalReservation->fill($reservaData);
                     $changes = $this->originalReservation->getDirty();
