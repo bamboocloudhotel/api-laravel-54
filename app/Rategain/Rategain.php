@@ -1384,7 +1384,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     'referencia' => "{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->GivenName} {$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->Surname} - " . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value,
                     'tipdoc' => $guestExits ? $guestExits->tipdoc : 1,
                     'cedula' => 0,//$cedula,
-                    'nit' => $company ? $company['id'] : $nit, // $nit,
+                    'nit' => $nit,// $company ? $company['id'] : $nit, // $nit,
                     'nitage' => $bambooCompanyNit ?: 0,
                     'numhab' => $numhab,
                     'tipres' => $tipres ?: $bambooTipres,
