@@ -1368,7 +1368,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                 $ratePlanCode4 = $ratePlanCodeParts[3][0];
 
                 foreach ($tipresCodes as $tipresCode) {
-                    if ($ratePlanCode2[1] === substr($tipresCode['detalle'], 0, 1)) {
+                    if (substr($ratePlanCode2, 0, 1) === substr($tipresCode['detalle'], 0, 1)) {
                         $tipres = $tipresCode['tipres'];
                     }
                 }
