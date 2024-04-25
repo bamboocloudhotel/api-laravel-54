@@ -127,7 +127,7 @@ class RategainRequestController extends Controller
         $query->execute([$date]);
 
         foreach ($query as $rategainRequest) {
-            RategainRequestBackup::create($rategainRequest)->toSql();
+            RategainRequestBackup::create($rategainRequest);
 
             $request = RategainRequest::where('id', $rategainRequest['id'])->first();
             $request->delete();
