@@ -59,7 +59,7 @@ class Crypt
         }
         else
         {
-            error('El número de tarjeta es invalido');
+            echo 'El número de tarjeta es invalido';
             return false;
         }
     }
