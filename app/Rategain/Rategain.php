@@ -1544,7 +1544,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     'type' => 'plans'
                 ]);
                 Plares::where('numres', $this->originalReservation->numres)->delete();
-                // PlaresNuevo::where('numres', $this->originalReservation->numres)->delete();
+                PlaresNuevo::where('numres', $this->originalReservation->numres)->delete();
             }
 
 
