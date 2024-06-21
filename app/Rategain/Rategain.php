@@ -1389,6 +1389,10 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     }
                 }
 
+                $idclifre = "{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->GivenName} {$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->Surname}";
+                if ($data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Email) {
+                    $idclifre .= " - {$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Email}";
+                }
 
                 $reservaData = [
                     'numres' => $numres,
@@ -1447,7 +1451,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     // 'rateplancode' => isset($roomStay->RatePlans->RatePlan->RatePlanCode) ? $roomStay->RatePlans->RatePlan->RatePlanCode : '',
                     // 'ratelist' => $rateList,
                     // 'idclifre' => $guestExits ? ($guestExits->primer_nombre . ' ' . $guestExits->primer_apellido . ' ' . $guestExits->email) : null,
-                    'idclifre' => $booker ? ($booker->givenname . ' ' . $booker->surname) : "{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->GivenName} {$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->Surname}",
+                    'idclifre' => $idclifre,
                     'totest' => isset($data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax) ? $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax : $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountAfterTax,
                 ];
                 if (!$update) {
