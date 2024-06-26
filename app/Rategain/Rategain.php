@@ -1404,6 +1404,19 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     $idclifre .= " - {$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Email}";
                 }
 
+                $totalEstadia = isset($data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax)
+                    ? $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax :
+                    $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountAfterTax;;
+
+                if (
+                    isset($data->HotelReservations->HotelReservation->ResGlobalInfo->Total->CurrencyCode) &&
+                    $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->CurrencyCode === 'USD'
+                ) {
+                    $usd = Valmon::orderBy('fecha', 'DESC')->first();
+                    $totalEstadia = $totalEstadia * $usd->valor;
+                }
+
+
                 $reservaData = [
                     'numres' => $numres,
                     'referencia' => "{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->GivenName} {$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->Surname} - " . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value,
@@ -1462,7 +1475,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     // 'ratelist' => $rateList,
                     // 'idclifre' => $guestExits ? ($guestExits->primer_nombre . ' ' . $guestExits->primer_apellido . ' ' . $guestExits->email) : null,
                     'idclifre' => $idclifre,
-                    'totest' => isset($data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax) ? $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax : $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountAfterTax,
+                    'totest' => $totalEstadia,
                 ];
                 if (!$update) {
                     $createdReservation = Reserva::create($reservaData);
