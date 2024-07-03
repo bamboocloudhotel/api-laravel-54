@@ -1173,6 +1173,10 @@ XML;
 
         $selectedRooms = [];
 
+        $originalReservationEstate = $this->originalReservation['estado'];
+
+        // dd($this->originalReservation, $originalReservationEstate);
+
         // cancel to availability
         if ($update) {
             $this->originalReservation = Reserva::where('referencia', 'LIKE', '%' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value . '%')
@@ -1192,6 +1196,8 @@ XML;
                 $selectedRooms[] = $this->getBambooAvailability($data, $roomClass)[0];
             }
         }
+
+        // dd($selectedRooms, $availables);
 
         if ($selectedRooms) {
             for ($i = 0; $i <= count($selectedRooms); $i++) {
@@ -1214,7 +1220,7 @@ XML;
 
         // return to granted to availability
         if ($update) {
-            $this->originalReservation->update(['estado' => 'G']);
+            $this->originalReservation->update(['estado' => $originalReservationEstate]);
         }
 
         foreach ($selectedRooms as $selectedRoom) {
@@ -1484,8 +1490,10 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
 
                     if ($this->originalReservation) {
                         $habitacionOr = Habitacion::where('numhab', $this->originalReservation['numhab'])->first();
-
-                        if ($habitacionOr->codcla === $roomClass) {
+                        $originalRoomIsAvailable = true;
+                        $availablesCollection = collect($availables);
+                        $originalRoomIsAvailable = $availablesCollection->where('numhab', $this->originalReservation['numhab'])->first();
+                        if ($habitacionOr->codcla === $roomClass && $originalRoomIsAvailable) {
                             $numhab = $this->originalReservation['numhab'];
                         }
                     }

@@ -121,6 +121,8 @@ class XMLController extends Controller
 
                 if (!$reserva) {
                     return response()->xml($this->rategain->getReservationError(['reservation.notFound']));
+                } else {
+                    $this->rategain->originalReservation = $reserva;
                 }
 
                 $response = $this->rategain->saveReservation($reservationObject, $confirmationid, true);
