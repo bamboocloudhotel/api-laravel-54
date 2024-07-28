@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\InventoryUpdate;
 use App\RategainRequest;
 use App\RategainRequestBackup;
 use Illuminate\Http\Request;
@@ -133,5 +134,41 @@ class RategainRequestController extends Controller
             $request->delete();
         }
         return response()->json(['message' => 'Old requests removed']);
+    }
+
+    public static function removeOldInventoryUpdates()
+    {
+        $date = date('Y-m-d', strtotime('-3 month'));
+
+        $inventoryUpdates = InventoryUpdate::where('created_at', '<', $date)
+            ->orderBy('created_at')
+            ->limit(100)->toSql();
+        $db = DB::connection()->getPdo();
+        $query = $db->prepare($inventoryUpdates);
+        $query->execute([$date]);
+
+        foreach ($query as $inventoryUpdate) {
+            $request = InventoryUpdate::where('id', $inventoryUpdate['id'])->first();
+            $request->delete();
+        }
+        return response()->json(['message' => 'Old inventory updates removed']);
+    }
+
+    public static function removeOldBackups()
+    {
+        $date = date('Y-m-d', strtotime('-12 month'));
+
+        $inventoryUpdates = RategainRequestBackup::where('created_at', '<', $date)
+            ->orderBy('created_at')
+            ->limit(100)->toSql();
+        $db = DB::connection()->getPdo();
+        $query = $db->prepare($inventoryUpdates);
+        $query->execute([$date]);
+
+        foreach ($query as $inventoryUpdate) {
+            $request = RategainRequestBackup::where('id', $inventoryUpdate['id'])->first();
+            $request->delete();
+        }
+        return response()->json(['message' => 'Old request backups removed']);
     }
 }

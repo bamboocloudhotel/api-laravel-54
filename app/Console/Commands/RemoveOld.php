@@ -40,5 +40,7 @@ class RemoveOld extends Command
     {
         //
         RategainRequestController::removeOld();
+        RategainRequestController::removeOldInventoryUpdates();
+        RategainRequestController::removeOldBackups();
     }
 }
