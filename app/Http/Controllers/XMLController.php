@@ -75,6 +75,13 @@ class XMLController extends Controller
 				// return response()->json(\Config::get("database.connections.on_the_fly"));
                 // dd($reservationObject->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode);
 
+                $reservation = Reserva::where('referencia', 'LIKE', '%' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value . '%')
+                    ->where('estado', 'G')->first();
+
+                if ($reservation) {
+                    return response()->xml($this->rategain->getReservationError(['reservation.exists']));
+                }
+
                 $response = $this->rategain->saveReservation($reservationObject, $confirmationid);
 
                 $rategainRequest->update([
@@ -228,14 +235,6 @@ class XMLController extends Controller
                 ]);
                 return response()->xml($this->rategain->reservationResponseError);
         }
-
-        dd($data['data']);
-
-        return response()->xml([
-            'data' => $data['data'],
-            'method' => $data['method'],
-        ]);
-
     }
 
     public function parseRequestXml($xml, $array = false)

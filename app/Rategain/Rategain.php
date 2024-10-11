@@ -732,6 +732,11 @@ XML;
                 'ShortText' => 'No room availabilities'
             ],
 
+            'exists' => [
+                'Code' => 400,
+                'ShortText' => 'The reservation already exists'
+            ],
+
         ];
 
         foreach ($errorsArray as $error) {
