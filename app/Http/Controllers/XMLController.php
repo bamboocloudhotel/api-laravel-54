@@ -42,6 +42,8 @@ class XMLController extends Controller
 
         try {
 
+            $xml = $this->removeEmoticon($xml);
+
             $rategainRequest = RategainRequest::create([
                 'reference' => 'Rategain ' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Type . ' ' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Value . ' - ' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Type . ' ' . $reservationObject->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value,
                 'type' => $data['data']['ResStatus'],
@@ -53,7 +55,7 @@ class XMLController extends Controller
         } catch (\Exception $exception) {
             dd($exception->getMessage());
         }
-
+        
         switch ($data['data']['ResStatus']) {
             case 'Commit':
 
@@ -452,4 +454,32 @@ class XMLController extends Controller
             'tipres' => $instance['tipres'],
         ]);
     }
+
+    private function removeEmoticon($text) {
+
+        $cleanText = "";
+
+        // Match Emoticons
+        $regexEmoticons = '/[\x{1F600}-\x{1F64F}]/u';
+        $cleanText     = preg_replace($regexEmoticons, '', $text);
+
+        // Match Miscellaneous Symbols and Pictographs
+        $regexSymbols = '/[\x{1F300}-\x{1F5FF}]/u';
+        $cleanText   = preg_replace($regexSymbols, '', $cleanText);
+
+        // Match Transport And Map Symbols
+        $regexTransport = '/[\x{1F680}-\x{1F6FF}]/u';
+        $cleanText     = preg_replace($regexTransport, '', $cleanText);
+
+        // Match Miscellaneous Symbols
+        $regexMisc  = '/[\x{2600}-\x{26FF}]/u';
+        $cleanText = preg_replace($regexMisc, '', $cleanText);
+
+        // Match Dingbats
+        $regexDingbats = '/[\x{2700}-\x{27BF}]/u';
+        $cleanText    = preg_replace($regexDingbats, '', $cleanText);
+
+        return $cleanText;
+    }
 }
+

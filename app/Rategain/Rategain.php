@@ -1406,6 +1406,8 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     }
                 }
 
+                $emailWebCheckin = '';
+
                 $idclifre = "{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->GivenName} {$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->Surname}";
                 if (
                     isset($data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Email) &&
@@ -1413,6 +1415,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     filter_var($data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Email, FILTER_VALIDATE_EMAIL)
                 ) {
                     $idclifre .= " - {$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Email}";
+                    $emailWebCheckin = "{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Email}";
                 }
 
                 $totalEstadia = isset($data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax)
@@ -1487,6 +1490,7 @@ RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReserv
                     // 'idclifre' => $guestExits ? ($guestExits->primer_nombre . ' ' . $guestExits->primer_apellido . ' ' . $guestExits->email) : null,
                     'idclifre' => $idclifre,
                     'totest' => $totalEstadia,
+                    'email' => $emailWebCheckin
                 ];
                 if (!$update) {
                     $createdReservation = Reserva::create($reservaData);
