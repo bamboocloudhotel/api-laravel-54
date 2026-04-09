@@ -1,5 +1,5 @@
 <?php
-
+// new line
 namespace App\Http\Controllers;
 
 use App\BambooInstance;
