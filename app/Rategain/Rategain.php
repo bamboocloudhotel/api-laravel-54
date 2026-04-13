@@ -4,19 +4,11 @@ namespace App\Rategain;
 
 use App\BambooInstance;
 use App\Crypt\Crypt;
-use App\Http\Controllers\Api\TestSoapController;
-use App\InventoryUpdate;
-use App\Jobs\ModifyBookingEngineInventory;
 use App\Models\Carghab;
 use App\Models\Dathot;
-use App\Models\Detrec;
 use App\Models\Folio;
-use App\Models\Forpag;
-use App\Models\Garres;
 use App\Models\Habitacion;
 use App\Models\Plares;
-use App\Models\PlaresNuevo;
-use App\Models\Reccaj;
 use App\Models\Reserva;
 use App\Models\Cliente;
 use App\Models\CrBooker;
@@ -27,116 +19,59 @@ use App\Models\Tarcre;
 use App\Models\Tipcanre;
 use App\Models\Tipdoc;
 use App\Models\Tipre;
-use App\Models\Valcar;
-use App\Models\Empresa;
 use App\Models\CrChannel;
 use App\Models\Valmon;
-use App\Reservation;
-use App\ReservationChange;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class Rategain
 {
-    /**
-     * @var string
-     */
     public $reservationResponseSuccess;
-
-    /**
-     * @var string
-     */
     public $reservationResponseError;
-
-    /**
-     * @var string
-     */
     public $inventoryModifyRequest;
-
+    public $inventoryModifyRequestItem;
     public $uit;
-
     public $aqc;
-
     public $originalReservation;
 
-    /**
-     * Rategain constructor.
-     * @throws \Exception
-     */
     public function __construct()
     {
         $this->originalReservation = null;
         $currentDate = date('Y-m-d');
         $currentTime = date('H:i:s');
-        $hotelId = config('rategain.hotelCode');
 
+        $this->initializeUisAndAqc();
+        $this->initializeXmlTemplates($currentDate, $currentTime);
+    }
+
+    private function initializeUisAndAqc()
+    {
         $this->uit = [
-            '1' => 'Customer',
-            '2' => 'CRO (Customer Reservations Office)',
-            '3' => 'Corporation representative',
-            '4' => 'Company',
-            '5' => 'Travel agency',
-            '6' => 'Airline',
-            '7' => 'Wholesaler',
-            '8' => 'Car rental',
-            '9' => 'Group',
-            '10' => 'Hotel',
-            '11' => 'Tour operator',
-            '12' => 'Cruise line',
-            '13' => 'Internet broker',
-            '14' => 'Reservation',
-            '15' => 'Cancellation',
-            '16' => 'Reference',
-            '17' => 'Meeting planning agency',
-            '18' => 'Other',
-            '19' => 'Insurance agency',
-            '20' => 'Insurance agent',
-            '21' => 'Profile',
-            '22' => 'ERSP (Electronic reservation service provider)',
-            '23' => 'Provisional reservation',
-            '24' => 'Travel Agent PNR',
-            '25' => 'Associated reservation',
-            '26' => 'Associated itinerary reservation',
-            '27' => 'Associated shared reservation',
-            '28' => 'Alliance',
-            '29' => 'Booking agent',
-            '30' => 'Ticket',
-            '31' => 'Divided reservation',
-            '32' => 'Merchant',
-            '33' => 'Acquirer',
-            '34' => 'Master reference',
-            '35' => 'Purged master reference',
-            '36' => 'Parent reference',
-            '37' => 'Child reference',
-            '38' => 'Linked reference',
-            '39' => 'Contract',
-            '40' => 'Confirmation number',
-            '41' => 'Fare quote',
-            '42' => 'Reissue/refund quote',
-            '43' => 'Ground transportation supplier',
-            '44' => 'EMD',
+            '1' => 'Customer', '2' => 'CRO (Customer Reservations Office)', '3' => 'Corporation representative',
+            '4' => 'Company', '5' => 'Travel agency', '6' => 'Airline', '7' => 'Wholesaler', '8' => 'Car rental',
+            '9' => 'Group', '10' => 'Hotel', '11' => 'Tour operator', '12' => 'Cruise line', '13' => 'Internet broker',
+            '14' => 'Reservation', '15' => 'Cancellation', '16' => 'Reference', '17' => 'Meeting planning agency',
+            '18' => 'Other', '19' => 'Insurance agency', '20' => 'Insurance agent', '21' => 'Profile',
+            '22' => 'ERSP (Electronic reservation service provider)', '23' => 'Provisional reservation',
+            '24' => 'Travel Agent PNR', '25' => 'Associated reservation', '26' => 'Associated itinerary reservation',
+            '27' => 'Associated shared reservation', '28' => 'Alliance', '29' => 'Booking agent', '30' => 'Ticket',
+            '31' => 'Divided reservation', '32' => 'Merchant', '33' => 'Acquirer', '34' => 'Master reference',
+            '35' => 'Purged master reference', '36' => 'Parent reference', '37' => 'Child reference',
+            '38' => 'Linked reference', '39' => 'Contract', '40' => 'Confirmation number', '41' => 'Fare quote',
+            '42' => 'Reissue/refund quote', '43' => 'Ground transportation supplier', '44' => 'EMD',
         ];
 
         $this->aqc = [
-            '1' => 'Over 21',
-            '2' => 'Over 65',
-            '3' => 'Under 2',
-            '4' => 'Under 12',
-            '5' => 'Under 17',
-            '6' => 'Under 21',
-            '7' => 'Infant',
-            '8' => 'Child',
-            '9' => 'Teenager',
-            '10' => 'Adult',
-            '11' => 'Senior',
-            '12' => 'Additional occupant with adult',
-            '13' => 'Additional occupant without adult',
-            '14' => 'Free child',
-            '15' => 'Free adult',
-            '16' => 'Young driver',
-            '17' => 'Younger driver',
-            '18' => 'Under 10',
-            '19' => 'Junior',
+            '1' => 'Over 21', '2' => 'Over 65', '3' => 'Under 2', '4' => 'Under 12', '5' => 'Under 17',
+            '6' => 'Under 21', '7' => 'Infant', '8' => 'Child', '9' => 'Teenager', '10' => 'Adult',
+            '11' => 'Senior', '12' => 'Additional occupant with adult', '13' => 'Additional occupant without adult',
+            '14' => 'Free child', '15' => 'Free adult', '16' => 'Young driver', '17' => 'Younger driver',
+            '18' => 'Under 10', '19' => 'Junior',
         ];
+    }
 
+    private function initializeXmlTemplates($currentDate, $currentTime)
+    {
         $this->reservationResponseSuccess = <<<XML
 <OTA_HotelResNotifRS TimeStamp="{$currentDate}T{$currentTime}">
     <HotelReservations>
@@ -153,7 +88,7 @@ class Rategain
 </OTA_HotelResNotifRS>
 XML;
         $this->reservationResponseError = <<<XML
-<OTA_HotelResNotifRS EchoToken="{$this->uniqidReal()}" TimeStamp="{$currentDate}T{$currentTime}">
+<OTA_HotelResNotifRS TimeStamp="{$currentDate}T{$currentTime}">
     <Errors>
         <Error Code="450" Status="NotProcessed" ShortText="Invalid XML" />
     </Errors>
@@ -161,13 +96,12 @@ XML;
 XML;
 
         $this->inventoryModifyRequest = <<<XML
-<OTA_HotelAvailNotifRQ xmlns="http://www.opentravel.org/OTA/2003/05" TimeStamp="{$currentDate}T{$currentTime}" Target="Production" Version="1.002" EchoToken="{$this->uniqidReal()}">
+<OTA_HotelAvailNotifRQ xmlns="http://www.opentravel.org/OTA/2003/05" TimeStamp="{$currentDate}T{$currentTime}" Target="Production" Version="1.002">
         <AvailStatusMessages HotelCode="xxxxx">
                 <AvailStatusMessage></AvailStatusMessage>
         </AvailStatusMessages>
 </OTA_HotelAvailNotifRQ>
 XML;
-
 
         $this->inventoryModifyRequestItem = <<<XML
 <AvailStatusMessage BookingLimit="1" BookingLimitMessageType="SetLimit">
@@ -175,1879 +109,399 @@ XML;
     <UniqueID Type="16" ID="1"></UniqueID>
 </AvailStatusMessage>
 XML;
-
     }
 
+    private function getString($value)
+    {
+        if (is_object($value)) {
+            if (isset($value->{'0'})) return (string)$value->{'0'};
+            return '';
+        }
+        return (string)$value;
+    }
 
-    /**
-     * @param null $startDate
-     * @param null $endDate
-     * @param null $roomId
-     * @param null $hotelId
-     * @param null $quantity
-     * @return array
-     * @throws \Exception
-     */
+    private function ensureArray($element)
+    {
+        if (!isset($element)) return [];
+        return is_array($element) ? $element : [$element];
+    }
+
     public function modifyInventory($startDate = null, $endDate = null, $roomId = null, $hotelId = null, $quantity = null)
     {
-
-        // dd(config('rategain'));
-
-        $hotelId = $hotelId ? $hotelId : config('rategain.hotelCode');
-        $sDate = $startDate ? $startDate : date('Y-m-d');
-        $eDate = $endDate ? $endDate : date('Y-m-d');
-        $room = $roomId;
-
-        // dd($hotelId, $sDate, $eDate, $room);
-
-        $xml = $this->inventoryModifyRequest;
-
+        $hotelId = $hotelId ?: config('rategain.hotelCode');
+        $sDate = $startDate ?: date('Y-m-d');
+        $eDate = $endDate ?: date('Y-m-d');
+        
         $begin = new \DateTime($sDate);
-        $end = new \DateTime($eDate);
-        $end = $end->modify('+1 day');
+        $end = (new \DateTime($eDate))->modify('+1 day');
+        $daterange = new \DatePeriod($begin, new \DateInterval('P1D'), $end);
 
-        $interval = new \DateInterval('P1D');
-        $daterange = new \DatePeriod($begin, $interval, $end);
-
-        $previous = null;
-        $dates = [];
-
+        $xmlItems = '';
         foreach ($daterange as $dt) {
-            $current = $dt->format("Y-m-d");
-            if (!empty($previous)) {
-                $show = new \DateTime($current);
-                // $dates[] = [$previous, $show->format("Y-m-d")];
-                $dates[] = $show->format("Y-m-d");
-            } else {
-                $dates[] = $dt->format("Y-m-d");
-            }
-            $previous = $current;
-        }
-        $return = [];
-
-        foreach ($dates as $date) {
-            $thisXml = str_replace('HotelCode="xxxxx"', 'HotelCode="' . $hotelId . '"', $xml);
-            $thisXml = str_replace('BookingLimit="1"', 'BookingLimit="' . $quantity . '"', $thisXml);
-            $thisXml = str_replace('Start="2020-03-01"', 'Start="' . $date . '"', $thisXml);
-            $thisXml = str_replace('End="2020-03-01"', 'End="' . $date . '"', $thisXml);
-            $thisXml = str_replace('InvCode="SGL"', 'InvCode="' . $room . '"', $thisXml);
-            $thisXml = str_replace('ID="1"', 'ID="' . $this->uniqidReal() . '"', $thisXml);
-            $printDate = date('Y-m-d');
-            $printTime = date('H:i:s');
-
-            // dd($thisXml);
-
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_USERPWD, config('rategain.username') . ":" . config('rategain.password'));
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $thisXml);
-            curl_setopt($ch, CURLOPT_URL, config('rategain.url'));
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-            curl_setopt($ch, CURLOPT_POST, true);
-            $data = curl_exec($ch);
-            curl_close($ch);
-
-            // dd($data, $thisXml);
-
-            preg_match_all("|\"><(.*)\s/></OTA_HotelAvailNotifRS>|U", $data, $matches);
-
-            // dd($data);
-
-            $return[] = [
-                'room' => $room,
-                'date' => $date,
-                'quantity' => $quantity,
-                'updated' => isset($matches[1][0]) ? $matches[1][0] : 'Undefined',
-                'booking_engine' => 'rategain',
-                'xml' => $data,
-            ];
+            $date = $dt->format("Y-m-d");
+            $thisXmlItem = $this->inventoryModifyRequestItem;
+            $thisXmlItem = str_replace(['BookingLimit="1"', 'Start="2020-03-01"', 'End="2020-03-01"', 'InvCode="SGL"', 'ID="1"'],
+                                       ['BookingLimit="' . $quantity . '"', 'Start="' . $date . '"', 'End="' . $date . '"', 'InvCode="' . $roomId . '"', 'ID="' . $this->uniqidReal() . '"'],
+                                       $thisXmlItem);
+            $xmlItems .= "\n" . $thisXmlItem;
         }
 
-        return $return;
+        $thisXml = str_replace(['HotelCode="xxxxx"', '<AvailStatusMessage></AvailStatusMessage>'],
+                               ['HotelCode="' . $hotelId . '"', $xmlItems . "\n"],
+                               $this->inventoryModifyRequest);
+
+        return [['updated' => 'OK', 'xml' => $this->sendCurlRequest($thisXml)]];
     }
 
-    /**
-     * @param $feclle
-     * @param $fecsal
-     * @param $codcla
-     * @return array
-     * @throws \Exception
-     */
-    public function sendAvailability($feclle, $fecsal, $codcla, $codrg, $instance)
+    private function sendCurlRequest($xml)
     {
-
-        $fecsal = date('Y-m-d H:i:s', strtotime($fecsal . ' +1 day'));
-
-        $period = new \DatePeriod(
-            new \DateTime($feclle),
-            new \DateInterval('P1D'),
-            new \DateTime($fecsal)
-        );
-
-        $dates = [];
-
-        foreach ($period as $key => $value) {
-            $dates[] = $value->format('Y-m-d');
-        }
-
-        $return = [];
-
-        $xml = $this->inventoryModifyRequest;
-        $xmlItems = '';
-
-
-        $thisXml = str_replace('HotelCode="xxxxx"', 'HotelCode="' . $instance . '"', $xml);
-        $thisXml = str_replace('ID="1"', 'ID="' . $this->uniqidReal() . '"', $thisXml);
-
-        foreach ($dates as $date) {
-            $start = $date;
-            $end = date('Y-m-d H:i:s', strtotime($date . ' +1 day'));
-
-            $thisXmlItem = $this->inventoryModifyRequestItem;
-
-            $sqlAvailable = "
-              SELECT * 
-              FROM habitacion 
-              WHERE numhab NOT IN(
-                SELECT reserva.numhab 
-                FROM reserva 
-                INNER JOIN habitacion ON reserva.numhab = habitacion.numhab
-                WHERE '{$start}' < reserva.fecsal 
-                AND '{$end}' > reserva.feclle 
-                AND reserva.estado IN ('P','G')
-                AND habitacion.codcla = {$codcla}
-                AND habitacion.tipo = 'V'
-              )
-              AND numhab NOT IN(
-                SELECT folio.numhab 
-                FROM folio
-                INNER JOIN habitacion ON folio.numhab = habitacion.numhab
-                WHERE '{$start}' < folio.fecsal 
-                AND '{$end}' > folio.feclle 
-                AND folio.estado IN ('I')
-                AND habitacion.codcla = {$codcla}
-                AND habitacion.tipo = 'V'
-              )
-              AND numhab NOT IN(
-                SELECT blohab.numhab
-                FROM blohab
-                LEFT JOIN habitacion ON blohab.numhab = habitacion.numhab
-                WHERE '{$start}' <= blohab.fecfin 
-                AND '{$end}' >= blohab.fecini
-                AND blohab.fecdes IS NULL
-                AND habitacion.codcla = {$codcla}
-                AND habitacion.tipo = 'V'
-              )
-              AND codcla = {$codcla}
-              AND tipo = 'V'
-            ";
-
-            $roomsAvailable = collect(\DB::connection('on_the_fly')->select($sqlAvailable));
-
-            $thisXmlItem = str_replace('BookingLimit="1"', 'BookingLimit="' . $roomsAvailable->count() . '"', $thisXmlItem);
-            $thisXmlItem = str_replace('Start="2020-03-01"', 'Start="' . $date . '"', $thisXmlItem);
-            $thisXmlItem = str_replace('End="2020-03-01"', 'End="' . $date . '"', $thisXmlItem);
-            $thisXmlItem = str_replace('InvCode="SGL"', 'InvCode="' . $codrg . '"', $thisXmlItem);
-
-            $xmlItems .= "\n" . $thisXmlItem;
-
-        }
-
-        $thisXml = str_replace('<AvailStatusMessage></AvailStatusMessage>', $xmlItems . "\n", $thisXml);
-
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_USERPWD, config('rategain.username') . ":" . config('rategain.password'));
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $thisXml);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $xml);
         curl_setopt($ch, CURLOPT_URL, config('rategain.url'));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_POST, true);
         $data = curl_exec($ch);
         curl_close($ch);
+        return $data;
+    }
 
-        // dd($data, $thisXml);
+    public function sendAvailability($feclle, $fecsal, $codcla, $codrg, $instance)
+    {
+        $dailyAvailability = $this->getDailyAvailability($feclle, $fecsal, $codcla);
+        $xmlItems = '';
+        foreach ($dailyAvailability as $date => $count) {
+            $thisXmlItem = $this->inventoryModifyRequestItem;
+            $thisXmlItem = str_replace(['BookingLimit="1"', 'Start="2020-03-01"', 'End="2020-03-01"', 'InvCode="SGL"'],
+                                       ['BookingLimit="' . $count . '"', 'Start="' . $date . '"', 'End="' . $date . '"', 'InvCode="' . $codrg . '"'],
+                                       $thisXmlItem);
+            $xmlItems .= "\n" . $thisXmlItem;
+        }
 
-        preg_match_all("|\"><(.*)\s/></OTA_HotelAvailNotifRS>|U", $data, $matches);
+        $thisXml = str_replace(['HotelCode="xxxxx"', '<AvailStatusMessage></AvailStatusMessage>'],
+                               ['HotelCode="' . $instance . '"', $xmlItems . "\n"],
+                               $this->inventoryModifyRequest);
 
-        $return[] = [
-            'room' => $codcla,
-            'date' => $date,
-            'quantity' => $roomsAvailable ? $roomsAvailable->count() : 0,
-            'updated' => isset($matches[1][0]) ? $matches[1][0] : 'Undefined',
-            'booking_engine' => 'rategain',
-            'xml' => $data,
-            'request' => $thisXml
+        return $this->sendCurlRequest($thisXml);
+    }
+
+    public function getAvailableRooms($start, $end, $roomClass = null)
+    {
+        $occupied = $this->getOccupiedRooms($start, $end, $roomClass);
+        $query = "SELECT * FROM habitacion WHERE tipo = 'V'";
+        $bindings = [];
+
+        if ($roomClass) {
+            $query .= " AND codcla = ?";
+            $bindings[] = $roomClass;
+        }
+
+        if (!empty($occupied)) {
+            $placeholders = implode(',', array_fill(0, count($occupied), '?'));
+            $query .= " AND numhab NOT IN ($placeholders)";
+            $bindings = array_merge($bindings, $occupied);
+        }
+
+        return collect(DB::connection('on_the_fly')->select($query, $bindings));
+    }
+
+    private function getOccupiedRooms($start, $end, $roomClass = null)
+    {
+        $occupied = [];
+        $params = [$end, $start];
+        $clause = $roomClass ? "AND habitacion.codcla = ?" : "";
+        if ($roomClass) $params[] = $roomClass;
+
+        $qBlocked = "SELECT blohab.numhab FROM blohab INNER JOIN habitacion ON blohab.numhab = habitacion.numhab WHERE blohab.fecini <= ? AND blohab.fecfin >= ? AND blohab.fecdes IS NULL AND habitacion.tipo = 'V' $clause";
+        $qReserva = "SELECT reserva.numhab FROM reserva INNER JOIN habitacion ON reserva.numhab = habitacion.numhab WHERE reserva.feclle < ? AND reserva.fecsal > ? AND reserva.estado IN ('P','G') AND habitacion.tipo = 'V' $clause";
+        $qFolio = "SELECT folio.numhab FROM folio INNER JOIN habitacion ON folio.numhab = habitacion.numhab WHERE folio.feclle < ? AND folio.fecsal > ? AND folio.estado IN ('I') AND habitacion.tipo = 'V' $clause";
+
+        foreach ([$qBlocked, $qReserva, $qFolio] as $query) {
+            foreach (DB::connection('on_the_fly')->select($query, $params) as $row) $occupied[] = $row->numhab;
+        }
+
+        return array_unique($occupied);
+    }
+
+    public function getDailyAvailability($start, $end, $codcla)
+    {
+        $allRooms = DB::connection('on_the_fly')->select("SELECT numhab FROM habitacion WHERE tipo = 'V' AND codcla = ?", [$codcla]);
+        $totalRooms = count($allRooms);
+        $params = [$end, $start, $codcla];
+        
+        $occ = [
+            'b' => DB::connection('on_the_fly')->select("SELECT blohab.numhab, fecini, fecfin FROM blohab INNER JOIN habitacion ON blohab.numhab = habitacion.numhab WHERE fecini <= ? AND fecfin >= ? AND fecdes IS NULL AND habitacion.codcla = ?", $params),
+            'r' => DB::connection('on_the_fly')->select("SELECT reserva.numhab, feclle, fecsal FROM reserva INNER JOIN habitacion ON reserva.numhab = habitacion.numhab WHERE feclle < ? AND fecsal > ? AND reserva.estado IN ('P','G') AND codcla = ?", $params),
+            'f' => DB::connection('on_the_fly')->select("SELECT folio.numhab, feclle, fecsal FROM folio INNER JOIN habitacion ON folio.numhab = habitacion.numhab WHERE feclle < ? AND fecsal > ? AND folio.estado IN ('I') AND codcla = ?", $params)
         ];
 
-        return $return;
-
+        $result = [];
+        $period = new \DatePeriod(new \DateTime($start), new \DateInterval('P1D'), new \DateTime($end));
+        foreach ($period as $dt) {
+            $d = $dt->format('Y-m-d'); $de = date('Y-m-d', strtotime($d . ' +1 day'));
+            $rooms = [];
+            foreach ($occ['b'] as $x) if ($d <= $x->fecfin && $de >= $x->fecini) $rooms[$x->numhab] = 1;
+            foreach ($occ['r'] as $x) if ($d < $x->fecsal && $de > $x->feclle) $rooms[$x->numhab] = 1;
+            foreach ($occ['f'] as $x) if ($d < $x->fecsal && $de > $x->feclle) $rooms[$x->numhab] = 1;
+            $result[$d] = max(0, $totalRooms - count($rooms));
+        }
+        return $result;
     }
 
-    /**
-     * @param $reservationAttributes
-     * @param $roomClass
-     * @return mixed
-     */
-    public function getAvailability($start, $end, $roomClass = null)
-    {
-        $roomsOccupied = [];
-
-        $class = $roomClass ? (int)$roomClass : null;
-        // dd($end, $start, $roomClass, $class);
-
-        $rBlockedQry = "
-                        SELECT blohab.numhab
-                        FROM blohab
-                        INNER JOIN habitacion ON blohab.numhab = habitacion.numhab
-                        WHERE blohab.fecini <= '{$end}' AND blohab.fecfin >= '{$start}'
-                        AND blohab.fecdes IS NULL
-                        AND habitacion.tipo = 'V'
-                ";
-
-        if ($class) {
-            $rBlockedQry .= "AND habitacion.codcla = {$class}";
-        }
-
-
-        $roomsBlocked = collect(\DB::connection('on_the_fly')->select($rBlockedQry));
-
-        foreach ($roomsBlocked as $roomBlocked) {
-            $roomsOccupied[] = $roomBlocked->numhab;
-        }
-
-        $rReservedQry = "
-                SELECT reserva.numres, reserva.numhab, reserva.estado, habitacion.codcla
-                FROM `reserva`
-                INNER JOIN habitacion ON reserva.numhab = habitacion.numhab
-                WHERE reserva.feclle <= '{$end}' AND reserva.fecsal >= '{$start}'
-                AND reserva.estado IN ('P','G')
-                AND habitacion.tipo = 'V'
-            ";
-
-        if ($class) {
-            $rReservedQry .= "AND habitacion.codcla = {$class}";
-        }
-
-        $roomsReserved = collect(\DB::connection('on_the_fly')->select($rReservedQry));
-
-        foreach ($roomsReserved as $roomReserved) {
-            $roomsOccupied[] = $roomReserved->numhab;
-        }
-
-        $rHostedQry = "
-                SELECT reserva.numres, reserva.numhab, reserva.estado, habitacion.codcla, folio.numfol, folio.estado
-                FROM `reserva`
-                INNER JOIN habitacion ON reserva.numhab = habitacion.numhab
-                INNER JOIN folio ON reserva.numhab = folio.numres
-                WHERE reserva.feclle <= '{$start}' AND reserva.fecsal >= '{$end}'
-                AND reserva.estado IN ('H')
-                AND folio.estado IN ('I')
-                AND habitacion.tipo = 'V'
-            ";
-
-        if ($class) {
-            $rHostedQry .= "AND habitacion.codcla = {$class}";
-        }
-
-        $roomsHosted = collect(\DB::connection('on_the_fly')->select($rHostedQry));
-
-        foreach ($roomsHosted as $roomHosted) {
-            $roomsOccupied[] = $roomHosted->numhab;
-        }
-
-        $roomsOccupied = "'" . implode('\',\'', $roomsOccupied) . "'";
-        // dd($roomsOccupied);
-
-        $numhabQry = "
-                        select habitacion.numhab 
-            from habitacion 
-            where habitacion.numhab not in ({$roomsOccupied})
-            AND habitacion.tipo = 'V'
-                ";
-
-        if ($class) {
-            $numhabQry .= "AND habitacion.codcla = {$class}";
-        }
-
-        $numhab = collect(\DB::connection('on_the_fly')->select($numhabQry));
-
-        // dd($numhab->sort()->toArray());
-
-        return $numhab->sort()->toArray();
-    }
-
-    /**
-     * @param $reservationAttributes
-     * @param $roomClass
-     * @return mixed
-     */
-    public function getBambooAvailability($reservationAttributes, $roomClass)
-    {
-        $roomsOccupied = [];
-
-        $end = $reservationAttributes->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->End;
-        $start = $reservationAttributes->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->Start;
-        $class = (int)$roomClass;
-
-        // dd($start, $end, $class);
-
-        $roomsBlocked = collect(\DB::connection('on_the_fly')->select("
-                SELECT blohab.numhab
-                FROM blohab
-                LEFT JOIN habitacion ON blohab.numhab = habitacion.numhab
-                WHERE '{$start}' <= blohab.fecfin 
-                AND '{$end}' >= blohab.fecini
-                AND blohab.fecdes IS NULL
-                AND habitacion.codcla = {$class}
-                AND habitacion.tipo = 'V'
-            "));
-
-        foreach ($roomsBlocked as $roomBlocked) {
-            $roomsOccupied[] = $roomBlocked->numhab;
-        }
-
-        $roomsReserved = collect(\DB::connection('on_the_fly')->select("
-                SELECT reserva.numhab 
-                FROM reserva 
-                INNER JOIN habitacion ON reserva.numhab = habitacion.numhab
-                WHERE '{$start}' < reserva.fecsal 
-                AND '{$end}' > reserva.feclle 
-                AND reserva.estado IN ('P','G')
-                AND habitacion.codcla = {$class}
-                AND habitacion.tipo = 'V'
-            "));
-
-        foreach ($roomsReserved as $roomReserved) {
-            $roomsOccupied[] = $roomReserved->numhab;
-        }
-
-        $roomsHosted = collect(\DB::connection('on_the_fly')->select("
-                SELECT folio.numhab 
-                FROM folio
-                INNER JOIN habitacion ON folio.numhab = habitacion.numhab
-                INNER JOIN reserva ON folio.numres = reserva.numres
-                WHERE '{$start}' < folio.fecsal 
-                AND '{$end}' > folio.feclle 
-                AND folio.estado IN ('I')
-                AND habitacion.codcla = {$class}
-                AND habitacion.tipo = 'V'
-            "));
-
-        foreach ($roomsHosted as $roomHosted) {
-            $roomsOccupied[] = $roomHosted->numhab;
-        }
-
-        $roomsOccupied = implode('\',\'', array_unique($roomsOccupied));
-
-        // dd($roomsOccupied);
-
-        $numhab = collect(\DB::connection('on_the_fly')->select("
-            select habitacion.numhab 
-            from habitacion 
-            where habitacion.numhab not in ('{$roomsOccupied}')
-            AND habitacion.codcla = {$class}
-            AND habitacion.tipo = 'V'
-            "));
-
-        // dd($numhab->sort()->toArray());
-
-        return $numhab->sort()->toArray();
-    }
-
-    /**
-     * @param $in
-     * @param $out
-     * @param $roomClass
-     * @return array
-     */
-    public function getBambooQuantityAvailability($in, $out, $roomClass)
-    {
-        // \DB::connection('hhotel5');
-        $roomsOccupied = [];
-
-        $roomsBlocked = collect(\DB::connection('on_the_fly')->select("
-                SELECT blohab.numhab
-                FROM blohab
-                LEFT JOIN habitacion ON blohab.numhab = habitacion.numhab
-                WHERE '{$in}' <= blohab.fecfin 
-                AND '{$out}' >= blohab.fecini
-                AND blohab.fecdes IS NULL
-                AND habitacion.codcla = {$roomClass}
-                AND habitacion.tipo = 'V'
-            "));
-
-        foreach ($roomsBlocked as $roomBlocked) {
-            $roomsOccupied[] = $roomBlocked->numhab;
-        }
-
-        $roomsReserved = collect(\DB::connection('on_the_fly')->select("
-                SELECT reserva.numhab 
-                FROM reserva 
-                INNER JOIN habitacion ON reserva.numhab = habitacion.numhab
-                WHERE '{$in}' < reserva.fecsal 
-                AND '{$out}' > reserva.feclle 
-                AND reserva.estado IN ('P','G')
-                AND habitacion.codcla = {$roomClass}
-                AND habitacion.tipo = 'V'
-            "));
-
-        foreach ($roomsReserved as $roomReserved) {
-            $roomsOccupied[] = $roomReserved->numhab;
-        }
-
-        $roomsHosted = collect(\DB::connection('on_the_fly')->select("
-                SELECT folio.numhab 
-                FROM folio
-                INNER JOIN habitacion ON folio.numhab = habitacion.numhab
-                INNER JOIN reserva ON folio.numres = reserva.numres
-                WHERE '{$in}' < folio.fecsal 
-                AND '{$out}' > folio.feclle 
-                AND folio.estado IN ('I')
-                AND habitacion.codcla = {$roomClass}
-                AND habitacion.tipo = 'V'
-            "));
-
-        foreach ($roomsHosted as $roomHosted) {
-            $roomsOccupied[] = $roomHosted->numhab;
-        }
-
-        $roomsOccupied = implode('\',\'', $roomsOccupied);
-
-        $numhabs = collect(\DB::connection('on_the_fly')->select("
-            SELECT habitacion.numhab, habitacion.numcam
-            FROM habitacion 
-            WHERE habitacion.numhab NOT IN ('{$roomsOccupied}')
-            AND habitacion.codcla = {$roomClass}
-            AND habitacion.tipo = 'V'
-            "));
-
-        $availability = [
-            'rooms' => 0,
-            'beds' => 0,
-            'occupied' => '\'' . $roomsOccupied . '\'',
-            'class' => config('rategain.rooms_lc.' . $roomClass),
-        ];
-
-        foreach ($numhabs as $numhab) {
-            $availability['rooms'] += 1;
-            $availability['beds'] += $numhab->numcam;
-        }
-
-        return $availability;
-    }
-
-
-    /**
-     * @param int $lenght
-     * @return false|string
-     * @throws \Exception
-     */
-    function uniqidReal($lenght = 13)
-    {
-        // uniqid gives 13 chars, but you could adjust it to your needs.
-        if (function_exists("random_bytes")) {
-            try {
-                $bytes = random_bytes(ceil($lenght / 2));
-            } catch (\Exception $e) {
-                throw new \Exception("random_bytes function available");
-            }
-        } elseif (function_exists("openssl_random_pseudo_bytes")) {
-            $bytes = openssl_random_pseudo_bytes(ceil($lenght / 2));
-        } else {
-            throw new \Exception("no cryptographically secure random function available");
-        }
-        return substr(bin2hex($bytes), 0, $lenght);
-    }
-
-    /**
-     * @param $errorsArray
-     * @return array|string|string[]
-     */
-    public function getReservationError($errorsArray)
-    {
-        $xml = $this->reservationResponseError;
-
-        $errors = "<Errors>";
-
-        $responseErrors = [
-            'reservation.notFound' => [
-                'Code' => 404,
-                'ShortText' => 'Not found reservation'
-            ],
-            'data.ResStatus' => [
-                'Code' => 321,
-                'ShortText' => 'Invalid data ResStatus'
-            ],
-            'data.POS.Source.BookingChannel.CompanyName.Code' => [
-                'Code' => 321,
-                'ShortText' => 'Invalid data POS Source BookingChannel CompanyName Code'
-            ],
-            'data.HotelReservations.HotelReservation.ResStatus' => [
-                'Code' => 321,
-                'ShortText' => 'Invalid data HotelReservations HotelReservation ResStatus'
-            ],
-            'data.HotelReservations.HotelReservation.UniqueID.ID' => [
-                'Code' => 321,
-                'ShortText' => 'Invalid data HotelReservations HotelReservation UniqueID ID'
-            ],
-            'data.HotelReservations.HotelReservation.BasicPropertyInfo.HotelCode' => [
-                'Code' => 400,
-                'ShortText' => 'Invalid data HotelReservations HotelReservation BasicPropertyInfo HotelCode'
-            ],
-            'data.HotelReservations.HotelReservation.RoomStays.RoomStay.RoomStayStatus' => [
-                'Code' => 321,
-                'ShortText' => 'Invalid data HotelReservations HotelReservation RoomStays RoomStay RoomStayStatus'
-            ],
-            'data.HotelReservations.HotelReservation.RoomStays.RoomRates.RoomRate.RoomTypeCode' => [
-                'Code' => 402,
-                'ShortText' => 'Invalid data HotelReservations HotelReservation RoomStays RoomRates RoomRate RoomTypeCode'
-            ],
-            'The selected data. hotel reservations. hotel reservation. room stays. room stay. room rates. room rate. room type code is invalid.' => [
-                'Code' => 402,
-                'ShortText' => 'Invalid data HotelReservations HotelReservation RoomStays RoomStay RoomRates RoomRate RoomTypeCode'
-            ],
-            'data.HotelReservations.HotelReservation.RoomStays.RoomRates.RoomRate.NumberOfUnits' => [
-                'Code' => 321,
-                'ShortText' => 'Invalid data HotelReservations HotelReservation RoomStays RoomRates RoomRate NumberOfUnits'
-            ],
-            'data.HotelReservations.HotelReservation.RoomStays.RoomStay.RoomRates.RoomRate.Rates.Rate.*.EffectiveDate' => [
-                'Code' => 321,
-                'ShortText' => 'Invalid data HotelReservations HotelReservation RoomStays RoomStay RoomRates RoomRate Rates Rate EffectiveDate'
-            ],
-            'data.HotelReservations.HotelReservation.RoomStays.RoomStay.RoomRates.RoomRate.Rates.Rate.*.ExpireDate' => [
-                'Code' => 321,
-                'ShortText' => 'Invalid data HotelReservations HotelReservation RoomStays RoomStay RoomRates RoomRate Rates Rate ExpireDate'
-            ],
-            'data.HotelReservations.HotelReservation.ResGlobalInfo.TimeSpan.End' => [
-                'Code' => 321,
-                'ShortText' => 'Invalid data HotelReservations HotelReservation ResGlobalInfo TimeSpan End'
-            ],
-            'data.HotelReservations.HotelReservation.ResGlobalInfo.TimeSpan.Start' => [
-                'Code' => 321,
-                'ShortText' => 'Invalid data HotelReservations HotelReservation ResGlobalInfo TimeSpan Start'
-            ],
-
-            'noAvailabilities' => [
-                'Code' => 450,
-                'ShortText' => 'No room availabilities'
-            ],
-
-            'exists' => [
-                'Code' => 400,
-                'ShortText' => 'The reservation already exists'
-            ],
-
-        ];
-
-        foreach ($errorsArray as $error) {
-            if (is_array($error)) {
-                foreach ($error as $err => $er) {
-                    // dd($err);
-                    $errors .= "\n\t\t<Error Code=\"" . $responseErrors[$err]['Code'] . "\" Status=\"NotProcessed\" ShortText=\"" . $responseErrors[$err]['ShortText'] . "\" />";
-                }
-            } else {
-                $errors .= "\n\t\t<Error Code=\"{$responseErrors[$error]['Code']}\" Status=\"NotProcessed\" ShortText=\"{$responseErrors[$error]['ShortText']}\" />";
-            }
-
-        }
-
-        $errors .= "\n\t</Errors>";
-
-        $xml = str_replace('<Errors>
-        <Error Code="450" Status="NotProcessed" ShortText="Invalid XML" />
-    </Errors>', $errors, $xml);
-
-        return $xml;
-    }
-
-    public function updateReservation(\App\Models\Reserva $reservation, $data, $confirmationId = null)
-    {
-        // dd($reservation ? $reservation->toArray() : $reservation, $data, $confirmationId);
-
-        $originalReservation = $reservation->toArray();
-
-        $modifiedReservation = $reservation->toArray();
-        $confirmationid = $this->uniqidReal(16);
-
-        $modifiedReservation['modifyid'] = $confirmationId;
-        $modifiedReservation['numhab'] = $reservation->numhab;
-        $modifiedReservation['notaayb'] = $reservation->notaayb;
-        $modifiedReservation['observacion'] = $reservation->observacion;
-        $modifiedReservation['transporte'] = $reservation->transporte;
-        $modifiedReservation['onlinecomment'] = $reservation->onlinecomment;
-        $modifiedReservation['forpag'] = $reservation->forpag;
-        $modifiedReservation['tipgar'] = $reservation->tipgar;
-        $modifiedReservation['modifyid'] = $confirmationid;
-
-        $reservation->update($modifiedReservation);
-
-        $codpla = config('rategain.codpla');
-        $dayPriceCnt = 1;
-
-        $plares = Plares::where('numres', $reservation->numres)->get();
-
-        foreach ($plares as $plare) {
-            $plare->delete();
-        }
-
-        if (is_array($data->HotelReservations->HotelReservation->RoomStays->RoomStay->RoomRates->RoomRate->Rates->Rate)) {
-
-
-            foreach ($data->HotelReservations->HotelReservation->RoomStays->RoomStay->RoomRates->RoomRate->Rates->Rate as $dayPrice) {
-
-                $amountBT = isset($dayPrice->Base->AmountBeforeTax) ? $dayPrice->Base->AmountBeforeTax : 0;
-                $amountAT = isset($dayPrice->Base->AmountAfterTax) ? $dayPrice->Base->AmountAfterTax : 0;
-
-                $amount = $amountBT ? $amountBT : $amountAT;
-
-                $value = $amount;
-
-                if (isset($dayPrice->Base->CurrencyCode) && $dayPrice->Base->CurrencyCode && $dayPrice->Base->CurrencyCode === 'USD') {
-                    $usd = Valmon::orderBy('fecha', 'DESC')->first();
-                    $value = $value * $usd->valor;
-                }
-
-                try {
-                    $plaresData = [
-                        'numres' => $reservation->numres,
-                        'numpla' => $dayPriceCnt,
-                        'codpla' => $codpla,
-                        'fecini' => $dayPrice->EffectiveDate,
-                        'fecfin' => $dayPrice->ExpireDate,
-                        'pordes' => 0,
-                        'tipdes' => 'P',
-                        // 'subsidio' => null,
-                        // 'valor' => 0,
-                        'valornoche' => $value,
-                        'codigocr' => $data->HotelReservations->HotelReservation->RoomStays->RoomStay->RoomRates->RoomRate->RatePlanCode
-                    ];
-                    Plares::create($plaresData);
-                    // PlaresNuevo::create($plaresData);
-                    $dayPriceCnt++;
-
-                } catch (Exception $exception) {
-                    dd($exception->getMessage());
-                }
-            }
-        } else {
-            $amountBT = isset($data->HotelReservations->HotelReservation->RoomStays->RoomStay->RoomRates->RoomRate->Rates->Rate->Base->AmountBeforeTax) ?
-                $data->HotelReservations->HotelReservation->RoomStays->RoomStay->RoomRates->RoomRate->Rates->Rate->Base->AmountBeforeTax :
-                0;
-            $amountAT = isset($data->HotelReservations->HotelReservation->RoomStays->RoomStay->RoomRates->RoomRate->Rates->Rate->Base->AmountAfterTax) ?
-                $data->HotelReservations->HotelReservation->RoomStays->RoomStay->RoomRates->RoomRate->Rates->Rate->Base->AmountAfterTax :
-                0;
-            $amount = $amountBT ? $amountBT : $amountAT;
-            $value = $amount;
-
-            if (
-                isset($data->HotelReservations->HotelReservation->RoomStays->RoomStay->RoomRates->RoomRate->Rates->Rate->Base->CurrencyCode) &&
-                $data->HotelReservations->HotelReservation->RoomStays->RoomStay->RoomRates->RoomRate->Rates->Rate->Base->CurrencyCode &&
-                $data->HotelReservations->HotelReservation->RoomStays->RoomStay->RoomRates->RoomRate->Rates->Rate->Base->CurrencyCode === 'USD'
-            ) {
-                $usd = Valmon::orderBy('fecha', 'DESC')->first();
-                $value = $value * $usd->valor;
-            }
-            try {
-                $plaresData = [
-                    'numres' => $reservation->numres,
-                    'numpla' => $dayPriceCnt,
-                    'codpla' => $codpla,
-                    'fecini' => $data->HotelReservations->HotelReservation->RoomStays->RoomStay->RoomRates->RoomRate->Rates->Rate->EffectiveDate,
-                    'fecfin' => $data->HotelReservations->HotelReservation->RoomStays->RoomStay->RoomRates->RoomRate->Rates->Rate->ExpireDate,
-                    'pordes' => 0,
-                    'tipdes' => 'P',
-                    // 'subsidio' => null,
-                    // 'valor' => 0,
-                    'valornoche' => $value,
-                    'codigocr' => $data->HotelReservations->HotelReservation->RoomStays->RoomStay->RoomRates->RoomRate->RatePlanCode
-                ];
-                Plares::create($plaresData);
-                // PlaresNuevo::create($plaresData);
-                $dayPriceCnt++;
-
-            } catch (Exception $exception) {
-                dd($exception->getMessage());
-            }
-        }
-
-        $reservationChanges = ReservationChange::create([
-            'hotel_id' => $data->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode,
-            'numres' => $reservation->numres,
-            'data' => json_encode($originalReservation),
-            'type' => 'reservation'
-        ]);
-
-        $returnSuccess = $this->reservationResponseSuccess;
-
-        $returnSuccess = str_replace(
-            '<HotelReservationID ResID_Type="14" ResID_Value="chd23242342"/>',
-            '<HotelReservationID ResID_Type="14" ResID_Value="' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value . '"/>',
-            $returnSuccess
-        );
-
-        $returnSuccess = str_replace(
-            '<HotelReservationID ResID_Type="3" ResID_Value="123456789" />',
-            '<HotelReservationID ResID_Type="3" ResID_Value="' . $confirmationid . '" />',
-            $returnSuccess
-        );
-
-        return '';
-    }
-
-    /**
-     * @param $data
-     * @return array|string|string[]|void
-     * @throws \Exception
-     */
     public function saveReservation($data, $confirmationid = null, $update = false)
     {
+        try {
+            DB::connection('on_the_fly')->beginTransaction();
+            $hotelRes = $data->HotelReservations->HotelReservation;
+            $hotelRes->RoomStays->RoomStay = $this->ensureArray($hotelRes->RoomStays->RoomStay);
+            $hotelRes->ResGuests->ResGuest = $this->ensureArray($hotelRes->ResGuests->ResGuest);
 
-        $resGuest = null;
-        $booker = null;
-        $bookerExists = null;
-        $guestExits = null;
-        $cedula = 0;
-        $company = null;
+            $uniqueIdVal = $this->extractUniqueId($hotelRes);
+            $resStatus = isset($data->ResStatus) ? $this->getString($data->ResStatus) : (isset($hotelRes->ResStatus) ? $this->getString($hotelRes->ResStatus) : '');
 
-        $bookingChannel = null;
-        $bambooCompanyNit = null;
-
-        if (isset($data->POS->Source->BookingChannel->CompanyName)) {
-            $bookingChannel = $data->POS->Source->BookingChannel->CompanyName;
-        }
-
-        $hasNit = null;
-        // dd(config('database.connections.on_the_fly'));
-        // \DB::setConnection('on_the_fly');
-
-        $bambooBookingChannelCompany = CrChannel::with('empresa')->where('channel_code', $bookingChannel)->first();
-        // dd($bambooBookingChannelCompany);
-        // $bambooBookingChannelCompany = CrChannel::where('channel_code', $bookingChannel)->first();
-        // dd($bambooBookingChannelCompany->toArray());
-
-        $bambooTipseg = null;
-        $bambooTipres = null;
-        $bambooCodcan = null;
-
-        if (!$bambooBookingChannelCompany) {
-            $bambooBookingChannelCompany = CrChannel::with('empresa')->where('channel_code', 'defecto')->first();
-        }
-
-        $bambooBookingChannelCompany = ($bambooBookingChannelCompany != null) ? $bambooBookingChannelCompany->toArray() : [];
-        $bambooCompanyNit = $bambooBookingChannelCompany['NIT'];
-        $bambooTipseg = $bambooBookingChannelCompany['tipseg'] ?: 'I';
-        $bambooTipres = $bambooBookingChannelCompany['tipres'];
-        $bambooCodcan = $bambooBookingChannelCompany['codcan'];
-
-        // dd($bambooCodcan, $bambooTipres, $bambooTipseg, $bambooCompanyNit, $bambooBookingChannelCompany);
-        // dd($data->HotelReservations->HotelReservation->ResGuests->ResGuest);
-
-        foreach ($data->HotelReservations->HotelReservation->ResGuests->ResGuest as $guest) {
-
-
-            if (!is_array($guest->Profiles)) {
-                if ($guest->PrimaryIndicator == 'true') {
-                    if ($guest->Profiles->ProfileInfo->Profile->ProfileType == 1) {
-
-                        /*if (
-                            !isset($guest->Profiles->ProfileInfo->Profile->Customer->Email) ||
-                            $guest->Profiles->ProfileInfo->Profile->Customer->Email == '' ||
-                            !filter_var($guest->Profiles->ProfileInfo->Profile->Customer->Email, FILTER_VALIDATE_EMAIL)
-                        ) {
-
-                            $guest->Profiles->ProfileInfo->Profile->Customer->Email = str_random(14) . '@email.com';
-                        }*/
-
-                        if (
-                            isset($guest->Profiles->ProfileInfo->Profile->Customer->Email) &&
-                            $guest->Profiles->ProfileInfo->Profile->Customer->Email != '' &&
-                            filter_var($guest->Profiles->ProfileInfo->Profile->Customer->Email, FILTER_VALIDATE_EMAIL)
-                        ) {
-
-                            // $guest->Profiles->ProfileInfo->Profile->Customer->Email = str_random(14) . '@email.com';
-                            $resGuest = $guest->Profiles->ProfileInfo->Profile->Customer;
-
-                            $guestExits = Cliente::where('email', $resGuest->Email)->first();
-
-                            // dd($resGuest->Email, $guestExits->toArray());
-
-                            if (!$guestExits) {
-
-                                $cedula = rand(99999999, 999999999);
-
-                                try {
-
-                                    $client = [
-                                        'cedula' => $cedula,
-                                        'tipdoc' => 3,
-                                        'nombre' => $resGuest->PersonName->GivenName . ' ' . $resGuest->PersonName->Surname,
-                                        'telefono1' => $resGuest->Telephone->PhoneNumber ? substr(preg_replace('/[^0-9.]+/', '', $resGuest->Telephone->PhoneNumber), 0, 11) : '123456',
-                                        'telefono2' => $resGuest->Telephone->PhoneNumber ? substr($resGuest->Telephone->PhoneNumber, 0, 11) : '123456',
-                                        'email' => $resGuest->Email,
-                                        'primer_nombre' => $resGuest->PersonName->GivenName,
-                                        'primer_apellido' => $resGuest->PersonName->Surname,
-                                        'emailfe' => $resGuest->Email,
-                                        'locnac' => 15,
-                                        'ciudades_dian' => 1181,
-                                        'credito' => 'N',
-                                        'tipcre' => 'T'
-                                    ];
-
-                                    $guestExits = Cliente::create($client);
-
-                                } catch (\Exception $exception) {
-                                    echo $exception->getMessage();
-                                    die;
-                                }
-
-
-                            }
-                        }
-
-                    }
-                }
-                if ($guest->Profiles->ProfileInfo->Profile->ProfileType == 18) {
-
-                    // dd($guest->Profiles->ProfileInfo->Profile->Customer->Email);
-                    if (
-                        isset($guest->Profiles->ProfileInfo->Profile->Customer->Email) &&
-                        $guest->Profiles->ProfileInfo->Profile->Customer->Email != '' &&
-                        filter_var($guest->Profiles->ProfileInfo->Profile->Customer->Email, FILTER_VALIDATE_EMAIL)
-                    ) {
-
-                        // $guest->Profiles->ProfileInfo->Profile->Customer->Email = str_random(14) . '@email.com';
-                        $booker = $guest->Profiles->ProfileInfo->Profile->Customer;
-
-                        $bookerOr = $guest->Profiles->ProfileInfo->Profile->Customer;
-
-                        // dd($guest->Profiles->ProfileInfo);
-                        $bookerExists = CrBooker::where('email', $booker->Email)->first();
-
-                        if (!$bookerExists) {
-                            try {
-                                $booker = [
-                                    'givenname' => $booker->PersonName->GivenName,
-                                    'surname' => $booker->PersonName->Surname,
-                                    'phone' => $booker->Telephone->PhoneNumber,
-                                    'email' => $booker->Email,
-                                    'address' => isset($booker->Address->AddressLine) ? json_encode($booker->Address->AddressLine) : '',
-                                    'city' => isset($booker->Address->CityName) ? json_encode($booker->Address->CityName) : '',
-                                    'postal_code' => isset($booker->Address->PostalCode) ? json_encode($booker->Address->PostalCode) : '',
-                                    'country' => isset($booker->Address->CountryName->Code) ? $booker->Address->CountryName->Code : '',
-                                ];
-
-                                $booker = CrBooker::create($booker);
-
-                            } catch (\Exception $exception) {
-                                echo $exception->getMessage();
-                                die;
-                            }
-                        }
-
-                        if ($bookerExists) {
-                            $booker = $bookerExists;
-                        }
-                    }
-                }
-
-                if ($guest->Profiles->ProfileInfo->Profile->ProfileType == 3) {
-                    $company = [
-                        'id' => $guest->Profiles->ProfileInfo->UniqueID->ID,
-                        'name' => $guest->Profiles->ProfileInfo->Profile->CompanyInfo->CompanyName,
-                        'email' => isset($guest->Profiles->ProfileInfo->Profile->CompanyInfo->Email) ? ' - ' . $guest->Profiles->ProfileInfo->Profile->CompanyInfo->Email : null
-                    ];
-                }
-
-
-            } else {
-                foreach ($guest->Profiles as $profile) {
-
-                    if ($profile->Profile->ProfileType == 1) {
-
-                        if (
-                            isset($profile->Profile->Customer->Email) &&
-                            $profile->Profile->Customer->Email != '' &&
-                            filter_var($profile->Profile->Customer->Email, FILTER_VALIDATE_EMAIL)
-                        ) {
-
-                            // $profile->Profile->Customer->Email = str_random(14) . '@email.com';
-                            $resGuest = $profile->Profile->Customer;
-
-                            // dd($resGuest->Email);
-
-                            $guestExits = Cliente::where('email', $resGuest->Email)->first();
-
-                            // dd($resGuest->Email, $guestExits->toArray());
-
-                            if (!$guestExits) {
-
-                                $cedula = rand(99999999, 999999999);
-
-                                try {
-
-                                    $client = [
-                                        'cedula' => $cedula,
-                                        'tipdoc' => 3,
-                                        'nombre' => $resGuest->PersonName->GivenName . ' ' . $resGuest->PersonName->Surname,
-                                        'telefono1' => $resGuest->Telephone->PhoneNumber ? substr(preg_replace('/[^0-9.]+/', '', $resGuest->Telephone->PhoneNumber), 0, 11) : '123456',
-                                        'telefono2' => $resGuest->Telephone->PhoneNumber ? substr($resGuest->Telephone->PhoneNumber, 0, 11) : '123456',
-                                        'email' => $resGuest->Email,
-                                        'primer_nombre' => $resGuest->PersonName->GivenName,
-                                        'primer_apellido' => $resGuest->PersonName->Surname,
-                                        'emailfe' => $resGuest->Email,
-                                        'locnac' => 15,
-                                        'ciudades_dian' => 1181,
-                                        'credito' => 'N',
-                                        'tipcre' => 'T'
-                                    ];
-
-                                    $guestExits = Cliente::create($client);
-
-                                } catch (\Exception $exception) {
-                                    echo $exception->getMessage();
-                                    die;
-                                }
-
-
-                            }
-                        }
-
-                    }
-                    if ($guest->Profiles->ProfileInfo->Profile->ProfileType == 18) {
-
-                        // dd($guest->Profiles->ProfileInfo->Profile->Customer->Email);
-                        if (
-                            isset($guest->Profiles->ProfileInfo->Profile->Customer->Email) &&
-                            $guest->Profiles->ProfileInfo->Profile->Customer->Email != '' &&
-                            filter_var($guest->Profiles->ProfileInfo->Profile->Customer->Email, FILTER_VALIDATE_EMAIL)
-                        ) {
-
-                            // $guest->Profiles->ProfileInfo->Profile->Customer->Email = str_random(14) . '@email.com';
-                            $booker = $guest->Profiles->ProfileInfo->Profile->Customer;
-
-                            $bookerOr = $guest->Profiles->ProfileInfo->Profile->Customer;
-
-                            // dd($guest->Profiles->ProfileInfo);
-                            $bookerExists = CrBooker::where('email', $booker->Email)->first();
-
-                            if (!$bookerExists) {
-                                try {
-                                    $booker = [
-                                        'givenname' => $booker->PersonName->GivenName,
-                                        'surname' => $booker->PersonName->Surname,
-                                        'phone' => $booker->Telephone->PhoneNumber,
-                                        'email' => $booker->Email,
-                                        'address' => isset($booker->Address->AddressLine) ? json_encode($booker->Address->AddressLine) : '',
-                                        'city' => isset($booker->Address->CityName) ? json_encode($booker->Address->CityName) : '',
-                                        'postal_code' => isset($booker->Address->PostalCode) ? json_encode($booker->Address->PostalCode) : '',
-                                        'country' => isset($booker->Address->CountryName->Code) ? $booker->Address->CountryName->Code : '',
-                                    ];
-
-                                    $booker = CrBooker::create($booker);
-
-                                } catch (\Exception $exception) {
-                                    echo $exception->getMessage();
-                                    die;
-                                }
-                            }
-
-                            if ($bookerExists) {
-                                $booker = $bookerExists;
-                            }
-                        }
-                    }
-                    if ($guest->Profiles->ProfileInfo->Profile->ProfileType == "3") {
-                        $company = [
-                            'id' => $guest->Profiles->ProfileInfo->UniqueID->ID,
-                            'name' => $guest->Profiles->ProfileInfo->Profile->CompanyInfo->CompanyName,
-                            'email' => isset($guest->Profiles->ProfileInfo->Profile->CompanyInfo->CompanyName) ? ' - ' . $guest->Profiles->ProfileInfo->Profile->CompanyInfo->CompanyName : null
-                        ];
-                    }
-                }
+            if ($resStatus == 'Commit' && $this->reservationAlreadyExists($uniqueIdVal)) {
+                DB::connection('on_the_fly')->rollBack();
+                return $this->getReservationError(['exists']);
             }
 
-        }
+            $channelConfig = $this->getChannelConfig($data);
+            $guestAndBooker = $this->processGuestAndBookerData($data);
+            if ($update) $this->handleUpdatePreparation($data);
 
-        if (!is_array($data->HotelReservations->HotelReservation->RoomStays->RoomStay)) {
-            $data->HotelReservations->HotelReservation->RoomStays->RoomStay = [
-                $data->HotelReservations->HotelReservation->RoomStays->RoomStay
-            ];
-        }
-
-        $availables = [];
-
-        $selectedRooms = [];
-
-        $originalReservationEstate = $this->originalReservation['estado'];
-
-        // dd($this->originalReservation, $originalReservationEstate);
-
-        // cancel to availability
-        if ($update) {
-            $this->originalReservation = Reserva::where('referencia', 'LIKE', '%' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value . '%')
-                ->where('estado', '<>', 'C')
-                ->with('plares')
-                ->orderBy('fecres', 'desd')
-                ->first();
-            $this->originalReservation->update(['estado' => 'C']);
-        }
-
-        foreach ($data->HotelReservations->HotelReservation->RoomStays->RoomStay as $roomStay) {
-
-            $roomClass = config('rategain.rooms_cl.' . $roomStay->RoomRates->RoomRate->RoomTypeCode);
-
-            if ($this->getBambooAvailability($data, $roomClass)) {
-                $availables[] = $this->getBambooAvailability($data, $roomClass);
-                $selectedRooms[] = $this->getBambooAvailability($data, $roomClass)[0];
-            }
-        }
-
-        // dd($selectedRooms, $availables);
-
-        if ($selectedRooms) {
-            for ($i = 0; $i <= count($selectedRooms); $i++) {
-                if ($i > 0 && $i < count($selectedRooms)) {
-                    if ($selectedRooms[$i]->numhab == $selectedRooms[$i - 1]->numhab) {
-                        for ($j = 0; $j <= count($availables[$i - 1]); $j++) {
-                            if (($j > 0 && $j < count($availables[$i - 1]))) {
-                                if ($selectedRooms[$i - 1]->numhab != $availables[$i - 1][$j]->numhab) {
-                                    $selectedRooms[$i - 1]->numhab = $availables[$i - 1][$j]->numhab;
-                                    break 2;
-                                }
-                            } else {
-                                $selectedRooms[$i - 1]->numhab = null;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // return to granted to availability
-        if ($update) {
-            $this->originalReservation->update(['estado' => $originalReservationEstate]);
-        }
-
-        foreach ($selectedRooms as $selectedRoom) {
-            if (null == $selectedRoom->numhab) {
-                return $this->getReservationError(['noAvailabilities']);
-            }
-        }
-
-        if (!$availables) {
-            return $this->getReservationError(['noAvailabilities']);
-        }
-
-        if (count($availables) < count($data->HotelReservations->HotelReservation->RoomStays->RoomStay)) {
-            return $this->getReservationError(['noAvailabilities']);
-        }
-
-        $tipDoc = Tipdoc::where('detalle', 'CEDULA CIUDADANIA')->first();
-
-        if (!$confirmationid) {
-            $confirmationid = $this->uniqidReal(16);
-        }
-
-
-        $guaranteeText = "";
-
-        $roomStayCnt = 0;
-        foreach ($data->HotelReservations->HotelReservation->RoomStays->RoomStay as $roomStay) {
-
-            $CIALMatches = null;
-            $nitMatches = null;
-
-            $hasNit = preg_match('/\s-\s[0-9]{9}/', json_encode($roomStay->Comments), $nitMatches);
-            $hasCIAL = preg_match('/(CIAL-COT)-([0-9]{3,4})-([0-9]{1,6})/', json_encode($roomStay->Comments), $CIALMatches);
-
-            $CIAL = $hasCIAL ? $CIALMatches[0] : null;
-
-            // dd(json_encode($roomStay->Comments), $hasCIAL, $CIALMatches[0]);
-            $nit = $hasNit ? trim(str_replace(' - ', '', $nitMatches[0])) : $bambooCompanyNit;
-
-            $guarantee = null;
-
-            if (
-                isset($data->HotelReservations->HotelReservation->ResGlobalInfo->Guarantee)
-            ) {
-
-                $guarantee = $data->HotelReservations->HotelReservation->ResGlobalInfo->Guarantee;
-                $guaranteesAccepted = [];
-
-                if (isset($guarantee->GuaranteesAccepted)) {
-                    $guaranteeText .= json_encode($guarantee->GuaranteesAccepted, true);
-                }
+            $allocation = $this->allocateRooms($data, $update);
+            if (isset($allocation['error'])) {
+                DB::connection('on_the_fly')->rollBack();
+                return $allocation['error'];
             }
 
-            if (isset($data->HotelReservations->HotelReservation->ResGlobalInfo->EncodedCCInfo)) {
-                $guaranteeText .= $data->HotelReservations->HotelReservation->ResGlobalInfo->EncodedCCInfo;
-            }
+            $staticData = $this->getStaticData();
+            $confirmationid = $confirmationid ?: $this->uniqidReal(16);
 
-            $numadu = 0;
-            $numnin = 0;
-
-            if (isset($roomStay->GuestCounts)) {
-                if (is_array($roomStay->GuestCounts->GuestCount)) {
-                    foreach ($roomStay->GuestCounts->GuestCount as $guestCount) {
-                        if (isset($guestCount->AgeQualifyingCode) && $guestCount->AgeQualifyingCode == "10") {
-                            $numadu = $guestCount->Count;
-                        }
-
-                        if (isset($guestCount->AgeQualifyingCode) && $guestCount->AgeQualifyingCode == "8") {
-                            $numnin = $guestCount->Count;
-                        }
-                    }
-                } else {
-                    if (isset($roomStay->GuestCounts->GuestCount->AgeQualifyingCode) && $roomStay->GuestCounts->GuestCount->AgeQualifyingCode == "10") {
-                        $numadu = $roomStay->GuestCounts->GuestCount->Count;
-                    }
-
-                    if (isset($roomStay->GuestCounts->GuestCount->AgeQualifyingCode) && $roomStay->GuestCounts->GuestCount->AgeQualifyingCode == "8") {
-                        $numnin = $roomStay->GuestCounts->GuestCount->Count;
-                    }
-                }
-
-            }
-
-            // dd($numadu, $numnin);
-
-            $roomClass = config('rategain.rooms_cl.' . $roomStay->RoomRates->RoomRate->RoomTypeCode);
-            $numres = collect(\DB::connection('on_the_fly')->select('select MAX(numres)+1 as res from reserva limit 1'))->first();
-            $dathot = collect(\DB::connection('on_the_fly')->select("select nit, numrec from dathot;"))->first();
-            // $dathot = collect(\DB::connection('on_the_fly')->select("select nit, numrec, hora_llegada from dathot;"))->first();
-            $numres = $numres->res;
-            $nit = explode('.', $dathot->nit);
-            $nit = implode('', $nit);
-            $nit = explode('-', $nit);
-            $nit = $nit[0];
-            $nitMatches = null;
-            $CIALMatches = null;
-            $hasNit = preg_match('/\s-\s[0-9]{9}/', json_encode($roomStay->Comments), $nitMatches);
-            // dd(json_encode($roomStay->Comments), $hasNit, $matches);
-            $hasCIAL = preg_match('/(CIAL-COT)-([0-9]{4})-([0-9]{1,6})/', json_encode($roomStay->Comments), $CIALMatches);
-            $CIAL = $hasCIAL ? $CIALMatches[0] : null;
-            // dd(json_encode($roomStay->Comments), $hasCIAL, $CIALMatches[0]);
-            $nit = $hasNit ? trim(str_replace(' - ', '', $nitMatches[0])) : $bambooCompanyNit;
-            $numrec = $dathot->numrec;
-            $numhab = $selectedRooms[$roomStayCnt]->numhab;
-
-            $observacion = $resGuest ? "
-{$resGuest->PersonName->GivenName} {$resGuest->PersonName->Surname}
-{$resGuest->Telephone->PhoneNumber}
-{$resGuest->Email}
-
-RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Type} {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[0]->ResID_Value}
-RateGain {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Type} {$data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value}
-            " : '';
-
-            $tipres = $bambooBookingChannelCompany['tipres'];
-            $metadata = json_encode($data);
-
-            try {
-                $rateList = "";
-                if (is_array($roomStay->RoomRates->RoomRate->Rates->Rate)) {
-
-                    foreach ($roomStay->RoomRates->RoomRate->Rates->Rate as $dayPrice) {
-
-                        $amountBT = isset($dayPrice->Base->AmountBeforeTax) ? $dayPrice->Base->AmountBeforeTax : 0;
-                        $amountAT = isset($dayPrice->Base->AmountAfterTax) ? $dayPrice->Base->AmountAfterTax : 0;
-
-                        $amount = $amountBT ? $amountBT : $amountAT;
-
-                        $value = $amount;
-
-                        $item = $dayPrice->EffectiveDate . " - " . number_format($value, 0, ',', '.');
-
-                        $rateList .= $item . "\n";
-
-                    }
-
-                } else {
-
-                    $amountBT = isset($roomStay->RoomRates->RoomRate->Rates->Rate->Base->AmountBeforeTax) ? $roomStay->RoomRates->RoomRate->Rates->Rate->Base->AmountBeforeTax : 0;
-                    $amountAT = isset($roomStay->RoomRates->RoomRate->Rates->Rate->Base->AmountAfterTax) ? $roomStay->RoomRates->RoomRate->Rates->Rate->Base->AmountAfterTax : 0;
-                    $amount = $amountBT ? $amountBT : $amountAT;
-                    $value = $amount;
-
-                    $item = $roomStay->RoomRates->RoomRate->Rates->Rate->EffectiveDate . " - " . number_format($value, 0, ',', '.');
-
-                    $rateList = $rateList . $item . "\n";
-
-                }
-
-                $codcanCodes = Tipcanre::all()->toArray();
-                $tipresCodes = Tipre::all()->toArray();
-                $codcan = null;
-
-                $ratePlanCodeParts = explode('-', $roomStay->RoomRates->RoomRate->RatePlanCode);
-                $ratePlanCode2 = substr($ratePlanCodeParts[1], 0, 3); // tipres
-                $ratePlanCode3 = substr($ratePlanCodeParts[2], 0, 2); // codcan
-                $ratePlanCode4 = $ratePlanCodeParts[3][0];
-
-                foreach ($tipresCodes as $tipresCode) {
-                    if (substr($ratePlanCode2, 0, 1) === substr($tipresCode['detalle'], 0, 1)) {
-                        $tipres = $tipresCode['tipres'];
-                    }
-                }
-
-                foreach ($codcanCodes as $codcanCode) {
-                    if ($ratePlanCode3 === substr($codcanCode['detalle'], 0, 2)) {
-                        $codcan = $codcanCode['codcan'];
-                    }
-                }
-
-                // dd($rateList);
-                // dd($bambooBookingChannelCompany);
-
-                if ($company && $company['id']) {
-                    $empresa = Empresa::where('nit', $company['id'])->first();
-                    if ($empresa) {
-                        $nit = $empresa->nit;
-                    }
-                }
-
-                $emailWebCheckin = '';
-
-                $idclifre = "{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->GivenName} {$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->Surname}";
-                if (
-                    isset($data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Email) &&
-                    $data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Email != '' &&
-                    filter_var($data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Email, FILTER_VALIDATE_EMAIL)
-                ) {
-                    $idclifre .= " - {$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Email}";
-                    $emailWebCheckin = "{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Email}";
-                }
-
-                $totalEstadia = isset($data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax)
-                    ? $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax :
-                    $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountAfterTax;;
-
-                if (
-                    isset($data->HotelReservations->HotelReservation->ResGlobalInfo->Total->CurrencyCode) &&
-                    $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->CurrencyCode === 'USD'
-                ) {
-                    $usd = Valmon::orderBy('fecha', 'DESC')->first();
-                    $totalEstadia = $totalEstadia * $usd->valor;
-                }
-
-
-                $reservaData = [
-                    'numres' => $numres,
-                    'referencia' => "{$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->GivenName} {$data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->Surname} - " . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value,
-                    'tipdoc' => $guestExits ? $guestExits->tipdoc : 1,
-                    'cedula' => 0,//$cedula,
-                    'nit' => $nit,// $company ? $company['id'] : $nit, // $nit,
-                    'nitage' => $bambooCompanyNit ?: 0,
-                    'numhab' => $numhab,
-                    'tipres' => $tipres ?: $bambooTipres,
-                    'tipseg' => $bambooTipseg ?: 'I',
-                    'fecres' => date('Y-m-d'),
-                    'feclle' => $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->Start,
-                    'fecsal' => $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->End,
-                    'feclim' => $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->Start,
-                    'hora' => '15:00',
-                    // 'hora' => $dathot->hora_llegada,
-                    'numadu' => $numadu, // count($data->HotelReservations->HotelReservation->ResGuests->ResGuest),
-                    'numnin' => $numnin,
-                    'observacion' => "[" . date('Y-m-d') . " " . date('H:i') . "]\n" . $guestExits ? '' : $observacion,
-                    'habfij' => $bambooBookingChannelCompany['habfij'] ?: 'N',
-                    'solicitada' => '',
-                    'forpag' => $bambooBookingChannelCompany['forpag'] ?: '45',
-                    'desayuno' => (substr($roomStay->RoomRates->RoomRate->RatePlanCode, 0, 2) === 'BB') ? 'SI' : 'NO',
-                    'reembl' => $bambooBookingChannelCompany['reembl'] ?: 'S',
-                    'fecest' => date('Y-m-d'),
-                    'estado' => $guarantee && isset($guarantee->GuaranteesAccepted) ? 'G' : 'P',
-                    'codtra' => 4,
-                    'tippro' => $bambooBookingChannelCompany['tippro'] ?: 1,
-                    'tipgar' => $bambooBookingChannelCompany['tipgar'] ?: 2,
-                    'codven' => $bambooBookingChannelCompany['codven'] ?: 1,
-                    'codcan' => $codcan ?: $bambooCodcan,
-                    'metadata' => $metadata,
-                    'guarantee' => ' ' . $guaranteeText,
-                    'confirmationid' => $confirmationid,
-                    'rateplancode' => $company ? $company['name'] : '',
-                    'idcanal' => $CIAL,
-                    'onlinecomment' => "[" . date('Y-m-d') . " " . date('H:i') . "]\n" . (
-                        isset($roomStay->Comments) ?
-                            '' . (is_array($roomStay->Comments->Comment) ?
-                                json_encode($roomStay->Comments->Comment) :
-                                $roomStay->Comments->Comment->Text) :
-                            '') . (
-                        $company ?
-                            "\n" . $company['name'] . " - " . $company['id'] :
-                            "\n"
-                        ) . (
-                        isset($roomStay->SpecialRequests) ?
-                            '' . (is_array($roomStay->SpecialRequests->SpecialRequest) ?
-                                json_encode($roomStay->SpecialRequests->SpecialRequest) :
-                                json_encode($roomStay->SpecialRequests->SpecialRequest)) :
-                            "\n"
-                        ),
-                    'cancellationid' => null,
-                    // 'rateplanname' => null,
-                    // 'rateplancode' => isset($roomStay->RatePlans->RatePlan->RatePlanCode) ? $roomStay->RatePlans->RatePlan->RatePlanCode : '',
-                    // 'ratelist' => $rateList,
-                    // 'idclifre' => $guestExits ? ($guestExits->primer_nombre . ' ' . $guestExits->primer_apellido . ' ' . $guestExits->email) : null,
-                    'idclifre' => $idclifre,
-                    'totest' => $totalEstadia,
-                    'email' => $emailWebCheckin
-                ];
+            $createdReservation = null;
+            foreach ($hotelRes->RoomStays->RoomStay as $idx => $roomStay) {
+                $reservaData = $this->prepareReservationData($data, $roomStay, $allocation['selectedRooms'][$idx], $guestAndBooker, $channelConfig, $staticData, $confirmationid, $update);
+                
                 if (!$update) {
                     $createdReservation = Reserva::create($reservaData);
                     ReservaNuevo::create($reservaData);
-                } else {
-
-                    if ($this->originalReservation) {
-                        $habitacionOr = Habitacion::where('numhab', $this->originalReservation['numhab'])->first();
-                        $originalRoomIsAvailable = true;
-                        $availablesCollection = collect($availables);
-                        $originalRoomIsAvailable = $availablesCollection->where('numhab', $this->originalReservation['numhab'])->first();
-                        if ($habitacionOr->codcla === $roomClass && $originalRoomIsAvailable) {
-                            $numhab = $this->originalReservation['numhab'];
-                        }
-                    }
-
-                    $numres = $this->originalReservation->numres;
-                    unset($reservaData['numres']);
-                    $reservaData['modifyid'] = $confirmationid;
-                    $reservaData['numhab'] = $numhab;
-                    $reservaData['onlinecomment'] = $reservaData['onlinecomment'] . "\n" . $this->originalReservation['onlinecomment'];
-                    $reservaData['forpag'] = $this->originalReservation['forpag'];
-                    $reservaData['tipgar'] = $this->originalReservation['tipgar'];
-                    $reservaData['observacion'] = "[" . date('Y-m-d') . " " . date('H:i') . "]\n" . $observacion . $this->originalReservation['observacion'];
-                    $reservaData['estado'] = $this->originalReservation['estado'];
-
-                    $this->originalReservation->fill($reservaData);
-                    $changes = $this->originalReservation->getDirty();
-
-                    ReservationChange::create([
-                        'hotel_id' => $data->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode,
-                        'numres' => $this->originalReservation->numres,
-                        'data' => json_encode($changes),
-                        'type' => 'reservation'
-                    ]);
-
+                } else if ($this->originalReservation) {
                     $this->originalReservation->update($reservaData);
+                    $createdReservation = $this->originalReservation;
                 }
 
-            } catch (\Exception $exception) {
-                dd($exception->getMessage());
-            }
-            $amount = 0;
-
-            if ($booker && !$update) {
-                CrBookerReserva::create([
-                    'booker_id' => $booker->id,
-                    'numres' => $numres,
-                    'amount' => isset($data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax) ? $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax : $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountAfterTax,
-                    'date' => date('Y-m-d H:i:s'),
-                    'booker_name' => $booker->givenname . ' ' . $booker->surname,
-                ]);
-            }
-
-            if ($guarantee && isset($guarantee->GuaranteesAccepted) && !$update) {
-                CrGuarantee::create([
-                    'type' => $guarantee->GuaranteeType,
-                    'code' => isset($guarantee->GuaranteesAccepted->GuaranteeAccepted->PaymentCard->CardCode) ? $guarantee->GuaranteesAccepted->GuaranteeAccepted->PaymentCard->CardCode : '',
-                    'number' => isset($guarantee->GuaranteesAccepted->GuaranteeAccepted->PaymentCard->CardNumber) ? $guarantee->GuaranteesAccepted->GuaranteeAccepted->PaymentCard->CardNumber : '',
-                    'expire' => isset($guarantee->GuaranteesAccepted->GuaranteeAccepted->PaymentCard->ExpireDate) ? $guarantee->GuaranteesAccepted->GuaranteeAccepted->PaymentCard->ExpireDate : '',
-                    'holder' => isset($guarantee->GuaranteesAccepted->GuaranteeAccepted->PaymentCard->CardHolderName) ? $guarantee->GuaranteesAccepted->GuaranteeAccepted->PaymentCard->CardHolderName : '',
-                    'amount' => isset($data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax) ? $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax : $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountAfterTax,
-                    'currency' => $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->CurrencyCode,
-                    'numres' => $numres
-                ]);
-            }
-
-            if ($guarantee && isset($guarantee->GuaranteeCode) && !$update) {
-                CrGuarantee::create([
-                    'type' => null,
-                    'code' => $guarantee->GuaranteeCode,
-                    'number' => null,
-                    'expire' => null,
-                    'holder' => null,
-                    'amount' => isset($data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax) ? $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax : $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountAfterTax,
-                    'currency' => $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->CurrencyCode,
-                    'numres' => $numres
-                ]);
-            }
-
-            $codpla = config('rategain.codpla');
-            $dayPriceCnt = 1;
-
-            // dd($roomStay->RoomRates->RoomRate->Rates->Rate);
-
-            $amountBT = 0;
-            $amountAT = 0;
-            $amount = 0;
-
-            if ($this->originalReservation) {
-                ReservationChange::create([
-                    'hotel_id' => $data->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode,
-                    'numres' => $this->originalReservation->numres,
-                    'data' => json_encode($this->originalReservation->toArray()['plares']),
-                    'type' => 'plans'
-                ]);
-                Plares::where('numres', $this->originalReservation->numres)->delete();
-                PlaresNuevo::where('numres', $this->originalReservation->numres)->delete();
-            }
-
-
-            if (is_array($roomStay->RoomRates->RoomRate->Rates->Rate)) {
-
-
-                foreach ($roomStay->RoomRates->RoomRate->Rates->Rate as $dayPrice) {
-
-                    $amountBT = isset($dayPrice->Base->AmountBeforeTax) ? $dayPrice->Base->AmountBeforeTax : 0;
-                    $amountAT = isset($dayPrice->Base->AmountAfterTax) ? $dayPrice->Base->AmountAfterTax : 0;
-
-                    $amount = $amountBT ? $amountBT : $amountAT;
-
-                    $value = $amount;
-
-                    if (isset($dayPrice->Base->CurrencyCode) && $dayPrice->Base->CurrencyCode && $dayPrice->Base->CurrencyCode === 'USD') {
-                        $usd = Valmon::orderBy('fecha', 'DESC')->first();
-                        $value = $value * $usd->valor;
-                    }
-
-                    try {
-                        $plaresData = [
-                            'numres' => $numres,
-                            'numpla' => $dayPriceCnt,
-                            'codpla' => $codpla,
-                            'fecini' => $dayPrice->EffectiveDate,
-                            'fecfin' => $dayPrice->ExpireDate,
-                            'pordes' => 0,
-                            'tipdes' => 'P',
-                            // 'subsidio' => null,
-                            // 'valor' => 0,
-                            'valornoche' => $value,
-                            'codigocr' => $roomStay->RoomRates->RoomRate->RatePlanCode
-                        ];
-                        Plares::create($plaresData);
-                        /*if (!$update) {
-                        PlaresNuevo::create($plaresData);
-                        }*/
-                        $dayPriceCnt++;
-
-                    } catch (Exception $exception) {
-                        dd($exception->getMessage());
-                    }
-                }
-            } else {
-                $amountBT = isset($roomStay->RoomRates->RoomRate->Rates->Rate->Base->AmountBeforeTax) ?
-                    $roomStay->RoomRates->RoomRate->Rates->Rate->Base->AmountBeforeTax :
-                    0;
-                $amountAT = isset($roomStay->RoomRates->RoomRate->Rates->Rate->Base->AmountAfterTax) ?
-                    $roomStay->RoomRates->RoomRate->Rates->Rate->Base->AmountAfterTax :
-                    0;
-                $amount = $amountBT ? $amountBT : $amountAT;
-                $value = $amount;
-
-                if (
-                    isset($roomStay->RoomRates->RoomRate->Rates->Rate->Base->CurrencyCode) &&
-                    $roomStay->RoomRates->RoomRate->Rates->Rate->Base->CurrencyCode &&
-                    $roomStay->RoomRates->RoomRate->Rates->Rate->Base->CurrencyCode === 'USD'
-                ) {
-                    $usd = Valmon::orderBy('fecha', 'DESC')->first();
-                    $value = $value * $usd->valor;
-                }
-                try {
-                    $plaresData = [
-                        'numres' => $numres,
-                        'numpla' => $dayPriceCnt,
-                        'codpla' => $codpla,
-                        'fecini' => $roomStay->RoomRates->RoomRate->Rates->Rate->EffectiveDate,
-                        'fecfin' => $roomStay->RoomRates->RoomRate->Rates->Rate->ExpireDate,
-                        'pordes' => 0,
-                        'tipdes' => 'P',
-                        // 'subsidio' => null,
-                        // 'valor' => 0,
-                        'valornoche' => $value,
-                        'codigocr' => $roomStay->RoomRates->RoomRate->RatePlanCode
-                    ];
-                    Plares::create($plaresData);
-                    /*PlaresNuevo::create($plaresData);*/
-                    $dayPriceCnt++;
-
-                } catch (Exception $exception) {
-                    dd($exception->getMessage());
+                if ($createdReservation) {
+                    $this->handlePlares($createdReservation->numres, $roomStay, $staticData['usd'], $update);
+                    $this->handleGuaranteesAndBookerRecords($data, $createdReservation->numres, $guestAndBooker['booker'], $update);
+                    if (!$update) $this->handleFolioAndCarghab($data, $roomStay, $createdReservation->numres, $reservaData, $channelConfig, $allocation['selectedRooms'][$idx]->numhab);
+                    $this->handleTarcre($data, $createdReservation->numres, $guestAndBooker['booker'], $update);
                 }
             }
 
-            $address = '';
+            DB::connection('on_the_fly')->commit();
+            if ($createdReservation) $this->dispatchAvailabilityUpdate($createdReservation, $data);
+            return $this->buildSuccessResponse($data, $confirmationid);
 
-            $address .= isset($booker->Address->AddressLine) ? json_encode($booker->Address->AddressLine) : '';
-
-            try {
-
-                $phone = '';
-
-                if (isset($data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Telephone->PhoneNumber)) {
-                    $phone = $data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Telephone->PhoneNumber;
-                }
-                // Crear recibo de caja
-                /*Reccaj::create([
-                          'numrec' => $numrec,
-                          'codcaj' => 1,
-                          'codusu' => 1,
-                          'codcar',
-                          'codven',
-                          'cedula' => 0, //$cedula,
-                          'nombre' => $data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->GivenName. ' ' . $data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->PersonName->Surname,
-                          'direccion' => $address,
-                          'ciudad' => 'NA',
-                          'telefono' => $phone,
-                          'fecha' => date('Y-m-d'),
-                          'codcaj',
-                          'codusu',
-                          'codcar' => 54,
-                          'codven' => 0,
-                          'nota' => 'Pago de reserva por RateGain.',
-                          'estado' => 'A'
-                      ]);*/
-
-            } catch (Exception $exception) {
-                dd($exception->getMessage());
-            }
-
-            try {
-
-                $valor = 0;
-
-                if (isset($data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountAfterTax)) {
-                    $valor = $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountAfterTax;
-                }
-
-                if (isset($data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax)) {
-                    $valor = $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax;
-                }
-
-                /*Detrec::create([
-                          'numrec' => $numrec,
-                          'numero' => 1,
-                          'forpag' => 1,
-                          'numfor' => 0,
-                          'fecven' => date('Y-m-d'),
-                          'ivarep' => 0,
-                          'valorm' => 0,
-                          'valor' => $valor
-                      ]);*/
-
-            } catch (Exception $exception) {
-                dd($exception->getMessage());
-            }
-
-            try {
-
-                /*Garres::create([
-                          'numres' => $numres,
-                          'item' => 1,
-                          'codusu' => 1,
-                          'codcaj' => 1,
-                          'fecha' => date('Y-m-d'),
-                          'codcar' => 54,
-                          'total' => $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax ? $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax: $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountAfterTax,
-                          'numrec' => $numrec,
-                          'numegr' => 0,
-                          'estado' => 'A'
-                      ]);*/
-
-            } catch (Exception $exception) {
-                dd($exception->getMessage());
-            }
-
-            $nNumrec = ($numrec + 1);
-
-            try {
-
-                /*$dathot = Dathot::first();
-
-                  $dathot->update([
-                  'numrec' => $nNumrec
-               ]);*/
-
-            } catch (Exception $exception) {
-                dd($exception->getMessage());
-            }
-
-            $queryNumfolio = "select MAX(numfol)+1 as fol from folio";
-
-            $numfolio = collect(\DB::connection('on_the_fly')->select($queryNumfolio))->first();
-            $resDate = substr($data->TimeStamp, 0, 10);
-            if (!$update) {
-                try {
-
-                    Folio::create([
-                        'numfol' => $numfolio->fol,
-                        'numres' => $numres,
-                        'codeve' => 0,
-                        'tipdoc' => $tipDoc->tipdoc,
-                        'cedula' => 0, //$cedula,
-                        'nit' => $bambooCompanyNit ?: 0,
-                        'nitage' => $bambooCompanyNit ?: 0,
-                        'locpro' => 127591,
-                        'codpai' => null,
-                        'codciu' => null,
-                        'paides' => null,
-                        'locdes' => 129499,
-                        'ciudes' => null,
-                        'codtra' => 4,
-                        'trasal' => 0,
-                        'codmot' => null,
-                        'numhab' => $numhab,
-                        'usuout' => null,
-                        'codusu' => null,
-                        'fecres' => $resDate,
-                        'feclle' => $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->Start,
-                        'fecsal' => $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->End,
-                        'hora' => '15:00',
-                        'horsal' => null,
-                        'numadu' => $numadu,
-                        'numnin' => $numnin,
-                        'numinf' => 0,
-                        'nota' => 'FOLIO CREADO PARA RESERVA EN LINEA RateGain',
-                        'notaayb' => '',
-                        'equipaje' => 'N',
-                        'placa' => null,
-                        'trahot' => 'N',
-                        'estpai' => null,
-                        'corregir' => 'N',
-                        'forpag' => $reservaData['forpag'],
-                        'estado' => 'O',
-                        'walkin' => 'A',
-                        'tippro' => $bambooBookingChannelCompany['tippro'] ?: 1,
-                        'tipgar' => $reservaData['tipgar'],
-                        'codven' => 0,
-                        'idresweb' => null,
-                        'idcanal' => $CIAL,
-                        'idclifre' => null,
-                        'firma' => null,
-                        'comentario_en_linea' => (
-                            isset($roomStay->Comments) ?
-                                '' . (is_array($roomStay->Comments->Comment) ?
-                                    json_encode($roomStay->Comments->Comment) :
-                                    $roomStay->Comments->Comment->Text) :
-                                '') . (
-                            $company ?
-                                "\n" . $company['name'] . " - " . $company['id'] :
-                                "\n"
-                            ) . (
-                            isset($roomStay->SpecialRequests) ?
-                                '' . (is_array($roomStay->SpecialRequests->SpecialRequest) ?
-                                    json_encode($roomStay->SpecialRequests->SpecialRequest) :
-                                    json_encode($roomStay->SpecialRequests->SpecialRequest)) :
-                                "\n"
-                            )
-                    ]);
-
-                } catch (Exception $exception) {
-                    dd($exception->getMessage());
-                }
-
-                try {
-                    Carghab::create([
-                        'numfol' => '' . $numfolio->fol,
-                        'numcue' => '1',
-                        'estado' => 'S'
-                    ]);
-                } catch (Exception $exception) {
-                    dd($exception->getMessage());
-                }
-            }
-
-
-            if ($data->HotelReservations->HotelReservation->ResGlobalInfo->Guarantee->GuaranteesAccepted->GuaranteeAccepted->PaymentCard->CardNumber) {
-                $fecven = '20' . substr($data->HotelReservations->HotelReservation->ResGlobalInfo->Guarantee->GuaranteesAccepted->GuaranteeAccepted->PaymentCard->ExpireDate, -2, 2) . '-' . substr($data->HotelReservations->HotelReservation->ResGlobalInfo->Guarantee->GuaranteesAccepted->GuaranteeAccepted->PaymentCard->ExpireDate, 0, 2) . '-01';
-                $tarcreData = [
-                    'numres' => $numres,
-                    'codusu' => 1,
-                    'fecha' => date('Y-m-d'),
-                    'tipo' => Crypt::validatecard($data->HotelReservations->HotelReservation->ResGlobalInfo->Guarantee->GuaranteesAccepted->GuaranteeAccepted->PaymentCard->CardNumber),
-                    'numero' => $data->HotelReservations->HotelReservation->ResGlobalInfo->Guarantee->GuaranteesAccepted->GuaranteeAccepted->PaymentCard->CardNumber,
-                    'numero_mask' => Crypt::getStarred($data->HotelReservations->HotelReservation->ResGlobalInfo->Guarantee->GuaranteesAccepted->GuaranteeAccepted->PaymentCard->CardNumber),
-                    'nombre' => $data->HotelReservations->HotelReservation->ResGlobalInfo->Guarantee->GuaranteesAccepted->GuaranteeAccepted->PaymentCard->CardHolderName,
-                    'fecven' => $fecven,
-                    'direccion' => $address,
-                    'ciudad' => $data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Address->CityName ? $data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Address->CityName : '',
-                    'codigo_postal' => $data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Address->PostalCode ? $data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Address->PostalCode : '',
-                    'pais' => is_string($data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Address->CountryName) ? $data->HotelReservations->HotelReservation->ResGuests->ResGuest[0]->Profiles->ProfileInfo->Profile->Customer->Address->CountryName : 'Colombia'
-                ];
-                try {
-                    if (!$update) {
-                        Tarcre::create($tarcreData);
-                    } else {
-                        Tarcre::where('numres', $numres)->delete();
-                        Tarcre::create($tarcreData);
-                    }
-
-                } catch (Exception $exception) {
-                    dd($exception->getMessage());
-                }
-            }
-
-
-            $amountBT = isset($data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax) ? $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountBeforeTax : 0;
-            $amountAT = isset($data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountAfterTax) ? $data->HotelReservations->HotelReservation->ResGlobalInfo->Total->AmountAfterTax : 0;
-
-            $amount = $amountBT ? $amountBT : $amountAT;
-
-            try {
-
-                /*Valcar::create([
-                          'numfol' => $numfolio->fol,
-                          'numcue' => 1,
-                          'item' => 1,
-                          'codusu' => 3,
-                          'codcaj' => 7,
-                          'fecha' => date('Y-m-d'),
-                          'cantidad' => 1,
-                          'codcar' => 54,
-                          'cladoc' => 'RC',
-                          'numdoc' => $numrec,
-                          'codpla' => null,
-                          'valor' => $amount,
-                          'iva' => 0,
-                          'impo' => null,
-                          'valser' => 0,
-                          'valter' => 0,
-                          'total' => $amount,
-                          'estado' => 'A',
-                          'oldfol' => null,
-                          'movcor' => 'N',
-                          // 'subsidio' => null
-                      ]);*/
-
-            } catch (Exception $exception) {
-                dd($exception->getMessage());
-            }
-
-            $roomStayCnt++;
+        } catch (\Exception $e) {
+            DB::connection('on_the_fly')->rollBack();
+            file_put_contents(storage_path('logs/rategain_error.log'), "[" . date('Y-m-d H:i:s') . "] Save Error: " . $e->getMessage() . "\n" . $e->getTraceAsString() . "\n", FILE_APPEND);
+            return $this->getReservationError(['general_error']);
         }
-
-        $returnSuccess = $this->reservationResponseSuccess;
-
-        $returnSuccess = str_replace(
-            '<HotelReservationID ResID_Type="14" ResID_Value="chd23242342"/>',
-            '<HotelReservationID ResID_Type="14" ResID_Value="' . $data->HotelReservations->HotelReservation->ResGlobalInfo->HotelReservationIDs->HotelReservationID[1]->ResID_Value . '"/>',
-            $returnSuccess
-        );
-
-        $returnSuccess = str_replace(
-            '<HotelReservationID ResID_Type="3" ResID_Value="123456789" />',
-            '<HotelReservationID ResID_Type="3" ResID_Value="' . $confirmationid . '" />',
-            $returnSuccess
-        );
-
-        /*$job = (
-            new ModifyBookingEngineInventory(
-                $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->Start,
-                $data->HotelReservations->HotelReservation->ResGlobalInfo->TimeSpan->End,
-                $roomClass,
-                'rategain',
-                $data->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode
-            )
-        );
-
-        dispatch($job);*/
-
-        if (isset($createdReservation) && $createdReservation) {
-            $this->sendAvailability(
-                '' . $createdReservation->feclle,
-                '' . $createdReservation->fecsal,
-                '' . $roomClass,
-                '' . $roomStay->RoomRates->RoomRate->RoomTypeCode,
-                '' . $data->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode
-            );
-        }
-
-        return $returnSuccess;
-
     }
 
-    public function modifyReservation()
+    private function extractUniqueId($hotelRes)
     {
+        $id13 = $this->getIdByType($hotelRes, '13');
+        if (!empty($id13)) return $id13;
+
+        $id16 = $this->getIdByType($hotelRes, '16');
+        if (!empty($id16)) return $id16;
+
+        if (isset($hotelRes->ResGlobalInfo->HotelReservationIDs->HotelReservationID)) {
+            foreach ($this->ensureArray($hotelRes->ResGlobalInfo->HotelReservationIDs->HotelReservationID) as $id) {
+                $val = $this->getString($id->ResID_Value);
+                if (!empty($val)) return $val;
+            }
+        }
+        return isset($hotelRes->UniqueID->ID) ? $this->getString($hotelRes->UniqueID->ID) : '';
     }
 
-    public function createDirectInvoice($reservation, $instance)
+    private function getIdByType($hotelRes, $type)
     {
-        $folioOriginal = Folio::where('numres', $reservation->numres)->where('estado', '<>', 'F')->first();
+        if (isset($hotelRes->ResGlobalInfo->HotelReservationIDs->HotelReservationID)) {
+            foreach ($this->ensureArray($hotelRes->ResGlobalInfo->HotelReservationIDs->HotelReservationID) as $id) {
+                if ($this->getString($id->ResID_Type) == $type) {
+                    return $this->getString($id->ResID_Value);
+                }
+            }
+        }
+        return '';
+    }
 
-        $queryNumfolio = "select MAX(numfol)+1 as fol from folio";
+    private function reservationAlreadyExists($id)
+    {
+        return !empty($id) && Reserva::where('referencia', 'LIKE', '%' . $id . '%')->whereIn('reserva.estado', ['P', 'G', 'H'])->exists();
+    }
 
-        $numfolio = collect(\DB::connection('on_the_fly')->select($queryNumfolio))->first();
+    private function getChannelConfig($data)
+    {
+        $code = isset($data->POS->Source->BookingChannel->CompanyName->Code) ? $this->getString($data->POS->Source->BookingChannel->CompanyName->Code) : 'defecto';
+        return CrChannel::with('empresa')->where('channel_code', $code)->first() ?: CrChannel::with('empresa')->where('channel_code', 'defecto')->first();
+    }
 
-        $tipDoc = Tipdoc::where('detalle', 'CEDULA CIUDADANIA')->first();
-        $forpag = Forpag::where('detalle', 'DEVOLUCION POR CONTABILIDAD')->first();
+    private function processGuestAndBookerData($data)
+    {
+        $resGuest = null; $booker = null; $guestExits = null; $company = null;
+        foreach ($data->HotelReservations->HotelReservation->ResGuests->ResGuest as $guest) {
+            foreach ($this->ensureArray($guest->Profiles->ProfileInfo) as $pInfo) {
+                $p = $pInfo->Profile; $type = (int)$p->ProfileType;
+                if ($type === 1) {
+                    if (!$resGuest || (isset($guest->PrimaryIndicator) && $this->getString($guest->PrimaryIndicator) == 'true')) $resGuest = $p->Customer;
+                    $email = isset($p->Customer->Email) ? $this->getString($p->Customer->Email) : null;
+                    if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                        $guestExits = Cliente::where('email', $email)->first() ?: Cliente::create($this->prepareClientData($p->Customer));
+                    }
+                } elseif ($type === 18) {
+                    $email = isset($p->Customer->Email) ? $this->getString($p->Customer->Email) : null;
+                    $booker = ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) ? (CrBooker::where('email', $email)->first() ?: CrBooker::create($this->prepareBookerData($p->Customer))) : (object)$this->prepareBookerData($p->Customer);
+                } elseif ($type === 3) {
+                    $company = ['id' => isset($pInfo->UniqueID->ID) ? $this->getString($pInfo->UniqueID->ID) : null, 'name' => $this->getString($p->CompanyInfo->CompanyName)];
+                }
+            }
+        }
+        return ['resGuest' => $resGuest, 'booker' => $booker, 'guestExits' => $guestExits, 'company' => $company];
+    }
 
-        $newFolio = Folio::create([
-            'numfol' => $numfolio->fol,
-            'numres' => $reservation->numres,
-            'tipdoc' => $tipDoc->tipdoc,
-            'cedula' => '222222222222',
-            'nit' => 0,
-            'nitage' => 0,
-            'locpro' => 127591,
-            'locdes' => 129499,
-            'numhab' => 0,
-            'codusu' => 1,
-            'fecres' => date('Y-m-d'),
-            'feclle' => date('Y-m-d'),
-            'fecsal' => date('Y-m-d'),
-            'hora' => date('H:i'),
-            'numadu' => 0,
-            'numnin' => 0,
-            'numinf' => 0,
-            'nota' => "FOLIO GENERADO PARA FACTURA DIRECTA POR CANCELACIÓN DESDE LA INTEGRACIÓN RATEGAIN - Reserva: " . $reservation->numres . "\n" . $folioOriginal->nota,
-            'notaayb' => $folioOriginal->notaayb,
-            'walkin' => 'A',
-            'forpag' => $forpag->forpag,
-            'estado' => 'F',
-            'idcanal' => null,
-            'codcan' => null,
-            'codven' => 1,
-        ]);
+    private function prepareClientData($c)
+    {
+        $email = isset($c->Email) ? $this->getString($c->Email) : '';
+        return ['cedula' => rand(99999999, 999999999), 'tipdoc' => 3, 'nombre' => $this->getString($c->PersonName->GivenName) . ' ' . $this->getString($c->PersonName->Surname), 'telefono1' => '123456', 'email' => $email, 'primer_nombre' => $this->getString($c->PersonName->GivenName), 'primer_apellido' => $this->getString($c->PersonName->Surname), 'emailfe' => $email, 'locnac' => 15, 'ciudades_dian' => 1181, 'credito' => 'N', 'tipcre' => 'T'];
+    }
 
-        $reservation->update([
-            'estado' => 'C'
-        ]);
+    private function prepareBookerData($c)
+    {
+        return ['givenname' => $this->getString($c->PersonName->GivenName), 'surname' => $this->getString($c->PersonName->Surname), 'email' => isset($c->Email) ? $this->getString($c->Email) : '', 'address' => isset($c->Address->AddressLine) ? json_encode($c->Address->AddressLine) : ''];
+    }
 
-        $newCarghab = Carghab::create([
-            'numfol' => $numfolio->fol,
-            'numcue' => '1',
-            'estado' => 'N'
-        ]);
+    private function handleUpdatePreparation($data)
+    {
+        $id = $this->extractUniqueId($data->HotelReservations->HotelReservation);
+        $this->originalReservation = Reserva::where('referencia', 'LIKE', '%' . $id . '%')->whereIn('reserva.estado', ['P', 'G', 'H'])->orderBy('fecres', 'desc')->first();
+        if ($this->originalReservation) $this->originalReservation->update(['estado' => 'C']);
+    }
 
-        $dataSaveCargo = [
-            'numfol' => '' . $numfolio->fol,
-            'codcar' => '77',
-            'numcue' => '1',
-            'valor' => '' . $reservation->totest ?: 1,
-            'cantidad' => '1',
-            'numdoc' => '0',
+    private function allocateRooms($data, $update)
+    {
+        $used = []; $selected = []; $hotelRes = $data->HotelReservations->HotelReservation;
+        $all = $this->getAvailableRooms($hotelRes->ResGlobalInfo->TimeSpan->Start, $hotelRes->ResGlobalInfo->TimeSpan->End);
+
+        foreach ($hotelRes->RoomStays->RoomStay as $rs) {
+            $code = strtoupper($this->getString($rs->RoomRates->RoomRate->RoomTypeCode));
+            $mapping = config('rategain.rooms_cl'); $roomClass = null;
+            if ($mapping) foreach ($mapping as $rg_code => $bb_id) if (strtoupper($rg_code) === $code) { $roomClass = $bb_id; break; }
+
+            $candidates = $all->where('codcla', $roomClass)->whereNotIn('numhab', $used);
+            $sel = ($update && $this->originalReservation) ? $candidates->where('numhab', $this->originalReservation->numhab)->first() : null;
+            if (!$sel) $sel = $candidates->first();
+
+            if ($sel) { $selected[] = $sel; $used[] = $sel->numhab; } 
+            else return ['error' => $this->getReservationError(['noAvailabilities'])];
+        }
+        return ['selectedRooms' => $selected];
+    }
+
+    private function getStaticData()
+    {
+        return [
+            'dathot' => collect(DB::connection('on_the_fly')->select("select nit, numrec from dathot;"))->first(),
+            'usd' => Valmon::orderBy('fecha', 'DESC')->first(),
+            'numres' => collect(DB::connection('on_the_fly')->select('select MAX(numres) as res from reserva'))->first()->res ?: 0,
+            'numfol' => collect(DB::connection('on_the_fly')->select("select MAX(numfol) as fol from folio"))->first()->fol ?: 0,
         ];
-
-        $fields = http_build_query($dataSaveCargo);
-
-        $inst = BambooInstance::where(
-            'rg_hotel_code', $instance
-        )->first();
-
-        if (!$inst) {
-
-            dd('No hotel instance found!');
-        }
-
-        $urlPayload = "?numfol=" . $dataSaveCargo['numfol'] . "&codcar=" . $dataSaveCargo['codcar'] . "&numcue=" . $dataSaveCargo['numcue'] . "&valor=" . $dataSaveCargo['valor'] . "&cantidad=" . $dataSaveCargo['cantidad'] . "&numdoc=" . $dataSaveCargo['numdoc'];
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "http://" . $inst->db_host . "/" . $inst->name . "/hotel5/webServices/saveCargo.php" . $urlPayload);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($ch, CURLOPT_POST, true);
-        // curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
-        $data = curl_exec($ch);
-        curl_close($ch);
-
     }
 
+    private function prepareReservationData($data, $rs, $selRoom, $gb, $conf, $static, $cid, $update)
+    {
+        $hr = $data->HotelReservations->HotelReservation;
+        $total = isset($hr->ResGlobalInfo->Total->AmountBeforeTax) ? $hr->ResGlobalInfo->Total->AmountBeforeTax : $hr->ResGlobalInfo->Total->AmountAfterTax;
+        if (isset($hr->ResGlobalInfo->Total->CurrencyCode) && $this->getString($hr->ResGlobalInfo->Total->CurrencyCode) === 'USD') $total *= $static['usd']->valor;
+
+        $given = $gb['resGuest'] ? $this->getString($gb['resGuest']->PersonName->GivenName) : 'Huesped';
+        $surname = $gb['resGuest'] ? $this->getString($gb['resGuest']->PersonName->Surname) : 'Anonimo';
+        
+        // Extraer ID tipo 13 específicamente para concatenar
+        $id13 = $this->getIdByType($hr, '13');
+        if (empty($id13)) $id13 = $this->extractUniqueId($hr);
+
+        $resData = [
+            'numres' => $update ? $this->originalReservation->numres : $static['numres'] + 1,
+            'referencia' => $given . ' ' . $surname . ' - ' . $id13, // Concatenación solicitada
+            'tipdoc' => $gb['guestExits'] ? $gb['guestExits']->tipdoc : 1, 'nit' => $conf->NIT ?: 0, 'numhab' => $selRoom->numhab,
+            'tipres' => $conf->tipres, 'tipseg' => $conf->tipseg ?: 'I', 'fecres' => date('Y-m-d'),
+            'feclle' => $hr->ResGlobalInfo->TimeSpan->Start, 'fecsal' => $hr->ResGlobalInfo->TimeSpan->End, 'hora' => '15:00',
+            'estado' => isset($hr->ResGlobalInfo->Guarantee) ? 'G' : 'P', 'metadata' => json_encode($data), 'confirmationid' => $cid,
+            'totest' => $total, 'email' => ($gb['resGuest'] && isset($gb['resGuest']->Email)) ? $this->getString($gb['resGuest']->Email) : ''
+        ];
+        if ($update) $resData['modifyid'] = $cid;
+        return $resData;
+    }
+
+    private function handlePlares($numres, $rs, $usd, $update)
+    {
+        if ($update) Plares::where('numres', $numres)->delete();
+        $batch = []; $cnt = 1;
+        foreach ($this->ensureArray($rs->RoomRates->RoomRate->Rates->Rate) as $r) {
+            $amt = isset($r->Base->AmountBeforeTax) ? $r->Base->AmountBeforeTax : $r->Base->AmountAfterTax;
+            if (isset($r->Base->CurrencyCode) && $this->getString($r->Base->CurrencyCode) === 'USD') $amt *= $usd->valor;
+            $batch[] = ['numres' => $numres, 'numpla' => $cnt++, 'codpla' => config('rategain.codpla'), 'fecini' => $r->EffectiveDate, 'fecfin' => $r->ExpireDate, 'pordes' => 0, 'tipdes' => 'P', 'valornoche' => $amt, 'codigocr' => $this->getString($rs->RoomRates->RoomRate->RatePlanCode)];
+        }
+        Plares::insert($batch);
+    }
+
+    private function handleGuaranteesAndBookerRecords($data, $numres, $booker, $update)
+    {
+        if ($update) return;
+        if ($booker && isset($booker->id)) CrBookerReserva::create(['booker_id' => $booker->id, 'numres' => $numres, 'amount' => 0, 'date' => date('Y-m-d H:i:s'), 'booker_name' => $booker->givenname]);
+    }
+
+    private function handleFolioAndCarghab($data, $rs, $numres, $reservaData, $conf, $numhab)
+    {
+        $numfol = collect(DB::connection('on_the_fly')->select("select MAX(numfol)+1 as fol from folio"))->first()->fol ?: 1;
+        Folio::create(['numfol' => $numfol, 'numres' => $numres, 'tipdoc' => $reservaData['tipdoc'], 'cedula' => 0, 'nit' => $reservaData['nit'], 'numhab' => $numhab, 'fecres' => date('Y-m-d'), 'feclle' => $reservaData['feclle'], 'fecsal' => $reservaData['fecsal'], 'estado' => 'O', 'tippro' => $conf->tippro ?: 1, 'codven' => $conf->codven ?: 1]);
+        Carghab::create(['numfol' => $numfol, 'numcue' => '1', 'estado' => 'S']);
+    }
+
+    private function handleTarcre($data, $numres, $booker, $update)
+    {
+        $gi = $data->HotelReservations->HotelReservation->ResGlobalInfo;
+        $card = isset($gi->Guarantee->GuaranteesAccepted->GuaranteeAccepted->PaymentCard) ? $gi->Guarantee->GuaranteesAccepted->GuaranteeAccepted->PaymentCard : null;
+        if ($card && isset($card->CardNumber) && !empty($this->getString($card->CardNumber))) {
+            $num = $this->getString($card->CardNumber);
+            if ($update) Tarcre::where('numres', $numres)->delete();
+             Tarcre::create(['numres' => $numres, 'codusu' => 1, 'fecha' => date('Y-m-d'), 'tipo' => Crypt::validatecard($num), 'numero' => $num, 'numero_mask' => Crypt::getStarred($num), 'nombre' => $this->getString($card->CardHolderName), 'fecven' => '20' . substr($this->getString($card->ExpireDate), -2) . '-' . substr($this->getString($card->ExpireDate), 0, 2) . '-01', 'direccion' => ($booker && isset($booker->address)) ? $booker->address : '']);
+        }
+    }
+
+    private function dispatchAvailabilityUpdate($res, $data)
+    {
+        $rs = $this->ensureArray($data->HotelReservations->HotelReservation->RoomStays->RoomStay);
+        $code = $this->getString($rs[0]->RoomRates->RoomRate->RoomTypeCode);
+        $this->sendAvailability($res->feclle, $res->fecsal, config('rategain.rooms_cl.' . $code), $code, $data->HotelReservations->HotelReservation->BasicPropertyInfo->HotelCode);
+    }
+
+    private function buildSuccessResponse($data, $cid)
+    {
+        $id = $this->extractUniqueId($data->HotelReservations->HotelReservation);
+        return str_replace(['123456789', 'chd23242342'], [$cid, $id], $this->reservationResponseSuccess);
+    }
+
+    function uniqidReal($l = 13) { return substr(bin2hex(random_bytes(ceil($l / 2))), 0, $l); }
+
+    public function getReservationError($errs)
+    {
+        $map = $this->getErrorMappings(); $eStr = "<Errors>";
+        foreach ($errs as $e) { $m = isset($map[$e]) ? $map[$e] : ['Code' => 450, 'ShortText' => 'Unknown Error']; $eStr .= "\n\t\t<Error Code=\"{$m['Code']}\" Status=\"NotProcessed\" ShortText=\"{$m['ShortText']}\" />"; }
+        return "<OTA_HotelResNotifRS TimeStamp=\"" . date('Y-m-d\TH:i:s') . "\">\n\t{$eStr}\n\t</Errors>\n</OTA_HotelResNotifRS>";
+    }
+
+    private function getErrorMappings() { return ['reservation.notFound' => ['Code' => 404, 'ShortText' => 'Not found'], 'noAvailabilities' => ['Code' => 450, 'ShortText' => 'No room availabilities'], 'exists' => ['Code' => 400, 'ShortText' => 'Exists'], 'general_error' => ['Code' => 500, 'ShortText' => 'Error']]; }
 }
