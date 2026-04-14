@@ -419,7 +419,7 @@ XML;
                 SELECT reserva.numres, reserva.numhab, reserva.estado, habitacion.codcla
                 FROM `reserva`
                 INNER JOIN habitacion ON reserva.numhab = habitacion.numhab
-                WHERE reserva.feclle <= '{$end}' AND reserva.fecsal >= '{$start}'
+                WHERE reserva.feclle < '{$end}' AND reserva.fecsal > '{$start}'
                 AND reserva.estado IN ('P','G')
                 AND habitacion.tipo = 'V'
             ";
@@ -439,7 +439,7 @@ XML;
                 FROM `reserva`
                 INNER JOIN habitacion ON reserva.numhab = habitacion.numhab
                 INNER JOIN folio ON reserva.numhab = folio.numres
-                WHERE reserva.feclle <= '{$start}' AND reserva.fecsal >= '{$end}'
+                WHERE reserva.feclle < '{$start}' AND reserva.fecsal > '{$end}'
                 AND reserva.estado IN ('H')
                 AND folio.estado IN ('I')
                 AND habitacion.tipo = 'V'

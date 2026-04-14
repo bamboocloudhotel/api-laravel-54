@@ -13,3 +13,4 @@ yarn-error.log
 /config/database.php
 /config/cm_reservas.php
 /config/rategain.php
+/.proxyai
